@@ -1404,7 +1404,7 @@ c
 c------------Added by Kristina Wagstrom 12/15/2010----------------
 c
       if (lApp) call Appprep()
-      if (lApp) call Appemmap()
+      !if (lApp) call Appemmap()
 c
 c-------------End Added 12/15/2010----------------------------------------------
 c

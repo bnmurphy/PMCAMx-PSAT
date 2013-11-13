@@ -97,46 +97,47 @@ c
       Appnam(95) = 'PCL_      '
       Appnam(105) = 'NA_       '
       Appnam(115) = 'PSO4_     '
-      Appnam(125) = 'APO1_     '
-      Appnam(135) = 'APO2_     '
-      Appnam(145) = 'APO3_     '
-      Appnam(155) = 'APO4_     '
-      Appnam(165) = 'APO5_     '
-      Appnam(175) = 'APO6_     '
-      Appnam(185) = 'APO7_     '
-      Appnam(195) = 'APO8_     '
-      Appnam(205) = 'AOO1_     '
-      Appnam(215) = 'AOO2_     '
-      Appnam(225) = 'AOO3_     '
-      Appnam(235) = 'AOO4_     '
-      Appnam(245) = 'AOO5_     '
-      Appnam(255) = 'AOO6_     '
-      Appnam(265) = 'AOO7_     '
-      Appnam(275) = 'AOO8_     '
-      Appnam(285) = 'ANS1_     '
-      Appnam(295) = 'ANS2_     '
-      Appnam(305) = 'ANS3_     '
-      Appnam(315) = 'ANS4_     '
-      Appnam(325) = 'ANS5_     '
-      Appnam(335) = 'ANS6_     '
-      Appnam(345) = 'ANS7_     '
-      Appnam(355) = 'ANS8_     '
-      Appnam(365) = 'ABS1_     '
-      Appnam(375) = 'ABS2_     '
-      Appnam(385) = 'ABS3_     '
-      Appnam(395) = 'ABS4_     '
-      Appnam(405) = 'ABS5_     '
-      Appnam(415) = 'AAS1_     '
-      Appnam(425) = 'AAS2_     '
-      Appnam(435) = 'AAS3_     '
-      Appnam(445) = 'AAS4_     '
-      Appnam(455) = 'AAS5_     '
-      Appnam(465) = 'PNO3_     '
-      Appnam(475) = 'PNH4_     '
+      Appnam(125) = 'APO1      '
+      Appnam(126) = 'APO2      '
+      Appnam(127) = 'APO3      '
+      Appnam(128) = 'APO4      '
+      Appnam(129) = 'APO5      '
+      Appnam(130) = 'APO6      '
+      Appnam(131) = 'APO7      '
+      Appnam(132) = 'APO8      '
+      Appnam(133) = 'AOO1      '
+      Appnam(134) = 'AOO2      '
+      Appnam(135) = 'AOO3      '
+      Appnam(136) = 'AOO4      '
+      Appnam(137) = 'AOO5      '
+      Appnam(138) = 'AOO6      '
+      Appnam(139) = 'AOO7      '
+      Appnam(140) = 'AOO8      '
+      Appnam(141) = 'ANS1      '
+      Appnam(142) = 'ANS2      '
+      Appnam(143) = 'ANS3      '
+      Appnam(144) = 'ANS4      '
+      Appnam(145) = 'ANS5      '
+      Appnam(146) = 'ANS6      '
+      Appnam(147) = 'ANS7      '
+      Appnam(148) = 'ANS8      '
+      Appnam(149) = 'ABS1      '
+      Appnam(150) = 'ABS2      '
+      Appnam(151) = 'ABS3      '
+      Appnam(152) = 'ABS4      '
+      Appnam(153) = 'ABS5      '
+      Appnam(154) = 'AAS1      '
+      Appnam(155) = 'AAS2      '
+      Appnam(156) = 'AAS3      '
+      Appnam(157) = 'AAS4      '
+      Appnam(158) = 'AAS5      '
+      Appnam(159) = 'PNO3      '
+      Appnam(160) = 'PNH4      '
+      !Appnam(161) = 'PCL_      '
 c
 c-----Assign full names to all the PM species
 c
-      do i=1,42
+      do i=1,6
           isblk=INDEX(Appnam(i*10+55),' ')
         do j=1,10
           Appnam(i*10+54+j)=Appnam(i*10+55)(1:isblk-1)//
@@ -144,6 +145,8 @@ c
         enddo
       enddo
       sa_num_gas = 56
+      sa_num_sv  = 125
+      sv_bin = 6 - 1
 c
 c-----Match tracers to modeled species
 c
@@ -159,9 +162,27 @@ c
             Appmap(i)=j
             Appmaprev(j)=i
             match = .TRUE.
+          elseif (j.ge.sa_num_sv .and.  !Semivolatile Aerosol
+     &          spname(i)(1:4).eq.Appnam(j)(1:4) ) then
+            if (spname(i)(5:7).eq.'_1 ') then
+              !Match the bulk Source Apportionment of SV 
+              !aerosols to the index number of the matching
+              !aerosol's lowest size bin
+              Appmap(i)=j
+              Appmaprev(j)=i
+              match = .TRUE.
+            elseif (spname(i)(5:7).eq.'_2 '.or.spname(i)(5:7).eq.'_3 '.or.
+     &              spname(i)(5:7).eq.'_4 '.or.spname(i)(5:7).eq.'_5 '.or.
+     &              spname(i)(5:7).eq.'_6 ' ) then
+              !Match the bulk Source Apportionment of SV 
+              !aerosols to the index number of the matching
+              !aerosol's lowest size bin
+              Appmap(i)=j
+              match = .TRUE.
+            endif
           endif
         enddo
-c        if (.not.match) write(6,*) 'Match not found: ',spname(i)
+        !if (.not.match) write(6,*) 'Match not found: ',spname(i)
       enddo
 c
 c-----Print out the headers for the output file

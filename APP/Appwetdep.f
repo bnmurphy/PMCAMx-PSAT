@@ -26,6 +26,8 @@ c
 c
       real con(MXCOL1,MXROW1,MXLAY1,MXSPEC),total
       integer i,j,k,s,spc,nx,ny,nz,v
+      integer spc_first_bin
+      real app_wet_con
 c
       nx = ncol(1)
       ny = nrow(1)
@@ -42,13 +44,25 @@ c
      &                nx*ny*nz*MXTRK*(s-1)
                   total = total + Appconc(loc)
                 enddo
-                do s=1,Appnum+3
-                  loc = i+nx*(j-1)+nx*ny*(k-1)+nx*ny*nz*(Appmap(spc)-1)+
+
+                if (Appmap(spc).ge.sa_num_sv) then  !Semivolatile Species
+                  spc_first_bin = Appmaprev(Appmap(spc))
+                  if (spc.eq.spc_first_bin) app_wet_con = 0.0
+                    app_wet_con = app_wet_con + con(i,j,k,spc)
+                else
+                  app_wet_con = con(i,j,k,spc)
+                endif
+
+                if (Appmap(spc).lt.sa_num_sv .or. spc.eq.spc_first_bin+5) then
+                  do s=1,Appnum+3
+                    loc = i+nx*(j-1)+nx*ny*(k-1)+nx*ny*nz*(Appmap(spc)-1)+
      &                  nx*ny*nz*MXTRK*(s-1)
-                  Appconc(loc) = con(i,j,k,spc)*Appconc(loc)/total
-                  if (Appconc(loc).eq.'NaN') 
-     &              write(6,*) 'Problem in Appwetdep',i,j,k,spc,s
-                enddo
+                    !Appconc(loc) = con(i,j,k,spc)*Appconc(loc)/total
+                    Appconc(loc) = app_wet_con*Appconc(loc)/total
+                    if (Appconc(loc).eq.'NaN') 
+     &                write(6,*) 'Problem in Appwetdep',i,j,k,spc,s
+                  enddo
+                endif
               endif
             enddo
           enddo
@@ -88,6 +102,15 @@ c                    write(6,*) 'IC,BC :',Appconc(loc), Appconc(loc2)
 c                    stop
 c                  endif
 c-------Check for total
+                  if (Appmap(spc).ge.sa_num_sv) then  !Semivolatile Species
+                    spc_first_bin = Appmaprev(Appmap(spc))
+                    if (spc.eq.spc_first_bin) app_wet_con = 0.0
+                      app_wet_con = app_wet_con + con(i,j,k,spc)
+                    else
+                      app_wet_con = con(i,j,k,spc)
+                  endif
+
+                if (Appmap(spc).lt.sa_num_sv .or. spc.eq.spc_first_bin+5) then
                   total = 0.0
                   do s=1,Appnum+3
                     loc=i+nx*(j-1)+nx*ny*(k-1)+nx*ny*nz*(Appmap(spc)-1)+
@@ -107,11 +130,14 @@ c-------Check for total
                       stop
                      endif
                   enddo
-                  if (abs(total-con(i,j,k,spc))
-     &               .gt.0.01*con(i,j,k,spc)) then
+                  if (abs(total-app_wet_con)
+     &               .gt.0.01*app_wet_con) then
+c                  if (abs(total-con(i,j,k,spc))
+c     &               .gt.0.01*con(i,j,k,spc)) then
                     write(6,*) 'ERROR in Appwetdep: total incorrect'
                     write(6,*) 'i,j,k,spc,: ',i,j,k,Appmap(spc)
-                    write(6,*) 'Actual Conc.', con(i,j,k,spc)
+                    !write(6,*) 'Actual Conc.', con(i,j,k,spc)
+                    write(6,*) 'Actual Conc.', app_wet_con
                     write(6,*) 'total ', total
                     do s=1,Appnum+3
                       loc=i+nx*(j-1)+nx*ny*(k-1)+nx*ny*nz*(Appmap(spc)
@@ -120,6 +146,7 @@ c-------Check for total
                     enddo
                     stop
                   endif
+                endif
                 endif
             enddo
           enddo

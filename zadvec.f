@@ -96,6 +96,11 @@ c
       real sen1d((MXLAYA+1)*MXTRSP)
       real*8 fluxes(nspc,13),fluxtop
       logical losat
+      integer spc_first_bin !BNM for PSAT SV Equilibrium
+      real c1dsum(MXLAYA), fc1sum(MXLAYA), fc2sum(MXLAYA), fc3sum(MXLAYA)
+      real c1dsum2(ncol,nrow,nlay), fc1sum2(ncol,nrow,nlay)
+      real fc2sum2(ncol,nrow,nlay), fc3sum2(ncol,nrow,nlay)
+      integer nx, ny, nz, s
 c
 c-----Entry point
 c
@@ -203,8 +208,51 @@ c========================= Process Analysis End ================================
 c
 c-----------Added by Kristina 05/08/07----------------------------------------------
 c
-            if (lApp.and.Appmap(ispc).ne.0) 
-     &         call Appzadv(fc1,fc2,fc3,i,j,Appmap(ispc),c1d)
+            nx = ncol
+            ny = nrow
+            nz = nlay
+            if (lApp.and.Appmap(ispc).ne.0) then
+               do k = 1,MXLAY1
+                 if (Appmap(ispc).ge.sa_num_sv) then
+                   spc_first_bin = Appmaprev(Appmap(ispc))
+                   if (ispc.eq.spc_first_bin) then
+                     c1dsum2(i,j,k) = 0.0
+                     fc1sum2(i,j,k) = 0.0
+                     fc2sum2(i,j,k) = 0.0
+                     fc3sum2(i,j,k) = 0.0
+                   endif
+                   c1dsum2(i,j,k) = c1dsum2(i,j,k) + c1d(k)
+                   fc1sum2(i,j,k) = fc1sum2(i,j,k) + fc1(k)
+                   fc2sum2(i,j,k) = fc2sum2(i,j,k) + fc2(k)
+                   fc3sum2(i,j,k) = fc3sum2(i,j,k) + fc3(k)
+                 else
+                   c1dsum2(i,j,k) = c1d(k)
+                   fc1sum2(i,j,k) = fc1(k)
+                   fc2sum2(i,j,k) = fc2(k)
+                   fc3sum2(i,j,k) = fc3(k)
+                 endif
+               enddo
+               if (Appmap(ispc).lt.sa_num_sv .or. ispc.eq.spc_first_bin+sv_bin) then    
+c               call Appzadv(fc1,fc2,fc3,i,j,Appmap(ispc),c1d)
+                !if (Appmap(ispc).ge.sa_num_sv) then
+                !print *,'zadvec: i=',i,' j=',j,' ispc=',ispc,' Appmap=',Appmap(ispc)
+                !print *,'   fc1=',fc1sum,' fc2=',fc2sum,' fc3=',fc3sum
+                !print *,'   c1dsum=',c1dsum
+                !do s = 1,11
+                !  loc = i+nx*(j-1)+nx*ny*(1-1)+nx*ny*nz*(Appmap(ispc)-1)
+     &          !         +nx*ny*nz*MXTRK*(s-1)
+                !  print *,'    s=',s,'  Appconc=',Appconc(loc)
+                !enddo
+                !endif
+                do k = 1,MXLAY1
+                  c1dsum(k) = c1dsum2(i,j,k)
+                  fc1sum(k) = fc1sum2(i,j,k)
+                  fc2sum(k) = fc2sum2(i,j,k)
+                  fc3sum(k) = fc3sum2(i,j,k)
+                enddo
+                call Appzadv(fc1sum,fc2sum,fc3sum,i,j,Appmap(ispc),c1dsum)
+               endif
+            endif
 c
 c-----------End Added 05/08/07--------------------------------------------------
 c

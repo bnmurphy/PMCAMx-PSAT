@@ -443,8 +443,10 @@ c-----Added by Kristina 06/21/2007-------------------------------------------
 c
 c      call Appgas(cncold,conc,rrxn,ii,jj,kk,dt,convfac,NO2case,NO2cons,
 c     &            NO3conc,NO3new)
+      !print *,'Starting Appgas i=',ii,' j=',jj
       call Appgas(cncold,conc,rrxn,ii,jj,kk,dt,convfac,NO2case,NO2cons,
      &            NO3conc,NO3new)     
+      !print *,'Finished Appgas i=',ii,' j=',jj
       nx = MXCOL1
       ny = MXROW1
       nz = MXLAY1
@@ -452,16 +454,16 @@ c     &            NO3conc,NO3new)
       do s = 1,appnum+3
         loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(s-1)
         total = total + appconc(loc)
-        print *,'Trap: After Appgas. Appconc(NO2,',s,')=',Appconc(loc)
+        !print *,'Trap: After Appgas. Appconc(NO2,',s,')=',Appconc(loc)
       enddo
-      print *,'Trap: After Appgas. NO2 Total=',total,' conc=',conc(kno2)*convfac
+      !print *,'Trap: After Appgas. NO2 Total=',total,' conc=',conc(kno2)*convfac
       total = 0.0
       do s = 1,appnum+3
         loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(4-1)+nx*ny*nz*MXTRK*(s-1)
         total = total + appconc(loc)
-        print *,'Trap: After Appgas. Appconc(NXOY,',s,')=',Appconc(loc)
+        !print *,'Trap: After Appgas. Appconc(NXOY,',s,')=',Appconc(loc)
       enddo
-      print *,'Trap: After Appgas. NXOY Total=',total,' conc=',conc(knxoy)*convfac
+      !print *,'Trap: After Appgas. NXOY Total=',total,' conc=',conc(knxoy)*convfac
 c
 c-------------End Added 06/21/2007--------------------------------------------
 c
@@ -482,14 +484,14 @@ c     sensitivity if NXOY concentration is reset to NO2 concentration.
 c
       conc(knxoy) = cncrad(kno3) + 2.*cncrad(kn2o5)
       ltest = .false.
-      print *,'Trap: AT NXOY. convfac=',convfac
-      print *,'Trap: AT NXOY. NO3=',cncrad(kno3)*convfac,' N2O5=',cncrad(kn2o5)*convfac
-      print *,'Trap: AT NXOY. NXOY=',conc(knxoy)*convfac,' NO2=',conc(kno2)*convfac
+      !print *,'Trap: AT NXOY. convfac=',convfac
+      !print *,'Trap: AT NXOY. NO3=',cncrad(kno3)*convfac,' N2O5=',cncrad(kn2o5)*convfac
+      !print *,'Trap: AT NXOY. NXOY=',conc(knxoy)*convfac,' NO2=',conc(kno2)*convfac
       if (conc(knxoy).gt.conc(kno2)) then
         conc(knxoy) = conc(kno2)
         ltest = .true.
       endif
-      print *,'Trap: AT NXOY. NXOY=',conc(knxoy)*convfac,' NO2=',conc(kno2)*convfac
+      !print *,'Trap: AT NXOY. NXOY=',conc(knxoy)*convfac,' NO2=',conc(kno2)*convfac
       
       !BNM Added to resolve NXOY problems in PSAT (NXOY=4)
       !Find the largest source contribiution to NXOY and correct
@@ -502,13 +504,13 @@ c
         loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(4-1)+nx*ny*nz*MXTRK*(s-1)
         total = total + appconc(loc)
       enddo
-      print *,'Trap: AT NXOY'
+      !print *,'Trap: AT NXOY'
       NXOYcrctn = conc(knxoy)*convfac - total
       total2 = total + NXOYcrctn
       !Need to take conc(knxoy) away from a combination of the
       !sources based on how much is there already
-      print *,'Trap: After NXOY Assignment. Corr=',NXOYcrctn,
-     &        ' total=',total
+      !print *,'Trap: After NXOY Assignment. Corr=',NXOYcrctn,
+      !&        ' total=',total
       do s = 1,appnum+3
         loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(4-1)+nx*ny*nz*MXTRK*(s-1)
         fracApp = appconc(loc)/total
@@ -521,9 +523,9 @@ c
       do s = 1,appnum+3
         loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(4-1)+nx*ny*nz*MXTRK*(s-1)
         total = total + appconc(loc)
-        print *,'Trap: After Appgas. Appconc(NXOY,',s,')=',Appconc(loc)
+        !print *,'Trap: After Appgas. Appconc(NXOY,',s,')=',Appconc(loc)
       enddo
-      print *,'Trap: After Appgas. NXOY Total=',total,' conc=',conc(knxoy)*convfac
+      !print *,'Trap: After Appgas. NXOY Total=',total,' conc=',conc(knxoy)*convfac
 c
 c======================== DDM Begin =======================
 c
@@ -567,7 +569,7 @@ c
       do s = 1,appnum+3
         loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(s-1)
         total = total + appconc(loc)
-        print *,'Trap: Before NXOY Correction. Appconc(NO2,',s,')=',Appconc(loc)
+        !print *,'Trap: Before NXOY Correction. Appconc(NO2,',s,')=',Appconc(loc)
       enddo
       !print *,'Trap: Before NO2. Total=',total,' conc=',conc(kno2)*convfac
       total2 = amax1(bdnl(kno2)*convfac, total - conc(knxoy)*convfac)

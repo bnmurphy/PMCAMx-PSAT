@@ -104,6 +104,7 @@ C BNM         VARIABLES FOR SUMMING MASSES
       real masschem(nspec), masspart(nspec)
       real dxmass(nrow), dymass, dzmass(ncol,nrow,nlay)
       real concbnmNO2        !debugging
+      integer s, nx, ny, nz
 
 c
 c========================= Source Apportion End ========================
@@ -463,11 +464,13 @@ c         loc = 73+97*(6-1)+90*97*(1-1)+97*90*14*(14-1)+97*90*14*490*(1-1)
 c         print *,'Chemdriv: Appconc(73,6,1,PAN2)=',
 c     &           (Appconc(loc+97*90*14*490*(is-1)),is=1,4) 
 
+c                  print *,'Starting from trap'
                  call trap(rxnrate5,radslvr5,ratejac5,rateslo5,dtchem,
      &             ldark(i,j),water(i,j,k),atm,O2,CH4,H2,con,crad,
      &             avgrad,tcell,
      &             sddm,nddmsp,ngas,ddmjac5,lddm,nirrrxn,titrt,rrxn_irr,
      &             lirr,i,j,k,convfac) !Kristina added i,j,k,changes on 06/21/07
+c                  print *,'Back from trap'
 
 C END <- BNM 
 
@@ -513,7 +516,12 @@ c
                        if (ispc.le.ngas) then
                          orig(ispc) = con(ispc)*convfac
                        else
-                         orig(ispc) = con(ispc)
+                         if (Appmaprev(Appmap(ispc)).eq.ispc) then 
+                           orig(Appmaprev(Appmap(ispc))) = con(ispc)
+                         else
+                           orig(Appmaprev(Appmap(ispc))) = 
+     &                        orig(Appmaprev(Appmap(ispc))) + con(ispc)
+                         endif
                        endif
                      enddo
                    endif
@@ -535,13 +543,26 @@ c
                             final(ispc) = bdnl(ispc)*convfac
                          endif
                        else
-                         final(ispc) = con(ispc)
+                         if (Appmaprev(Appmap(ispc)).eq.ispc) then 
+                           final(Appmaprev(Appmap(ispc))) = con(ispc)
+                         else
+                           final(Appmaprev(Appmap(ispc))) = 
+     &                        final(Appmaprev(Appmap(ispc))) + con(ispc)
+                         endif
                          if (final(ispc).eq.0.0) then
                             final(ispc) = bdnl(ispc)
                          endif
                        endif
                      enddo
+c		     print *,'Calling Appaero\n'
                      call Appaero(orig,final,i,j,k,convfac)
+c		     print *,'Done with Appaero i=',i,' j=',j,'\n'
+                   endif
+
+                   if (i.eq.7.and.j.eq.78) then
+                     !print *,'Chemdriv: i=',i,' j=',j,' k=',k
+                     !ispc=17   
+                     !print *,'   orig(57)=',orig(57),'  final(57)=',final(57)
                    endif
 c
 c-------------------End added 05/11/07--------------------------------
@@ -768,6 +789,7 @@ cbk              con(kcg2) = con(kcg2)/convfac
 cbk              con(kcg3) = con(kcg3)/convfac
 cbk              con(kcg4) = con(kcg4)/convfac
 cbk            endif
+
             do is=1,ngas
               con(is) = amax1(bdnl(is),con(is)) ! bkoo (03/12/03)
               conc(i,j,k,is) = con(is)*convfac  ! ppm->umol/m3

@@ -43,7 +43,7 @@ c
       include 'App.com'
 c
 c
-      real old(MXSPEC),new(MXSPEC),frac(56,MXSOUR),r(300)
+      real old(MXSPEC),new(MXSPEC+1),frac(56,MXSOUR),r(MXRXN)
       integer i,j,k,s,loc,n,loc2,loc3,loc4,spc,ict,NO2case,isrc
       real total(56),tot,conv,total2(56),test,NO2cons(3)
       real NXOYtot,oldNO(MXTRK),dt,dummy,NO3conc
@@ -266,8 +266,10 @@ c
       NOxRemain = NOxTotal + (-1*gPBZN-gHNO3-ngHONO-ngPAN-ngPAN2-ngMPAN
      &            -gHNO4-gNPHE-gXN-0.5*cycPAN-0.5*cycPAN2-0.5*cycHONO
      &            -0.5*cycMPAN)*dt
+      !NOxEnd = NOxTotal + (-1*gPBZN-gHNO3-dHONO-dPAN-dPAN2-dMPAN
+      !&            -gHNO4-gNPHE-gXN+lPBZN+lHNO3+lHNO4)*dt
       NOxEnd = NOxTotal + (-1*gPBZN-gHNO3-dHONO-dPAN-dPAN2-dMPAN
-     &            -gHNO4-gNPHE-gXN+lPBZN+lHNO3+lHNO4)*dt
+     &            -gHNO4-gNPHE-gXN+lPBZN+lHNO3+3*lHNO4)*dt
       modelTot = new(Appmaprev(1))+new(Appmaprev(2))+new(Appmaprev(4))+
      &           NO3new
       if (abs(modelTot-NOxEnd).gt.0.1*MIN(modelTot,NOxEnd)) then

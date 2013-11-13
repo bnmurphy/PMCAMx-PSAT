@@ -29,7 +29,7 @@ c
       integer i,j,k,aspc,gspc,n,s,loc,locA,locG,ii,jj,kk,v
       integer nx,ny,nz,a,g,coorA(38),coorG(38),count
       real total(MXTRK),frac,allsize(38,MXSOUR),allsizetot(38)
-      integer loc2,loc3,loc4,spc,coorP(5)
+      integer loc2,loc3,loc4,spc,coorP(5), nend
 c
       nx = ncol(1)
       ny = nrow(1)
@@ -82,42 +82,43 @@ c
 c     MAP GAS TO AEROSOL (the gas/aerosol pairs share an index)
       coorA(1) = 115 !PSO4
       coorA(2) = 125 !APO1
-      coorA(3) = 135 !APO2
-      coorA(4) = 145 !APO3
-      coorA(5) = 155 !APO4
-      coorA(6) = 165 !APO5
-      coorA(7) = 175 !APO6
-      coorA(8) = 185 !APO7
-      coorA(9) = 195 !APO8
-      coorA(10) = 205 !AOO1
-      coorA(11) = 215 !AOO2
-      coorA(12) = 225 !AOO3
-      coorA(13) = 235 !AOO4
-      coorA(14) = 245 !AOO5
-      coorA(15) = 255 !AOO6
-      coorA(16) = 265 !AOO7
-      coorA(17) = 275 !AOO8
-      coorA(18) = 285 !ANS1
-      coorA(19) = 295 !ANS2
-      coorA(20) = 305 !ANS3
-      coorA(21) = 315 !ANS4
-      coorA(22) = 325 !ANS5
-      coorA(23) = 335 !ANS6
-      coorA(24) = 345 !ANS7
-      coorA(25) = 355 !ANS8
-      coorA(26) = 365 !ABS1
-      coorA(27) = 375 !ABS2
-      coorA(28) = 385 !ABS3
-      coorA(29) = 395 !ABS4
-      coorA(30) = 405 !ABS5
-      coorA(31) = 415 !AAS1
-      coorA(32) = 425 !AAS2
-      coorA(33) = 435 !AAS3
-      coorA(34) = 445 !AAS4
-      coorA(35) = 455 !AAS5
-      coorA(36) = 195 !PCL
-      coorA(37) = 475 !PNH4
-      coorA(38) = 465 !PNO3
+      coorA(3) = 126 !APO2
+      coorA(4) = 127 !APO3
+      coorA(5) = 128 !APO4
+      coorA(6) = 129 !APO5
+      coorA(7) = 130 !APO6
+      coorA(8) = 131 !APO7
+      coorA(9) = 132 !APO8
+      coorA(10) = 133 !AOO1
+      coorA(11) = 134 !AOO2
+      coorA(12) = 135 !AOO3
+      coorA(13) = 136 !AOO4
+      coorA(14) = 137 !AOO5
+      coorA(15) = 138 !AOO6
+      coorA(16) = 139 !AOO7
+      coorA(17) = 140 !AOO8
+      coorA(18) = 141 !ANS1
+      coorA(19) = 142 !ANS2
+      coorA(20) = 143 !ANS3
+      coorA(21) = 144 !ANS4
+      coorA(22) = 145 !ANS5
+      coorA(23) = 146 !ANS6
+      coorA(24) = 147 !ANS7
+      coorA(25) = 148 !ANS8
+      coorA(26) = 149 !ABS1
+      coorA(27) = 150 !ABS2
+      coorA(28) = 151 !ABS3
+      coorA(29) = 152 !ABS4
+      coorA(30) = 153 !ABS5
+      coorA(31) = 154 !AAS1
+      coorA(32) = 155 !AAS2
+      coorA(33) = 156 !AAS3
+      coorA(34) = 157 !AAS4
+      coorA(35) = 158 !AAS5
+      coorA(36) = 95  !PCL
+      !coorA(36) = 161 !PCL
+      coorA(37) = 160 !PNH4
+      coorA(38) = 159 !PNO3
       coorG(1) = 15 !SO2
       coorG(2) = 22 !CPO1
       coorG(3) = 23 !CPO2
@@ -160,21 +161,28 @@ c     MAP GAS TO AEROSOL (the gas/aerosol pairs share an index)
       coorP(1) = 65
       coorP(2) = 75
       coorP(3) = 85
-      coorP(4) = 95
-      coorP(5) = 105
+      coorP(4) = 105
 
 c
 c     GETTING TOTALS
+      !print *,'Appaero: Getting totals'
       do n=1,MXTRK
-        if ( (n.gt.sa_num_gas .and. n.lt.65) .or.n.ge.485) goto 200
+        if (Appmaprev(n).eq.0) goto 200
+c        if ( (n.gt.sa_num_gas .and. n.lt.65) .or.n.ge.162.or. 
+c     &       (n.ge.95.and.n.lt.104) ) goto 200
         total(n) = 0
         do s=1,Appnum+3
           loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(n-1) +
      &          nx*ny*nz*MXTRK*(s-1)
           total(n) = total(n) + Appconc(loc)
+          !if (n.eq.19) then
+          !  print *,'APPAERO: s=',s,' Appconc=',Appconc(loc)
+          !  print *,'         n=',n,' total(HCL)=',total(n)
+          !endif
         enddo
         if (n.le.sa_num_gas) conv = convfac
         if (n.gt.sa_num_gas) conv = 1
+ 
 c
 c     CHECKING TOTALS AT BEGINNING
         if (abs(total(n)-orig(Appmaprev(n))).gt.
@@ -183,8 +191,9 @@ c     CHECKING TOTALS AT BEGINNING
           if ((abs(orig(Appmaprev(n))-bdnl(Appmaprev(n))*conv).lt.
      &         0.05*bdnl(Appmaprev(n))*conv).or.
      &        (n.eq.4).or.(n.eq.5).or.
-     &        (i.eq.1.or.i.eq.97.or.j.eq.1.or.j.eq.90))
-     &         then
+     &        (i.eq.1.or.i.eq.97.or.j.eq.1.or.j.eq.90).or.
+     &        (abs(total(n)-orig(Appmaprev(n))).lt.10*bdnl(Appmaprev(n))*conv)
+     &         ) then
             do ict=1,Appnum+3
               loc3 = i + nx*(j-1) + nx*ny*(k-1)+nx*ny*nz*(n-1)+
      &               nx*ny*nz*MXTRK*(ict-1)
@@ -213,18 +222,21 @@ c
 c     TOTALS FOR AEROSOL SPECIES -- ADD ALL SIZE SECTIONS TOGETHER
       do count=1,38
         allsizetot(count) = 0.0
-        do n=1,10
+        nend = 1
+        if (count.eq.1.or.count.eq.36) nend = 10 !Sulfate and Chloride
+        do n=1,nend
           do s=1,Appnum+3
             if (n.eq.1) allsize(count,s) = 0.0
             loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*
      &            ((coorA(count)-1+n)-1) + nx*ny*nz*MXTRK*(s-1)
-            allsize(count,s) = allsize(count,s) + Appconc(loc)
+            allsize(count,s)  = allsize(count,s)  + Appconc(loc)
             allsizetot(count) = allsizetot(count) + Appconc(loc)
           enddo
         enddo
       enddo
 c
 c     SULFATE
+      !print *,'Appaero: Doing sulfate'
       do n=1,10
         a = coorA(1)-1+n
         g = coorG(1)
@@ -254,8 +266,11 @@ c     SULFATE
       enddo
 c
 c     Remaining Species (semi-volatiles)
+      !print *,'Appaero: Doing semi-volatiles'
       do count=2,38
-        do n=1,10
+        nend = 1
+        if (count.eq.36) nend=10  !It's PCL, do size resolved partitioning
+        do n=1,nend  !BNM remove size from semivolatiles
           a = coorA(count)-1+n
           g = coorG(count)
           aspc = Appmaprev(a)
@@ -269,8 +284,12 @@ c     Remaining Species (semi-volatiles)
             frac = (Appconc(locG)*MW(count)+allsize(count,s))/
      &             (total(g)*MW(count)+allsizetot(count))
             check = check + frac
-            if (frac.lt.0.or.frac.gt.1) write(6,*) 'Improper frac: ',
-     &        frac,i,j,k,a,g,s
+            if (frac.lt.0.or.frac.gt.1) then 
+              write(6,*) 'Improper frac: ',frac,i,j,k,a,g,s,count
+              write(6,*) '         Appconc(gas)=',Appconc(locG),' total=',total(g)
+              write(6,*) '         Allsizetot=',allsizetot(count)
+            endif
+     
             if (abs(1-check).gt.0.001.and.s.eq.Appnum+3) then
               write(6,*) 'frac Total not 1: ',frac,i,j,k,a,g,check,
      &                   count
@@ -287,7 +306,7 @@ c     Remaining Species (semi-volatiles)
               stop
             endif
             Appconc(locA) = final(aspc)*frac
-            if (n.eq.10) Appconc(locG) = final(gspc)*frac
+            if (n.eq.nend) Appconc(locG) = final(gspc)*frac
             if (Appconc(locA).eq.'NaN'.or.Appconc(locG).eq.'NaN') 
      &        write(6,*) 'Problem in Appaero'
           enddo
@@ -297,9 +316,10 @@ c
 c     Primary Emissions
 c     Two cases: Net condensation, Net evaporation
 c     Case 1: Net Condensation
+      !print *,'Appaero: Doing primary species'
       if ((final(Appmaprev(coorP(1)))-orig(Appmaprev(coorP(1)))).lt.0)
      &    then
-        do count = 1,5
+        do count = 1,4
           do n = 1,10
             spc = coorP(count) + (11-n) - 1  !(11-n) counts backwards
             do s = 1,Appnum+3
@@ -321,7 +341,7 @@ c     Case 1: Net Condensation
         enddo
 c     Case 2: Net evaporation
       else
-        do count = 1,5
+        do count = 1,4
           do n = 1,10
             spc = coorP(count) + n - 1 
             do s = 1,Appnum+3
@@ -346,8 +366,10 @@ c
 c-------------------------------------------------------------------
 c------------------------CHECKS-------------------------------------
 c-------------------------------------------------------------------
+      !print *,'Appaero: Before Check'
       do spc=1,MXTRK
 
+        if (Appmaprev(spc).eq.0) goto 100
 c
 c-----Check total & Negative Concentrations
         tot = 0.0
@@ -370,6 +392,10 @@ c            stop
 c          endif
           tot = tot+Appconc(loc)
         enddo
+        if (spc.eq.17.and.i.eq.7.and.j.eq.78) then
+          print *,'Appaero: i=',i,' j=',j,' k=',k,' spc=',spc
+          print *,'     total=',tot,'  final=',final(loc2)
+        endif
         if (abs(tot-final(loc2)).gt.0.10*MIN(final(loc2),tot)) 
      &       then
 c          if (final(Appmaprev(n)).eq.bdnl(Appmaprev(n))) then
@@ -399,7 +425,14 @@ c          endif
           loc2 = Appmaprev(spc)
           Appconc(loc) = Appconc(loc)*final(loc2)/tot
         enddo
+        if (spc.eq.17.and.i.eq.7.and.j.eq.78) then
+          print *,'Appaero: i=',i,' j=',j,' k=',k,' spc=',spc
+          print *,'     total=',tot,'  final=',final(loc2)
+        endif
 c
+ 100    continue
+
       enddo
-c
+c          
+      !print *,'Done with Appaero'
       end

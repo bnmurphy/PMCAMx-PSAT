@@ -32,6 +32,7 @@ c     tlat1   -- 1st true latitude of Lamber Conformal projection (degrees)
 c     tlat2   -- 2nd true latitude of Lamber Conformal projection (degrees)
 c-----------------------------------------------------------------------
 c
+      integer ncol, nrow, nlay
       common /grdsz/  ncol(MXGRID),nrow(MXGRID),nlay(MXGRID),
      &                deltax(MXROWA,MXGRID), deltay(MXGRID)
 c

@@ -102,13 +102,13 @@ c
      &          nx*ny*nz*MXTRK*(s-1)
 c
 c         ENTRAINMENT
-c
+c         
           if (-1*f2(k).gt.Apptot(k)) then !If more than original conc is transported out
             remain = Apptot(k) + f2(k)
             if (f1(k).ge.0) then
               Appconc(loc)=(f1(k)+remain)*original(k-1,s)/Apptot(k-1)
             elseif (f1(k).lt.0) then
-              write(6,*) 'Negative conc in Appzadv - fluxes too high'
+              write(6,*) 'Negative conc in Appzadv - f2 fluxes too high'
             endif
 c
           elseif (-1*f1(k).gt.Apptot(k)) then !If more than original conc is transported out
@@ -116,7 +116,7 @@ c
             if (f2(k).ge.0) then
               Appconc(loc)=(f2(k)+remain)*original(k+1,s)/Apptot(k+1)
             elseif (f2(k).lt.0) then
-              write(6,*) 'Negative conc in Appzadv - fluxes too high'
+              write(6,*) 'Negative conc in Appzadv - f1 fluxes too high'
             endif
 c
           else

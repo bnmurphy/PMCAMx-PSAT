@@ -30,7 +30,7 @@ c
       real AppAFT(MXCOL1,MXROW1,MXLAY1,MXSPEC)
       real Appavg(MXCOL1*MXROW1*MXLAY1*MXSOUR*MXTRK)
       integer Appnum, Appmap(MXSPEC), Appct
-      integer Appmaprev(MXTRK), sa_num_gas
+      integer Appmaprev(MXTRK), sa_num_gas, sa_num_sv
       character*10 Appnam(MXTRK)
       integer AppemisP(MXSOUR-3,MXTRK)
       integer AppemisA(MXSOUR-3,MXTRK)
@@ -38,12 +38,15 @@ c
       real AppemfracA(MXCOL1,MXROW1,MXSPEC,MXSOUR-2)
       real AppemfracP(120000,MXSPEC,MXSOUR-2)
       real modvdep(MXCOL1,MXROW1,MXSPEC)
+      real saconc(MXCOL1,MXROW1,MXLAY1,MXTRK*MXSOUR)
+      integer sv_bin
 c
       common /App/ Appconc,Appnum,Appnam,Appmap,Appct,
      &             Appavg, AppFORE, AppAFT
       common /App2/ nAppA,nAppP,Appmaprev
       common /App3/ AppemfracA,AppemfracP
       common /App4/ AppemisP, AppemisA
-      common /App5/ modvdep, sa_num_gas
+      common /App5/ modvdep, sa_num_gas, sa_num_sv
+      common /App6/ saconc, sv_bin
 c     
 c     END

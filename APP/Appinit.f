@@ -51,8 +51,12 @@ c
               do j = 1,ny
                 do i = 1,nx
                   n4d = i+nx*(j-1)+nx*ny*(k-1)+nx*ny*nz*(l-1)
-                  loc = i+nx*(j-1)+nx*ny*(k-1)+nx*ny*nz*(Appmap(l)-1)            
-                  Appconc(loc) = conc(n4d)
+                  loc = i+nx*(j-1)+nx*ny*(k-1)+nx*ny*nz*(Appmap(l)-1)
+                  !Needs to be cumulative because semivolatile aerosols
+                  !will all refer back to the same Appconc location.
+                  !Shouldn't affect other species since they were all
+                  !initialized earlier.
+                  Appconc(loc) = Appconc(loc) + conc(n4d) 
                 enddo
               enddo
             enddo

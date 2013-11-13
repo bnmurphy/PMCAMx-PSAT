@@ -97,7 +97,9 @@ c
       dimension tarray2(2)
       real fp(MX1D),fm(MX1D),dep(MX1D) !Kristina Added 05/08/07
       real original(MXCOL1,MXROW1,MXLAY1,MXSPEC) !Kristina Added 08/23/07
-      integer s !Added by Kristina 08/23/07
+      integer s, nx, ny, nz !Added by Kristina 08/23/07
+      integer isize, spc_first_bin
+      real fpsum(MX1D), fmsum(MX1D)
 c
 c======================== Process Analysis Begin ====================================
 c
@@ -187,7 +189,14 @@ c
 c--------Added by Kristina 08/23/07-------------------------------------
 c
               !original(i,j,k,ispc) = conc(i,j,k,ispc)
-              AppFORE(i,j,k,ispc) = conc(i,j,k,ispc)
+              if (Appmap(ispc).ge.sa_num_sv) then
+                spc_first_bin = Appmaprev(Appmap(ispc))
+                if (ispc.eq.spc_first_bin) AppFORE(i,j,k,spc_first_bin) = 0.0
+                AppFORE(i,j,k,spc_first_bin) = AppFORE(i,j,k,spc_first_bin) 
+     &                     + conc(i,j,k,ispc)
+              else
+                AppFORE(i,j,k,ispc) = conc(i,j,k,ispc)  !BNM Added
+              endif
 c
 c-------------End Added 08/23/07---------------------------------------
 c
@@ -335,10 +344,27 @@ c
                 fp(i)=fp(i)/dy
                 fm(i)=fm(i)/dy
                 dep(i) = depth(i,j,k)
-                AppAFT(i,j,k,ispc) = conc(i,j,k,ispc)  !BNM Added
+                if (Appmap(ispc).ge.sa_num_sv) then
+                  spc_first_bin = Appmaprev(Appmap(ispc))
+                  if (ispc.eq.spc_first_bin) then
+                     AppAFT(i,j,k,spc_first_bin) = 0.0
+                     fpsum(i) = 0.0
+                     fmsum(i) = 0.0
+                  endif
+                  AppAFT(i,j,k,spc_first_bin) = AppAFT(i,j,k,spc_first_bin) 
+     &                    + conc(i,j,k,ispc)
+                  fpsum(i) = fpsum(i) + fp(i)
+                  fmsum(i) = fmsum(i) + fm(i)
+                else
+                  AppAFT(i,j,k,ispc) = conc(i,j,k,ispc)  !BNM Added
+                  fpsum(i) = fp(i)
+                  fmsum(i) = fm(i)
+                endif
               enddo
-              call Appxyadv(fp,fm,Appmap(ispc),1,k,j,dep,m1d,
-     &                      dy)  !Ben added dy just for consistency
+              if (Appmap(ispc).lt.sa_num_sv .or. ispc.eq.spc_first_bin+sv_bin) then
+                call Appxyadv(fpsum,fmsum,Appmap(ispc),1,k,j,dep,m1d,
+     &                      dy,ispc)  !Ben added dy just for consistency
+              endif
             endif
 c
 c-----------End Added 05/08/07-------------------------------------
@@ -444,7 +470,15 @@ c
 c--------Added by Kristina 08/23/07-------------------------------------
 c
               !original(i,j,k,ispc) = conc(i,j,k,ispc) BNM replaced
-              AppFORE(i,j,k,ispc) = conc(i,j,k,ispc)
+              if (Appmap(ispc).ge.sa_num_sv) then
+                spc_first_bin = Appmaprev(Appmap(ispc))
+                if (ispc.eq.spc_first_bin) AppFORE(i,j,k,spc_first_bin) = 0.0
+                AppFORE(i,j,k,spc_first_bin) = AppFORE(i,j,k,spc_first_bin) 
+     &                     + conc(i,j,k,ispc)
+              else
+                AppFORE(i,j,k,ispc) = conc(i,j,k,ispc)  !BNM Added
+              endif
+              !AppFORE(i,j,k,ispc) = conc(i,j,k,ispc)
 c
 c-------------End Added 08/23/07---------------------------------------
 c
@@ -585,19 +619,27 @@ c
             if (lApp.and.Appmap(ispc).ne.0) then
               do j=1,MXROW1
                 dep(j) = depth(i,j,k)
-                AppAFT(i,j,k,ispc) = conc(i,j,k,ispc) !BNM
+                if (Appmap(ispc).ge.sa_num_sv) then
+                  spc_first_bin = Appmaprev(Appmap(ispc))
+                  if (ispc.eq.spc_first_bin) then
+                    AppAFT(i,j,k,spc_first_bin) = 0.0
+                    fpsum(j) = 0.0
+                    fmsum(j) = 0.0
+                  endif
+                  AppAFT(i,j,k,spc_first_bin) = AppAFT(i,j,k,spc_first_bin) 
+     &                   + conc(i,j,k,ispc)
+                  fpsum(j) = fpsum(j) + fp(j)
+                  fmsum(j) = fmsum(j) + fm(j)
+                else
+                  AppAFT(i,j,k,ispc) = conc(i,j,k,ispc)  !BNM Added
+                  fpsum(j) = fp(j)
+                  fmsum(j) = fm(j)
+                endif
               enddo
-	      !if (k.eq.1.and.i.eq.2) then
-	      !nx = 97
-	      !ny = 90
-	      !nz = 14
-              !loc = 2+nx*(18-1)+nx*ny*(1-1)+nx*ny*nz*(130-1)+nx*ny*nz*MXTRK*(4-1)
-              !print *,'XYADVEC: before Appyadvec. Appconc(...)=',Appconc(loc)
-	      !endif
-              call Appxyadv(fp,fm,Appmap(ispc),2,k,i,dep,m1d,
-     &                      dx)
-              !loc = 2+nx*(18-1)+nx*ny*(1-1)+nx*ny*nz*(130-1)+nx*ny*nz*MXTRK*(4-1)
-              !print *,'XYADVEC: after Appyadvec. i=',i,' k=',k,' Appconc(...)=',Appconc(loc)
+              if (Appmap(ispc).lt.sa_num_sv .or. ispc.eq.spc_first_bin+sv_bin) then
+                call Appxyadv(fpsum,fmsum,Appmap(ispc),2,k,i,dep,m1d,
+     &                      dx,ispc)
+              endif
             endif
 c
 c-----------End Added 05/08/07-------------------------------------

@@ -29,10 +29,10 @@ c
       !real old(MXCOL1,MXROW1,MXLAY1,MXSPEC)
       !BNM Replaced AppAFT and old with AppAFT and AppFORE, respectively
       integer spc,xy,k,ij,loc,loc2,loc3,s,src,nx,ny,nz,maxi,maxj
-      integer mini,minj,v
+      integer mini,minj,v,l
       real Apptot(MXCOL1),Original(MXCOL1,MXSOUR),total
       real dep(MX1D),scale(MX1D),dx(MX1D),convfac
-      integer l
+      real original2, original3(MX1D), size_bin
 c
       nx = ncol(1)
       ny = nrow(1)
@@ -49,6 +49,8 @@ c     Totals
      &            nx*ny*nz*MXTRK*(src-1)
             Apptot(i) = Appconc(loc)+Apptot(i)
             Original(i,src)=Appconc(loc)
+            print *,'i=',i,' src=',src,'  Apptot(i)=',Apptot(i)
+            print *,'   Appconc=',Appconc(loc),'  Original=',Original(i,src)
           enddo
           loc2 = i + nx*(ij-1) + nx*ny*(k-1) + 
      &           nx*ny*nz*(Appmaprev(spc)-1)
@@ -59,57 +61,68 @@ c     Totals
             convfac = 1
           endif
 
-c          print *,'Appxyadv: i=',i,' j=',ij,' spc=',l,' Apptot=',Apptot(i)
-c          do src = 1,11
-c            loc = i + nx*(ij-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
-c     &            nx*ny*nz*MXTRK*(src-1)
-c            print *,'   src=',src,' Appconc=',Appconc(loc)
-c          enddo
-          
-          if (abs(Apptot(i)-AppFORE(i,ij,k,Appmaprev(spc))).gt.
-     &        0.01*MIN(Apptot(i),AppFORE(i,ij,k,Appmaprev(spc))).or.
-     &        AppFORE(i,ij,k,Appmaprev(spc)).eq.bdnl(Appmaprev(spc))*convfac) then
-            if (abs(AppFORE(i,ij,k,Appmaprev(spc))-bdnl(Appmaprev(spc))
-     &          *convfac).lt.0.05*bdnl(Appmaprev(spc))*convfac.or.
-     &          abs(Apptot(i)-AppFORE(i,ij,k,Appmaprev(spc)).le.
-     &               11*bdnl(Appmaprev(spc))*convfac) .or.
-     &          spc.eq.5) then
+          if (spc.ge.sa_num_sv) then
+            !Species is a semivolatile aerosol. Sum up size bins
+            !Find out size bin
+            size_bin = l - Appmaprev(spc) + 1
+            original2    = 0.0
+            original3(i) = 0.0
+            print *,'i=',i,' j=',ij,' k=',k,'  spc=',l
+            do isize = 1,10
+              original2    = original2 + AppFORE(i,ij,k,Appmaprev(spc)-1+isize)
+              original3(i) = original3(i) + AppAFT(i,ij,k,Appmaprev(spc)-1+isize)
+              print *,'  isize=',isize,' original2=',original2,' AppFORE=',AppFORE(i,ij,k,Appmaprev(spc)-1+isize)
+              print *,'  isize=',isize,' original3=',original3(i),' AppAFT=',AppAFT(i,ij,k,Appmaprev(spc)-1+isize)
+            enddo
+            print *,'   Apptot(i)=',Apptot(i)
+          else
+            original2    = AppFORE(i,ij,k,Appmaprev(spc))
+            original3(i) = AppAFT(i,ij,k,Appmaprev(spc))
+          endif
+
+          if (abs(Apptot(i)-original2).gt.
+     &        0.01*MIN(Apptot(i),original2).or.
+     &        original2.eq.bdnl(Appmaprev(spc))*convfac) then
+            if (abs(original2-bdnl(Appmaprev(spc))
+     &          *convfac).lt.0.05*bdnl(Appmaprev(spc))*convfac.or.spc.eq.5) then
               do s = 1,Appnum+3
                 loc = i + nx*(ij-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &                nx*ny*nz*MXTRK*(s-1)
                 if (Apptot(i).eq.0) then
-                  if (s.eq.1) Appconc(loc) = AppFORE(i,ij,k,Appmaprev(spc))
+                  if (s.eq.1) Appconc(loc) = original2
                   if (s.ne.1) Appconc(loc) = 0.0
                 else
-                  Appconc(loc) = Appconc(loc)*AppFORE(i,ij,k,Appmaprev(spc))
+                  Appconc(loc) = Appconc(loc)*original2
      &                         /Apptot(i)
                 endif
                 Original(i,s)=Appconc(loc)
               enddo
-              Apptot(i) = AppFORE(i,ij,k,Appmaprev(spc))
+              Apptot(i) = original2
             elseif (i.eq.1.or.i.eq.97.or.j.eq.1.or.j.eq.90) then  !BNMchanged 96->97
               do s = 1,Appnum+3
                 loc = i + nx*(ij-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &                nx*ny*nz*MXTRK*(s-1)
                 if (Apptot(i).eq.0) then
-                  if (s.eq.1) Appconc(loc) = AppFORE(i,ij,k,Appmaprev(spc))
+                  if (s.eq.1) Appconc(loc) = original2
                   if (s.ne.1) Appconc(loc) = 0.0
                 else
-                  Appconc(loc) = Appconc(loc)*AppFORE(i,ij,k,Appmaprev(spc))
+                  Appconc(loc) = Appconc(loc)*original2
      &                         /Apptot(i)
                 endif
                 Original(i,s)=Appconc(loc)
+                print *,'  Corrected: Appconc=',Appconc(loc),'  Original=',Original(i,s)
+                print *,'             Apptot=',Apptot(i)
               enddo
-              Apptot(i) = AppFORE(i,ij,k,Appmaprev(spc))
             else
               write(6,*) 'Totals not same at beginning of Appxyadv',i,ij
-     &                    ,k,spc, l
+     &                    ,k,spc
               write(6,*) 'Total,old,bdnl:',Apptot(i),
-     &                   AppFORE(i,ij,k,Appmaprev(spc)),bdnl(Appmaprev(spc))
+     &                   original2,bdnl(Appmaprev(spc))
               write(6,*) 'New: ',AppAFT(i,ij,k,Appmaprev(spc))
               stop
             endif
           endif
+          print *,'  After total check: Apptot(i)=',Apptot(i)
         enddo
 c
 c
@@ -122,11 +135,15 @@ c           BOUNDARY CELLS DO NOT CHANGE
             !if (i.eq.1.and.fm(2).eq.0.and.fp(1).eq.0) then
             if (i.eq.1) then
               loc = i + nx*(ij-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
-     &              nx*ny*nz*MXTRK*(s-1)
+     &              nx*ny*nz*mxtRK*(s-1)
               loc3 = i + nx*(ij-1) + nx*ny*(k-1) + 
      &               nx*ny*nz*(Appmaprev(spc)-1)
               !Appconc(loc)=conc(loc3)*(Original(i,s)/Apptot(i))
-              Appconc(loc)=AppFORE(i,ij,k,Appmaprev(spc))*(Original(i,s)/Apptot(i)) 
+              !BNM editing to make semivolatiles independent of size
+              print *,' Boundary Cell: i=',i,' j=',j,' s=',s,' original3=',original3(i)
+              print *,'     Original(i,s)=',Original(i,s),' Apptot=',Apptot(i),' Appconc=',Appconc(loc)
+              Appconc(loc)=original3(i)*(Original(i,s)/Apptot(i)) 
+              print *,'     Appconc=',Appconc(loc)
 c
             !elseif (i.eq.1.and.(fm(2).ne.0 .or. fp(1).ne.0) ) then
             !  loc = i + nx*(ij-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
@@ -141,15 +158,14 @@ c
      &      !               Apptot(i) + fm(i+1)*Original(i+1,s)/
      &      !               Apptot(i+1) )*scale(i)/dep(i)
 c
-            !elseif (i.eq.MX1D.and.fm(MX1D-1).eq.0) then
-            !elseif (i.eq.MXCOL1.and.fp(MXCOL1-1).eq.0.and.fm(MXCOL1).eq.0) then
             elseif (i.eq.MXCOL1) then
               loc = i + nx*(ij-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &              nx*ny*nz*MXTRK*(s-1)
               loc3 = i + nx*(ij-1) + nx*ny*(k-1) + 
      &               nx*ny*nz*(Appmaprev(spc)-1)
               !Appconc(loc)=conc(loc3)*(Original(i,s)/Apptot(i))
-              Appconc(loc)=AppFORE(i,ij,k,Appmaprev(spc))*(Original(i,s)/Apptot(i)) 
+              !BNM editing to make semivolatiles independent of size
+              Appconc(loc)=original3(i)*(Original(i,s)/Apptot(i))
 c
             !elseif (i.eq.MX1D.and.fm(MX1D-1).ne.0) then
             !elseif (i.eq.MXCOL1.and.(fp(MXCOL1-1).ne.0 .or. fm(MXCOL1).ne.0) ) then
@@ -192,7 +208,6 @@ c       Totals
      &            nx*ny*nz*MXTRK*(src-1)
             Apptot(j) = Appconc(loc)+Apptot(j)
             Original(j,src) = Appconc(loc)
-
           enddo
           loc2 = ij + nx*(j-1) + nx*ny*(k-1) + 
      &           nx*ny*nz*(Appmaprev(spc)-1)
@@ -203,46 +218,43 @@ c       Totals
             convfac = 1
           endif
 
-
-          if (abs(Apptot(j)-AppFORE(ij,j,k,Appmaprev(spc))).gt.
-     &        0.02*MIN(Apptot(j),AppFORE(ij,j,k,Appmaprev(spc)))) then
-            if (abs(AppFORE(ij,j,k,Appmaprev(spc))-bdnl(Appmaprev(spc))*convfac)
-     &          .lt.0.05*AppFORE(ij,j,k,Appmaprev(spc)).or.
-     &          abs(Apptot(j)-AppFORE(ij,j,k,Appmaprev(spc)).le.
-     &               11*bdnl(Appmaprev(spc))*convfac) .or.
+          if (spc.ge.sa_num_sv) then
+            !Species is a semivolatile aerosol. Sum up size bins
+            !Find out size bin
+            size_bin = l - Appmaprev(spc) + 1
+            original2    = 0.0
+            original3(j) = 0.0
+            do isize = 1,10
+              original2    = original2 + AppFORE(ij,j,k,Appmaprev(spc)-1+isize)
+              original3(j) = original3(j) + AppAFT(ij,j,k,Appmaprev(spc)-1+isize)
+            enddo
+          else
+            original2    = AppFORE(ij,j,k,Appmaprev(spc))
+            original3(j) = AppAFT(ij,j,k,Appmaprev(spc))
+          endif
+          
+          if (abs(Apptot(j)-original2).gt.
+     &        0.02*MIN(Apptot(j),original2)) then
+            if (abs(original2-bdnl(Appmaprev(spc))*convfac)
+     &          .lt.0.01*original2.or.
      &          spc.eq.5) then
               do s = 1,Appnum+3
                 loc = ij + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &                nx*ny*nz*MXTRK*(s-1)
                 if (Apptot(j).eq.0) then
-                  if (s.eq.1) Appconc(loc) = AppFORE(ij,j,k,Appmaprev(spc))
+                  if (s.eq.1) Appconc(loc) = original2
                   if (s.ne.1) Appconc(loc) = 0.0
                 else
-                  Appconc(loc) = Appconc(loc)*AppFORE(ij,j,k,Appmaprev(spc))
-     &                         /Apptot(j)
+                  Appconc(loc) = Appconc(loc)*original2/Apptot(j)
                 endif
                 Original(j,s)=Appconc(loc)
               enddo
-              Apptot(j) = AppFORE(ij,j,k,Appmaprev(spc))
-            elseif (i.eq.1.or.i.eq.97.or.j.eq.1.or.j.eq.90) then  !BNMchanged 96->97
-              do s = 1,Appnum+3
-                loc = ij + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
-     &                nx*ny*nz*MXTRK*(s-1)
-                if (Apptot(j).eq.0) then
-                  if (s.eq.1) Appconc(loc) = AppFORE(ij,j,k,Appmaprev(spc))
-                  if (s.ne.1) Appconc(loc) = 0.0
-                else
-                  Appconc(loc) = Appconc(loc)*AppFORE(ij,j,k,Appmaprev(spc))
-     &                         /Apptot(j)
-                endif
-                Original(j,s)=Appconc(loc)
-              enddo
-              Apptot(j) = AppFORE(ij,j,k,Appmaprev(spc))
+              Apptot(j) = original2
             else
               write(6,*) 'Totals not same at beginning of Appxyadv',ij,j
      &                    ,k,spc,xy,convfac
               write(6,*) 'Total,old,bdnl:',Apptot(j),
-     &                   AppFORE(ij,j,k,Appmaprev(spc)),bdnl(Appmaprev(spc))
+     &                   original2,bdnl(Appmaprev(spc))
               write(6,*) 'New: ',AppAFT(ij,j,k,Appmaprev(spc))
               do s = 1,Appnum+3
                 loc = ij + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
@@ -255,12 +267,13 @@ c       Totals
             do s = 1,Appnum+3
               loc = ij + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &              nx*ny*nz*MXTRK*(s-1)
-              Appconc(loc) = Appconc(loc)*AppFORE(ij,j,k,Appmaprev(spc))
+              Appconc(loc) = Appconc(loc)*original2
      &                       /Apptot(j)
               Original(j,s)=Appconc(loc)
             enddo
-            Apptot(j) = AppFORE(ij,j,k,Appmaprev(spc))
+            Apptot(j) = original2
           endif
+
         enddo
 c
         do s=1,Appnum+3
@@ -276,7 +289,8 @@ c           BOUNDARY CELLS DO NOT CHANGE
               loc3 = ij + nx*(j-1) + nx*ny*(k-1) + 
      &               nx*ny*nz*(Appmaprev(spc)-1)
               !Appconc(loc)=conc(loc3)*(Original(j,s)/Apptot(j))
-              Appconc(loc)=AppFORE(ij,j,k,Appmaprev(spc))*(Original(j,s)/Apptot(j)) 
+              !BNM editing to make semivolatiles independent of size
+              Appconc(loc)=original3(j)*(Original(j,s)/Apptot(j))
 c
             !elseif (j.eq.1.and.fp(2).ne.0) then
             !  loc = ij + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
@@ -293,7 +307,8 @@ c
               loc3 = ij + nx*(j-1) + nx*ny*(k-1) + 
      &               nx*ny*nz*(Appmaprev(spc)-1)
               !Appconc(loc)=conc(loc3)*(Original(j,s)/Apptot(j))
-              Appconc(loc)=AppFORE(ij,j,k,Appmaprev(spc))*(Original(j,s)/Apptot(j))
+              !BNM editing to make semivolatiles independent of size
+              Appconc(loc)=original3(j)*(Original(j,s)/Apptot(j))
 c
             !elseif (j.eq.MX1D.and.fm(MX1D-1).ne.0) then
             !elseif (j.eq.MXROW1.and.fm(MXROW1-1).ne.0) then
@@ -395,11 +410,30 @@ c-----Check total
                 stop
               endif
             enddo
-            if (abs(total-AppAFT(i,j,k,Appmaprev(spc)))
-     &          .gt.0.06*MIN(AppAFT(i,j,k,Appmaprev(spc)),total)) then
+
+            if (spc.ge.sa_num_sv) then
+              print *,'Appxyadv: i=',i,' j=',j,' k=',k,' spc=',spc
+              print *,'          total=',total,'  AppAFT=',AppAFT(i,j,k,Appmaprev(spc))
+              !Species is a semivolatile aerosol. Sum up size bins
+              !Find out size bin
+              size_bin = l - Appmaprev(spc) + 1
+              original2 = 0.0
+              do isize = 1,10
+                original2 = original2 + AppAFT(i,j,k,Appmaprev(spc)-1+isize)
+              enddo
+            else
+              original2 = AppAFT(i,j,k,Appmaprev(spc))
+            endif
+          
+            if (abs(total-original2)
+     &          .gt.0.05*MIN(original2,total) ) then
+              if (spc.ge.sa_num_sv
+     &            .and.original2.le.10.5*bdnl(Appmaprev(spc))*convfac ) then
+                  goto 300
+              endif
               write(6,*) 'ERROR in Appxyadv: total incorrect'
               write(6,*) 'i,j,k,spc,xy?,ij: ',i,j,k,spc,xy,ij
-              write(6,*) 'Actual Conc.', AppAFT(i,j,k,Appmaprev(spc))
+              write(6,*) 'Actual Conc.', original2
               write(6,*) 'total ', total, '  bdnl ',bdnl(Appmaprev(spc))*convfac
               if (xy.eq.1) then
                do s=1,Appnum+3
@@ -424,11 +458,11 @@ c-----Check total
               endif
               stop
             else
-              do s=1,Appnum+3
+ 300          do s=1,Appnum+3
                 loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &                nx*ny*nz*MXTRK*(s-1)
                 Appconc(loc) = Appconc(loc)*
-     &            AppAFT(i,j,k,Appmaprev(spc))/total
+     &            original2/total
               enddo
             endif
         enddo

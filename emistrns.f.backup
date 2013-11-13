@@ -46,7 +46,6 @@ c
       include 'filunit.com'
       include "ptemiss.com"
       include "bndary.com"
-      include 'App.com' !Added by Kristina
 c
 c======================== Process Analysis Begin ====================================
 c
@@ -67,17 +66,6 @@ c
       data fluxdum /MXTRSP*0.0,MXTRSP*0.0,MXTRSP*0.0,MXTRSP*0.0,
      &              MXTRSP*0.0,MXTRSP*0.0,MXTRSP*0.0,MXTRSP*0.0,
      &              MXTRSP*0.0,MXTRSP*0.0,MXTRSP*0.0/
-c
-c--------------Added by Kristina 08/04/08-----------------------------
-c
-c      pointer (p,modvdep)
-      real savdep(MXCOL1,MXROW1,MXTRK*MXSOUR)
-c      dimension modvdep(ncol(igrd),nrow(igrd),nspec)
-      integer saspc,modspc,i,j,n,s,loc
-      integer nx, ny, nz, ispc
-c      real saconc(MXCOL1,MXROW1,MXLAY1,MXTRK*MXSOUR)
-c
-c---------------End added 08/04/08------------------------------------
 c
 c========================= Source Apportion End ========================
 c
@@ -221,6 +209,7 @@ c========================= Source Apportion End ========================
 c
 c-----Perform wet scavenging
 c
+
       if (lwet) then
         write(*,'(a20,$)') 'wetdep  ......'
         write(iout,'(a20,$)') 'wetdep  ......'
@@ -299,71 +288,19 @@ c
      &                     conc(iptr4d(igrd)),vdep(iptrem(igrd)),ptvdep,
      &                                             vdeprt(ipsa2d(igrd)))
 c
-c---------Added by Kristina 08/04/08-----------------------
-c
-      endif
-c
-      if (lApp) then
-c
-c     ASSIGN vdep array for apportionment species
-c
-      write(6,*) 'PSAT Diffusion calculations ...'
-c
-c      p=vdep(iptrem(igrd))
-      call vdepread(ncol(igrd),nrow(igrd),nspec,vdep(iptrem(igrd)),
-     &              modvdep)
-      do i=1,ncol(igrd)
-        do j=1,nrow(igrd)
-          do k=1,nlay(igrd)
-            do n=1,MXTRK
-              do s=1,MXSOUR
-                saspc = n + (MXTRK)*(s-1)
-                modspc = Appmaprev(n)
-c                write(6,*) 'Here: ',i,j,k,n,s,modspc,saspc,MXSOUR
-c                if (k.eq.1) savdep(i,j,saspc) = modvdep(i,j,modspc)
-                loc=i+ncol(igrd)*(j-1)+(nrow(igrd)*ncol(igrd))*(k-1)+
-     &              (nlay(igrd)*
-     &              ncol(igrd)*nrow(igrd))*(n-1)+(MXTRK*ncol(igrd)
-     &              *nrow(igrd)*
-     &              nlay(igrd))*(s-1)
-c                write(6,*) 'Here #2: ',loc
-                saconc(i,j,k,saspc)=Appconc(loc)
-              enddo
-            enddo
-          enddo
-        enddo
-      enddo
-
-c
-      write(6,*) 'PSAT diffusion calculations, take 2'
-c              
-c ----------End added 08/04/08-----------------------------        
-c
 c  --- call routine with tracer species arrays, send dummy
 c      arguemnts for the total mass arrays ---
 c
-c     --Call modified by Kristina to calculate source tracer diffusion---------
-c
-         call diffus(igrd,ncol(igrd),nrow(igrd),nlay(igrd),
-     &               MXTRK*MXSOUR,1,                          
+         call diffus(igrd,ncol(igrd),nrow(igrd),nlay(igrd),ntotsp,1,
      &               deltat(igrd),deltax(1,igrd),deltay(igrd),
-     &               idfin(iptr2d(igrd)),savdep,rkx(iptr3d(igrd)),
+     &               idfin(iptr2d(igrd)),ptvdep,rkx(iptr3d(igrd)),
      &               rky(iptr3d(igrd)),rkv(iptr3d(igrd)),
      &               depth(iptr3d(igrd)),tempk(iptr3d(igrd)),
      &               press(iptr3d(igrd)),mapscl(iptr2d(igrd)),
-     &               saconc,fluxdum,depdum,saconc,
+     &               ptconc(ipsa3d(igrd)),fluxdum,depdum,ptconc(1),
      &               tarray2,
      &               '  SA z diffus ......','  SA x/y diff ......',
-     &               ipacl_2d(iptr2d(igrd)),ipacl_3d(iptr3d(igrd)) )  
-c
-c----Added by Kristina 08/08/08---------------------------------
-c
-        !call Appalign(conc(iptr4d(igrd)),saconc)
-        call Appalign(conc(iptr4d(igrd)))
-
-c
-c -----End added 08/08/08---------------------------------------
-c
+     &               ipacl_2d(iptr2d(igrd)),ipacl_3d(iptr3d(igrd)) )
       endif
 c
 c========================= Source Apportion End ========================
@@ -414,4 +351,3 @@ c
 c
       return
       end
-c

@@ -1,4 +1,4 @@
-      subroutine Appemiss(dconc,i,j,k,l,type,srnum,Actconc,original)
+      subroutine Appemiss(dconc,i,j,k,l,type,srnum,conc1,original)
 c
 c     This subroutine handles the changes in apportionment due to emissions. 
 c  
@@ -26,6 +26,12 @@ c
 c
       real dconc,Actconc,total,conv,original
       integer i,j,k,l,srnum,type,spc,s,nx,ny,nz,n,m,test
+      integer isize, size_bin, loc
+      real conc1(ncol(1),nrow(1),nlay(1),nspec)
+
+      integer receptor_x, receptor_y, ring_size(20), sum_n
+      integer inner_top, inner_bottom, outer_top, outer_bottom
+      integer inner_east, outer_east, inner_west, outer_west
 c
       spc = Appmap(l)
       if (spc.eq.0) return
@@ -35,34 +41,57 @@ c
       nz = nlay(1)
       loc = i+nx*(j-1)+nx*ny*(k-1)
       conv = densfac*(273/tempk(loc))*(press(loc)/1013)
-
-      !if (i.eq.2.and.j.eq.18.and.Appmap(l).eq.130.and.k.eq.1) then
-      ! loc = 2+nx*(18-1) + nx*ny*(1-1)+nx*ny*nz*(130-1)+nx*ny*nz*MXTRK*(1-1)
-      ! print *,'\nBegin Appemiss: Appconc(i=2,j=17,spc=130,s=1)=',Appconc(loc)
-      ! loc = 2+nx*(18-1) + nx*ny*(1-1)+nx*ny*nz*(130-1)+nx*ny*nz*MXTRK*(2-1)
-      ! print *,'Begin Appemiss: Appconc(i=2,j=17,spc=130,s=2)=',Appconc(loc)
-      ! loc = 2+nx*(18-1) + nx*ny*(1-1)+nx*ny*nz*(130-1)+nx*ny*nz*MXTRK*(3-1)
-      ! print *,'Begin Appemiss: Appconc(i=2,j=17,spc=130,s=3)=',Appconc(loc)
-      ! loc = 2+nx*(18-1) + nx*ny*(1-1)+nx*ny*nz*(130-1)+nx*ny*nz*MXTRK*(4-1)
-      ! print *,'Begin Appemiss: Appconc(i=2,j=18,spc=130,s=4)=',Appconc(loc)
-      ! print *,'dconc=',dconc,'  actconc=',actconc,'  original=',original 
-      !endif
+      if (Appmap(l).gt.sa_num_gas) conv = 1.0
+      Actconc = conc1(i,j,k,l)
 c
 c     Checking the totals at the start
       total = 0.0
+      !print *,'Appemiss: i=',i,' j=',j,' k=',k,' conv=',conv
+      !print *,'          l=',l
       do s = 1, Appnum+3
         loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(Appmap(l)-1) +
      &        nx*ny*nz*MXTRK*(s-1)
+        !print *,'    Appconc=',Appconc(loc),'  total=',total
+        if (Appconc(loc).lt.bdnl(l)*conv) Appconc(loc) = bdnl(l)*conv
+        !if (Appconc(loc).eq.'NaN') Appconc(loc) = bdnl(l)*conv
         total = total + Appconc(loc)
+        !print *,'    Appconc=',Appconc(loc),'  total=',total
       enddo
       if (total.eq.0.0) then  !The species ran out of mass.
                               !Put the lower-bound mass in the s1 bin
-        total = bdnl(l)
+        !total = bdnl(l)
+        total = bdnl(l)*conv
         loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(Appmap(l)-1) +
      &        nx*ny*nz*MXTRK*(1-1)
-        Appconc(loc) = bdnl(l)
+        !Appconc(loc) = bdnl(l)
+        Appconc(loc) = bdnl(l)*conv
       endif
-         
+      
+      if (Appmap(l).ge.sa_num_sv) then
+        !The Species is Semivolatile Aerosol. Sum up the 
+        !size bins before making a comparison        
+
+        !Find out what bin this is
+        size_bin = l - Appmaprev(Appmap(l)) + 1
+        !Sum up before and after
+        original = 0.0
+        Actconc = 0.0
+        !print *,'Appemiss: l=',l,'  Appmap=',Appmap(l)
+        do isize = 1,6
+          original = original + conc1(i,j,k,l-size_bin+isize)
+          Actconc  = Actconc  + conc1(i,j,k,l-size_bin+isize)
+          !print *,'    isize=',isize,'  conc1=',conc1(i,j,k,l-size_bin+isize),' bdnl=',bdnl(l-size_bin+isize)
+        enddo
+        original = original - dconc
+        !print *,'   original = ',original,' Actconc=',Actconc,' dconc=',dconc
+      else
+        original = original
+        Actconc = Actconc
+        !print *,'Appemiss: l=',l,'  Appmap=',Appmap(l)
+        !print *,'  conc1=',conc1(i,j,k,l),' bdnl=',bdnl(l)
+      endif
+      
+      
       if (abs(total-original).gt.0.01*MIN(original,total).and.
      &    Appmap(l).ne.0.and.total.gt.0.0) then
         if (abs(original-bdnl(l)*conv).lt.0.05*bdnl(l)*conv.and.
@@ -74,7 +103,8 @@ c     Checking the totals at the start
           enddo
         elseif (abs(original-bdnl(l)).lt.0.05*bdnl(l).or.
      &         abs(total-original).lt.0.05*MIN(original,total).or.
-     &         original.lt.1.0E-7) then
+     &         abs(total-original).lt.(Appnum+4)*bdnl(l)*conv
+     &          ) then
           do s = 1,Appnum+3
             loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(Appmap(l)-1) +
      &            nx*ny*nz*MXTRK*(s-1)
@@ -85,19 +115,104 @@ c     Checking the totals at the start
      &                 Appmap(l),l,type
           write(6,*) 'Total,old,bdnl:',total,original,bdnl(l)*conv,
      &               bdnl(l)
+          write(6,*) '  Source Apportionment:'
+          do s = 1,Appnum+3
+            loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(Appmap(l)-1) +
+     &            nx*ny*nz*MXTRK*(s-1)
+            write(6,*)'       s=',s,'  Appconc=',Appconc(loc)
+          enddo
           write(6,*) 'New: ',Actconc
           stop
         endif
       endif
-c
+
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 cTHIS IS FOR THE AGE CODE!!!!!!
-      do n=1,Appnum+1
-        AppemfracP(srnum,Appmap(l),n) = 0.0
-        if (n.eq.date-1192) AppemfracP(srnum,Appmap(l),n) = 1.0
-        AppemfracA(i,j,Appmap(l),n) = 0.0
-        if (n.eq.date-1192) AppemfracA(i,j,Appmap(l),n) = 1.0
-      enddo
+c      do n=1,Appnum+1
+c        AppemfracP(srnum,Appmap(l),n) = 0.0
+c        if (n.eq.date-1192) AppemfracP(srnum,Appmap(l),n) = 1.0
+c        AppemfracA(i,j,Appmap(l),n) = 0.0
+c        if (n.eq.date-1192) AppemfracA(i,j,Appmap(l),n) = 1.0
+c      enddo
 cAGE CODE!!!!!! BNM
+
+cTHIS CODE IS FOR PSAT APPLIED TO SOURCE LOCATION
+      
+      !Set Receptor Location
+      receptor_x = 65      !Pittsburgh (65,51)
+      receptor_y = 51
+      !receptor_x = 79      !New York (79,55)
+      !receptor_y = 55
+      !receptor_x = 70      !Duke Forest (70,38)
+      !receptor_y = 38
+      !receptor_x = 51      !Bowling Green, KY
+      !receptor_y = 38
+      ring_size(1) = 1
+      ring_size(2) = 1
+      ring_size(3) = 2
+      ring_size(4) = 2
+      ring_size(5) = 2
+      ring_size(6) = 3
+      ring_size(7) = 3
+      ring_size(8) = 3
+      ring_size(9) = 4
+      ring_size(10) = 4
+
+        AppemfracP(srnum,Appmap(l),Appnum+1) = 1.0
+        AppemfracA(i,j,Appmap(l),Appnum+1) = 1.0
+        do n=1,Appnum
+          AppemfracP(srnum,Appmap(l),n) = 0.0
+          AppemfracA(i,j,Appmap(l),n) = 0.0
+        enddo
+
+        !Loop Through Source Categories
+        if (i.eq.receptor_x.and.j.eq.receptor_y) then
+          !Local Emissions
+          AppemfracP(srnum,Appmap(l),1) = 1.0
+          AppemfracA(i,j,Appmap(l),1) = 1.0
+          !Erase Attribution from OTHER Category
+          AppemfracP(srnum,Appmap(l),Appnum+1) = 0.0
+          AppemfracA(i,j,Appmap(l),Appnum+1) = 0.0
+        endif
+
+        sum_n = 0
+        do n = 2,Appnum
+          sum_n = sum_n + ring_size(n-1)
+          outer_top = receptor_y + sum_n
+          inner_top = outer_top - ring_size(n-1)
+          outer_bottom = receptor_y - sum_n
+          inner_bottom = outer_bottom + ring_size(n-1)
+          outer_east = receptor_x + sum_n
+          inner_east = outer_east - ring_size(n-1)
+          outer_west = receptor_x - sum_n
+          inner_west = outer_west + ring_size(n-1)
+            
+          if ((i.le.outer_east.and.i.ge.outer_west.AND.
+     &       j.le.outer_top.and.j.ge.outer_bottom).AND.
+     &      .NOT.
+     &      (i.le.inner_east.and.i.ge.inner_west.AND.
+     &       j.le.inner_top.and.j.ge.inner_bottom)) then
+            !Source is inside this ring
+            AppemfracP(srnum,Appmap(l),n) = 1.0
+            AppemfracA(i,j,Appmap(l),n) = 1.0
+            !Erase Attribution from OTHER Category
+            AppemfracP(srnum,Appmap(l),Appnum+1) = 0.0
+            AppemfracA(i,j,Appmap(l),Appnum+1) = 0.0
+          endif
+        enddo
+    
+      !This is for Paris
+      !if (i.eq.58.and.j.eq.73) then
+      !  n=1   !Local Emissions
+      !  AppemfracP(srnum,Appmap(l),n) = 1.0
+      !  AppemfracA(i,j,Appmap(l),n) = 1.0
+      !else
+      !  n=2   !Everything Else
+      !  AppemfracP(srnum,Appmap(l),n) = 1.0
+      !  AppemfracA(i,j,Appmap(l),n) = 1.0
+      !endif
+cLOCATION CODE        
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       
 c
       if (Appmap(l).ne.0) then
@@ -157,7 +272,7 @@ c-----Check total
      &        nx*ny*nz*MXTRK*(s-1)
         total = total + Appconc(loc)
       enddo
-      if (k.eq.1.and.i.eq.2.and.j.eq.18) print *,'Appemiss: spc=',Appmap(l),' total=',total
+
       if (abs(total-Actconc).gt.0.01*MIN(Actconc,total)) then
         if (Actconc.eq.bdnl(l)) then
           do s=1,Appnum+3
@@ -192,17 +307,16 @@ c-----Check total
       endif
 c
       endif
-      if (i.eq.4.and.j.eq.3.and.k.eq.14) then
-       print *,'spc =',l,'  Appspc=',Appmap(l) 
-       print *,'i=',i,'  j=',j
-       loc = 4+nx*(3-1) + nx*ny*(1-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(1-1)
-       print *,'Appemiss: Appconc(i=4,j=3,spc=2,s=1)=',Appconc(loc)
-       loc = 4+nx*(3-1) + nx*ny*(1-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(2-1)
-       print *,'Appemiss: Appconc(i=4,j=3,spc=2,s=2)=',Appconc(loc)
-       loc = 4+nx*(3-1) + nx*ny*(1-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(3-1)
-       print *,'Appemiss: Appconc(i=4,j=3,spc=2,s=3)=',Appconc(loc)
-       loc = 4+nx*(3-1) + nx*ny*(1-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(4-1)
-       print *,'Appemiss: Appconc(i=4,j=3,spc=2,s=4)=',Appconc(loc)
-      endif
 c
+      
+c      if (i.eq.65.and.j.eq.51.and.Appmap(l).eq.65) then
+c        print *,'Source Attribution at Pittsburgh 2008; Layer',k,':'
+c        do s=1,Appnum+3
+c          loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(Appmap(l)-1) +
+c     &          nx*ny*nz*MXTRK*(s-1)
+c          print *,'   Source ',s,':',Appconc(loc)
+c        enddo
+c      endif
+
+     
       end

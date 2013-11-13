@@ -265,7 +265,7 @@ c     MXTRK   -- maximum number of species that are tracked
 c----------------------------------------------------------------------
 c
       integer MXSOUR, MXTRK
-      parameter ( MXSOUR = 6, MXTRK = 490 )
+      parameter ( MXSOUR = 13, MXTRK = 161 )
       
       !MXTRK value here is copied from PSAT-2004. Should it be more for
       !the semivolatile organics implementation? -BNM

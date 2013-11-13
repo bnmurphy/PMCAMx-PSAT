@@ -36,7 +36,7 @@ c     Printing the Average File
          write(6,*) 'Writing average apportionment concentrations'
          do k=1,1
            istart = MXCOL1*MXROW1*MXTRK*MXSOUR*(k-1)
-           istop = MXCOL1*MXROW1*MXTRK*MXSOUR*(k) - 1
+           istop = MXCOL1*MXROW1*MXTRK*MXSOUR*(k)-1
            write(iAppoA(k)) (Appavg(i),i=istart,istop)
          enddo
       endif

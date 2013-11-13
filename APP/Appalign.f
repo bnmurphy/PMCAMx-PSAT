@@ -1,4 +1,4 @@
-      subroutine Appalign(actual,saconc)
+      subroutine Appalign(actual)
 c
 c     This program realigns the mass totals between CAMx and PSAT after
 c     the source tracers are sent through the vertical diffusion
@@ -29,10 +29,10 @@ c
       include 'App.com'
 c
 c 
-      real saconc(MXCOL1,MXROW1,MXLAY1,MXTRK*MXSOUR)
+      !real saconc(MXCOL1,MXROW1,MXLAY1,MXTRK*MXSOUR)
       real actual(MXCOL1,MXROW1,MXLAY1,MXSPEC)
-      real totals(MXCOL1,MXROW1,MXLAY1,MXTRK)
-      integer i,j,k,n,s
+      real totals, app_align_con
+      integer i,j,k,n,s,isize
 c
 c     COPY concentrations from saconc to Appconc
 c
@@ -40,40 +40,33 @@ c
         do j=1,MXROW1
           do k=1,MXLAY1
             do n=1,MXTRK
-              totals(i,j,k,n) = 0.0
+              totals = 0.0
               do s=1,MXSOUR
                 loc1=n+MXTRK*(s-1)
                 loc2=i + MXCOL1*(j-1) + MXCOL1*MXROW1*(k-1) +
      &               MXCOL1*MXROW1*MXLAY1*(n-1) +
      &               MXCOL1*MXROW1*MXLAY1*MXTRK*(s-1)
                 Appconc(loc2) = saconc(i,j,k,loc1)
-                totals(i,j,k,n) = totals(i,j,k,n) + Appconc(loc2)
+                totals = totals + Appconc(loc2)
               enddo
-              if (totals(i,j,k,n).ne.actual(i,j,k,Appmaprev(n))) then
-c                if ((totals(i,j,k,n)-actual(i,j,k,Appmaprev(n))).gt.
-c     &               0.99*actual(i,j,k,Appmaprev(n)).and.
-c     &               totals(i,j,k,n).gt.1.0E-6) then
-c                  write(6,*) 'HUGE difference in totals in Appalign'
-c                  write(6,*) 'Location: ',i,j,k,n,s
-c                  write(6,*) 'SA concentration total: ',totals(i,j,k,n)
-c                  write(6,*) 'Actual concentration: ',
-c     &                       actual(i,j,k,Appmaprev(n))
-c                  write(6,*) 'Source concentrations: '
-c                  do s=1,MXSOUR
-c                    loc2=i + MXCOL1*(j-1) + MXCOL1*MXROW1*(k-1) +
-c     &                   MXCOL1*MXROW1*MXLAY1*(n-1) +
-c     &                   MXCOL1*MXROW1*MXLAY1*MXTRK*(s-1)
-c                    write(6,*) s,Appconc(loc2)
-c                  enddo
-c                  stop
-c                endif
+
+              if (n.ge.sa_num_sv) then
+                app_align_con = 0.0
+                do isize = Appmaprev(n),Appmaprev(n)+sv_bin
+                  app_align_con = app_align_con + actual(i,j,k,isize)
+                enddo
+              else
+                app_align_con = actual(i,j,k,Appmaprev(n))
+              endif             
+                
+              !if (totals.ne.actual(i,j,k,Appmaprev(n))) then
+              if (totals.ne.app_align_con) then
                 do s=1,MXSOUR
                   loc2=i + MXCOL1*(j-1) + MXCOL1*MXROW1*(k-1) +
      &                 MXCOL1*MXROW1*MXLAY1*(n-1) +
      &                 MXCOL1*MXROW1*MXLAY1*MXTRK*(s-1)
                   Appconc(loc2) = Appconc(loc2) *
-     &                            actual(i,j,k,Appmaprev(n))/
-     &                            totals(i,j,k,n)
+     &                            app_align_con/totals
                 enddo
               endif
             enddo

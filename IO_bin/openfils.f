@@ -256,7 +256,7 @@ c
         open(unit=iAppoA(1),file=filroot(1:ii+5),form='UNFORMATTED',
      &                                       status= 'UNKNOWN',ERR=7005)
         write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo
+     &                  (unit):',iAppo+1
         write(iout,9002) '   File: ',filroot(1:ii+5)
         nfils = nfils + 1
 
@@ -268,7 +268,7 @@ c
         open(unit=iAppoA(2),file=filroot(1:ii+5),form='UNFORMATTED',
      &                                       status= 'UNKNOWN',ERR=7005)
         write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo
+     &                  (unit):',iAppo+2
         write(iout,9002) '   File: ',filroot(1:ii+5)
         nfils = nfils + 1
 c
@@ -280,7 +280,7 @@ c
         open(unit=iAppoA(3),file=filroot(1:ii+5),form='UNFORMATTED',
      &                                       status= 'UNKNOWN',ERR=7005)
         write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo
+     &                  (unit):',iAppo+3
         write(iout,9002) '   File: ',filroot(1:ii+5)
         nfils = nfils + 1
 c
@@ -292,7 +292,7 @@ c
         open(unit=iAppoA(4),file=filroot(1:ii+5),form='UNFORMATTED',
      &                                       status= 'UNKNOWN',ERR=7005)
         write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo
+     &                  (unit):',iAppo+4
         write(iout,9002) '   File: ',filroot(1:ii+5)
         nfils = nfils + 1
 c
@@ -304,7 +304,7 @@ c
         open(unit=iAppoA(5),file=filroot(1:ii+5),form='UNFORMATTED',
      &                                       status= 'UNKNOWN',ERR=7005)
         write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo
+     &                  (unit):',iAppo+5
         write(iout,9002) '   File: ',filroot(1:ii+5)
         nfils = nfils + 1
 c
@@ -316,7 +316,7 @@ c
         open(unit=iAppoA(6),file=filroot(1:ii+5),form='UNFORMATTED',
      &                                       status= 'UNKNOWN',ERR=7005)
         write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo
+     &                  (unit):',iAppo+6
         write(iout,9002) '   File: ',filroot(1:ii+5)
         nfils = nfils + 1
 c
@@ -328,7 +328,7 @@ c
         open(unit=iAppoA(7),file=filroot(1:ii+5),form='UNFORMATTED',
      &                                       status= 'UNKNOWN',ERR=7005)
         write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo
+     &                  (unit):',iAppo+7
         write(iout,9002) '   File: ',filroot(1:ii+5)
         nfils = nfils + 1
 c
@@ -340,7 +340,7 @@ c
         open(unit=iAppoA(8),file=filroot(1:ii+5),form='UNFORMATTED',
      &                                       status= 'UNKNOWN',ERR=7005)
         write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo
+     &                  (unit):',iAppo+8
         write(iout,9002) '   File: ',filroot(1:ii+5)
         nfils = nfils + 1
 c
@@ -352,7 +352,7 @@ c
         open(unit=iAppoA(9),file=filroot(1:ii+5),form='UNFORMATTED',
      &                                       status= 'UNKNOWN',ERR=7005)
         write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo
+     &                  (unit):',iAppo+9
         write(iout,9002) '   File: ',filroot(1:ii+5)
         nfils = nfils + 1
 c
@@ -364,7 +364,7 @@ c
         open(unit=iAppoA(10),file=filroot(1:ii+5),form='UNFORMATTED',
      &                                       status= 'UNKNOWN',ERR=7005)
         write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo
+     &                  (unit):',iAppo+10
         write(iout,9002) '   File: ',filroot(1:ii+5)
         nfils = nfils + 1
 c
@@ -376,7 +376,7 @@ c
         open(unit=iAppoA(11),file=filroot(1:ii+5),form='UNFORMATTED',
      &                                       status= 'UNKNOWN',ERR=7005)
         write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo
+     &                  (unit):',iAppo+11
         write(iout,9002) '   File: ',filroot(1:ii+5)
         nfils = nfils + 1
 c
@@ -388,7 +388,7 @@ c
         open(unit=iAppoA(12),file=filroot(1:ii+5),form='UNFORMATTED',
      &                                       status= 'UNKNOWN',ERR=7005)
         write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo
+     &                  (unit):',iAppo+12
         write(iout,9002) '   File: ',filroot(1:ii+5)
         nfils = nfils + 1
 c
@@ -400,7 +400,7 @@ c
         open(unit=iAppoA(13),file=filroot(1:ii+5),form='UNFORMATTED',
      &                                       status= 'UNKNOWN',ERR=7005)
         write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo
+     &                  (unit):',iAppo+13
         write(iout,9002) '   File: ',filroot(1:ii+5)
         nfils = nfils + 1
 c
@@ -412,7 +412,7 @@ c
         open(unit=iAppoA(14),file=filroot(1:ii+5),form='UNFORMATTED',
      &                                       status= 'UNKNOWN',ERR=7005)
         write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo
+     &                  (unit):',iAppo+14
         write(iout,9002) '   File: ',filroot(1:ii+5)
         nfils = nfils + 1
       endif
@@ -480,39 +480,40 @@ c
 c-----Read in the file names for the Apportionment input files
 c
       if (lApp) then
+      !Commented out by BNM since all are read from the same file
 c
 c       EMISSIONS files
 c
-        do i = 1,Appnum
-c        Point Emissions File
-          irec = irec + 1
-          action = 'Reading emissions filename - point'
-          read(inp,'(20X,A)',ERR=7001,END=7004) filtmp
-          iAppiP(i) = nfils
-          inquire(file=filtmp,exist=lexist)
-          if( .NOT. lexist ) goto 7002
-          nopen = nopen + 1
-          open(unit=iAppiP(i),file=filtmp,form='UNFORMATTED',
-     &                status='OLD',ERR=7000)
-          write(iout,9000)'Emissions file            (unit):',
-     &                                                     iAppiP(i)
-          write(iout,9002) '   File: ',filtmp(:istrln(filtmp))
-          nfils = nfils + 1
-c        Area Emissions File
-          irec = irec + 1
-          action = 'Reading emissions filename - area'
-          read(inp,'(20X,A)',ERR=7001,END=7004) filtmp
-          iAppiA(i) = nfils
-          inquire(file=filtmp,exist=lexist)
-          if( .NOT. lexist ) goto 7002
-          nopen = nopen + 1
-          open(unit=iAppiA(i),file=filtmp,form='UNFORMATTED',
-     &            status='OLD',ERR=7000)
-          write(iout,9000)'Emissions file            (unit):',
-     &                                                     iAppiA(i)
-          write(iout,9002) '   File: ',filtmp(:istrln(filtmp))
-          nfils = nfils + 1
-        enddo        
+c        do i = 1,Appnum
+cc        Point Emissions File
+c          irec = irec + 1
+c          action = 'Reading emissions filename - point'
+c          read(inp,'(20X,A)',ERR=7001,END=7004) filtmp
+c          iAppiP(i) = nfils
+c          inquire(file=filtmp,exist=lexist)
+c          if( .NOT. lexist ) goto 7002
+c          nopen = nopen + 1
+c          open(unit=iAppiP(i),file=filtmp,form='UNFORMATTED',
+c     &                status='OLD',ERR=7000)
+c          write(iout,9000)'Emissions file            (unit):',
+c     &                                                     iAppiP(i)
+c          write(iout,9002) '   File: ',filtmp(:istrln(filtmp))
+c          nfils = nfils + 1
+cc        Area Emissions File
+c          irec = irec + 1
+c          action = 'Reading emissions filename - area'
+c          read(inp,'(20X,A)',ERR=7001,END=7004) filtmp
+c          iAppiA(i) = nfils
+c          inquire(file=filtmp,exist=lexist)
+c          if( .NOT. lexist ) goto 7002
+c          nopen = nopen + 1
+c          open(unit=iAppiA(i),file=filtmp,form='UNFORMATTED',
+c     &            status='OLD',ERR=7000)
+c          write(iout,9000)'Emissions file            (unit):',
+c     &                                                     iAppiA(i)
+c          write(iout,9002) '   File: ',filtmp(:istrln(filtmp))
+c          nfils = nfils + 1
+c        enddo        
       endif
 c
 c------------End Added 08/18/2006---------------------------------------------------
