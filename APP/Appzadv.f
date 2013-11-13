@@ -169,7 +169,7 @@ c
           if (f2(k).ge.0) then
             Appconc(loc) = 0.0
             loc2 = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
-     &            nx*ny*nz*MXTRK*(1-1)
+     &            nx*ny*nz*MXTRK*(2-1)  !BNM changed s=1 to s=2
             Appconc(loc2)=f2(k)+remain
           elseif (f2(k).lt.0) then
             write(6,*) 'Negative conc in Appzadv - fluxes too high'
@@ -185,7 +185,7 @@ c
      &                     Apptot(k)
           endif
 c
-          if (f2(k).gt.0.and.s.eq.1) then
+          if (f2(k).gt.0.and.s.eq.2) then  !BNM changed s.eq.1 to s.eq.2
             Appconc(loc) = Appconc(loc) + f2(k)
           elseif (f2(k).le.0) then
             Appconc(loc) = Appconc(loc) + f2(k)*original(k,s)/
@@ -230,6 +230,11 @@ c-----Check total
        do s=1,Appnum+3
           loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &          nx*ny*nz*MXTRK*(s-1)
+          total = total + Appconc(loc)
+        enddo
+       do s=1,Appnum+3
+          loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
+     &          nx*ny*nz*MXTRK*(s-1)
           if (Appconc(loc).lt.0) then
 c           CORRECT IF ONE SOURCE IS NEGATIVE
 c            if ((abs(f1(k))+abs(f2(k))).gt.Apptot(k)) then
@@ -256,7 +261,10 @@ c            if (Appconc(loc2).lt.0) then
 
             !IF THE CONCENTRATION IS LESS THAN THE LOWER BOUND VALUE,
             !SET IT TO ZERO
-            if (abs(Appconc(loc)).lt.bdnl(Appmaprev(spc)) ) then
+            !if (abs(Appconc(loc)).lt.bdnl(Appmaprev(spc)) ) then
+            if (abs(Appconc(loc)).lt.Actconc(k)/100 .or.
+     &          abs(Appconc(loc)).gt.Actconc(k)*100
+     &            ) then
               Appconc(loc) = 0.0
             else
               write(6,*) 'Negative Value in Appzadv'
@@ -281,6 +289,8 @@ c            endif
           total = total + Appconc(loc)
         enddo
         if (abs(total-Actconc(k)).gt.0.01*Actconc(k)) then
+         if (k.lt.9
+     &         ) then
           write(6,*) 'ERROR in Appzadv: total incorrect'
           write(6,*) 'i,j,k,spc: ',i,j,k,spc
           write(6,*) 'Actual Conc.', Actconc(k)
@@ -289,9 +299,16 @@ c            endif
           do s=1,Appnum+3
             loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &            nx*ny*nz*MXTRK*(s-1)
-            write(6,*) s,Appconc(loc),original(k,s),original(k-1,s)
-          enddo
-          stop
+              write(6,*) s,Appconc(loc),original(k,s),original(k-1,s)
+            enddo
+            stop
+          else
+            do s=1,Appnum+3
+              loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
+     &              nx*ny*nz*MXTRK*(s-1)
+              Appconc(loc) = Appconc(loc)/total * Actconc(k) 
+            enddo
+          endif
         endif
       enddo
 c

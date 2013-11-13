@@ -30,9 +30,9 @@ c
       !BNM Replaced AppAFT and old with AppAFT and AppFORE, respectively
       integer spc,xy,k,ij,loc,loc2,loc3,s,src,nx,ny,nz,maxi,maxj
       integer mini,minj,v
-      real Apptot(MXCOL1),Original(MXCOL1,MXSOUR),total
+      real Apptot(MX1D),Original(MX1D,MXSOUR),total
       real dep(MX1D),scale(MX1D),dx(MX1D),convfac
-      integer l
+      integer l, loc4, maxns, ns
 c
       nx = ncol(1)
       ny = nrow(1)
@@ -87,7 +87,7 @@ c          enddo
                 Original(i,s)=Appconc(loc)
               enddo
               Apptot(i) = AppFORE(i,ij,k,Appmaprev(spc))
-            elseif (i.eq.1.or.i.eq.97.or.j.eq.1.or.j.eq.90) then  !BNMchanged 96->97
+            elseif (i.eq.1.or.i.eq.ncol(1).or.j.eq.1.or.j.eq.nrow(1)) then  !BNMchanged 96->97
               do s = 1,Appnum+3
                 loc = i + nx*(ij-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &                nx*ny*nz*MXTRK*(s-1)
@@ -169,6 +169,17 @@ c           NON-BOUNDARY CELLS
      &                     Apptot(i+1))*scale(i)/dep(i)
               if (Appconc(loc).lt.0.and.
      &            abs(Appconc(loc)).lt.bdnl(Appmaprev(spc))*convfac) then
+                 maxns = 1
+                 do ns = 2,Appnum+3
+                   loc3 = i + nx*(ij-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
+     &                    nx*ny*nz*MXTRK*(ns-1)
+                   loc4 = i + nx*(ij-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
+     &                    nx*ny*nz*MXTRK*(maxns-1)
+                   if (Appconc(loc3).gt.Appconc(loc4)) maxns = ns
+                 enddo
+                 loc4 = i + nx*(ij-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
+     &                    nx*ny*nz*MXTRK*(maxns-1)
+                 Appconc(loc4) = Appconc(loc4) + Appconc(loc)
                  Appconc(loc) = 0.0
               endif
               if (Appconc(loc).eq.'NaN') 
@@ -224,7 +235,7 @@ c       Totals
                 Original(j,s)=Appconc(loc)
               enddo
               Apptot(j) = AppFORE(ij,j,k,Appmaprev(spc))
-            elseif (i.eq.1.or.i.eq.97.or.j.eq.1.or.j.eq.90) then  !BNMchanged 96->97
+            elseif (i.eq.1.or.i.eq.ncol(1).or.j.eq.1.or.j.eq.nrow(1)) then  !BNMchanged 96->97
               do s = 1,Appnum+3
                 loc = ij + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &                nx*ny*nz*MXTRK*(s-1)
@@ -313,6 +324,17 @@ c           NON-BOUNDARY CELLS
      &                     Apptot(j+1))*scale(j)/dep(j)/dx(j)
               if (Appconc(loc).lt.0.and.
      &           abs(Appconc(loc)).lt.bdnl(Appmaprev(spc))*convfac) then
+                 maxns = 1
+                 do ns = 2,Appnum+3
+                   loc3 = ij + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
+     &                    nx*ny*nz*MXTRK*(ns-1)
+                   loc4 = ij + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
+     &                    nx*ny*nz*MXTRK*(maxns-1)
+                   if (Appconc(loc3).gt.Appconc(loc4)) maxns = ns
+                 enddo
+                 loc4 = ij + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
+     &                    nx*ny*nz*MXTRK*(maxns-1)
+                 Appconc(loc4) = Appconc(loc4) + Appconc(loc)
                  Appconc(loc) = 0.0
               endif
             endif
@@ -383,8 +405,22 @@ c-----Check total
                 write(6,*) 'Actual Conc.', AppAFT(i,j,k,Appmaprev(spc))
                 write(6,*) 'Apptot ', Apptot
                 write(6,*) 'total ', total
-                do v=1,Appnum+3
-                  loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
+                write(6,*) 'bdnl  ', bdnl(Appmaprev(spc)),'  conv ',convfac
+                write(6,*) 'bdnl*conv  ',bdnl(Appmaprev(spc))*convfac
+                if (xy.eq.1) then
+                  do v=1,Appnum+3
+                    loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
+     &                  nx*ny*nz*MXTRK*(v-1)
+                    write(6,*) v,Appconc(loc),Original(i,v),Original(i+1,v)
+                  enddo
+                  write(6,*) 'fp(i-1),fp(i),fm(i),fm(i+1):',
+     &                      fp(i-1),fp(i),fm(i),fm(i+1)
+                  write(6,*) 'scale,depth,dx: ',
+     &                      scale(i),dep(i),dx(i)
+                  stop
+                else 
+                  do v=1,Appnum+3
+                    loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &                  nx*ny*nz*MXTRK*(v-1)
                   write(6,*) v,Appconc(loc),Original(j,v),Original(j+1,v)
                 enddo

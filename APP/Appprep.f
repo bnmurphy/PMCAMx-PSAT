@@ -25,7 +25,7 @@ c
       include 'flags.com'
       include 'App.com'
 c
-      integer i,j
+      integer i,j,ISUND
       character*2 num(10)
       logical match
 c
@@ -164,7 +164,8 @@ c
             match = .TRUE.
           elseif (j.ge.sa_num_sv .and.  !Semivolatile Aerosol
      &          spname(i)(1:4).eq.Appnam(j)(1:4) ) then
-            if (spname(i)(5:7).eq.'_1 ') then
+            ISUND=INDEX(spname(i),'_')
+            if (spname(i)(ISUND:ISUND+2).eq.'_1 ') then
               !Match the bulk Source Apportionment of SV 
               !aerosols to the index number of the matching
               !aerosol's lowest size bin

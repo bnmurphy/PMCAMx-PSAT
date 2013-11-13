@@ -125,92 +125,94 @@ c     Checking the totals at the start
           stop
         endif
       endif
-
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cTHIS IS FOR THE AGE CODE!!!!!!
-c      do n=1,Appnum+1
-c        AppemfracP(srnum,Appmap(l),n) = 0.0
-c        if (n.eq.date-1192) AppemfracP(srnum,Appmap(l),n) = 1.0
-c        AppemfracA(i,j,Appmap(l),n) = 0.0
-c        if (n.eq.date-1192) AppemfracA(i,j,Appmap(l),n) = 1.0
-c      enddo
+c
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cTHIS CODE IS FOR PSAT APPLIED TO AGE
+      !8121 is for May, 2008
+      !1192 is for July, 2001
+      !do n=1,Appnum+1
+      !  AppemfracP(srnum,Appmap(l),n) = 0.0
+      !  if (n.eq.date-8121) AppemfracP(srnum,Appmap(l),n) = 1.0
+      !  AppemfracA(i,j,Appmap(l),n) = 0.0
+      !  if (n.eq.date-8121) AppemfracA(i,j,Appmap(l),n) = 1.0
+      !enddo
 cAGE CODE!!!!!! BNM
 
 cTHIS CODE IS FOR PSAT APPLIED TO SOURCE LOCATION
-      
-      !Set Receptor Location
-      receptor_x = 65      !Pittsburgh (65,51)
-      receptor_y = 51
-      !receptor_x = 79      !New York (79,55)
-      !receptor_y = 55
-      !receptor_x = 70      !Duke Forest (70,38)
-      !receptor_y = 38
-      !receptor_x = 51      !Bowling Green, KY
-      !receptor_y = 38
-      ring_size(1) = 1
-      ring_size(2) = 1
-      ring_size(3) = 2
-      ring_size(4) = 2
-      ring_size(5) = 2
-      ring_size(6) = 3
-      ring_size(7) = 3
-      ring_size(8) = 3
-      ring_size(9) = 4
-      ring_size(10) = 4
+c     
+c     !Set Receptor Location
+c     receptor_x = 65      !Pittsburgh (65,51)
+c     receptor_y = 51
+c     !receptor_x = 79      !New York (79,55)
+c     !receptor_y = 55
+c     !receptor_x = 70      !Duke Forest (70,38)
+c     !receptor_y = 38
+c     !receptor_x = 51      !Bowling Green, KY
+c     !receptor_y = 38
+c     ring_size(1) = 1
+c     ring_size(2) = 1
+c     ring_size(3) = 2
+c     ring_size(4) = 2
+c     ring_size(5) = 2
+c     ring_size(6) = 3
+c     ring_size(7) = 3
+c     ring_size(8) = 3
+c     ring_size(9) = 4
+c     ring_size(10) = 4
 
-        AppemfracP(srnum,Appmap(l),Appnum+1) = 1.0
-        AppemfracA(i,j,Appmap(l),Appnum+1) = 1.0
-        do n=1,Appnum
-          AppemfracP(srnum,Appmap(l),n) = 0.0
-          AppemfracA(i,j,Appmap(l),n) = 0.0
-        enddo
+c       AppemfracP(srnum,Appmap(l),Appnum+1) = 1.0
+c       AppemfracA(i,j,Appmap(l),Appnum+1) = 1.0
+c       do n=1,Appnum
+c         AppemfracP(srnum,Appmap(l),n) = 0.0
+c         AppemfracA(i,j,Appmap(l),n) = 0.0
+c       enddo
 
-        !Loop Through Source Categories
-        if (i.eq.receptor_x.and.j.eq.receptor_y) then
-          !Local Emissions
-          AppemfracP(srnum,Appmap(l),1) = 1.0
-          AppemfracA(i,j,Appmap(l),1) = 1.0
-          !Erase Attribution from OTHER Category
-          AppemfracP(srnum,Appmap(l),Appnum+1) = 0.0
-          AppemfracA(i,j,Appmap(l),Appnum+1) = 0.0
-        endif
+c       !Loop Through Source Categories
+c       if (i.eq.receptor_x.and.j.eq.receptor_y) then
+c         !Local Emissions
+c         AppemfracP(srnum,Appmap(l),1) = 1.0
+c         AppemfracA(i,j,Appmap(l),1) = 1.0
+c         !Erase Attribution from OTHER Category
+c         AppemfracP(srnum,Appmap(l),Appnum+1) = 0.0
+c         AppemfracA(i,j,Appmap(l),Appnum+1) = 0.0
+c       endif
 
-        sum_n = 0
-        do n = 2,Appnum
-          sum_n = sum_n + ring_size(n-1)
-          outer_top = receptor_y + sum_n
-          inner_top = outer_top - ring_size(n-1)
-          outer_bottom = receptor_y - sum_n
-          inner_bottom = outer_bottom + ring_size(n-1)
-          outer_east = receptor_x + sum_n
-          inner_east = outer_east - ring_size(n-1)
-          outer_west = receptor_x - sum_n
-          inner_west = outer_west + ring_size(n-1)
-            
-          if ((i.le.outer_east.and.i.ge.outer_west.AND.
-     &       j.le.outer_top.and.j.ge.outer_bottom).AND.
-     &      .NOT.
-     &      (i.le.inner_east.and.i.ge.inner_west.AND.
-     &       j.le.inner_top.and.j.ge.inner_bottom)) then
-            !Source is inside this ring
-            AppemfracP(srnum,Appmap(l),n) = 1.0
-            AppemfracA(i,j,Appmap(l),n) = 1.0
-            !Erase Attribution from OTHER Category
-            AppemfracP(srnum,Appmap(l),Appnum+1) = 0.0
-            AppemfracA(i,j,Appmap(l),Appnum+1) = 0.0
-          endif
-        enddo
-    
+c       sum_n = 0
+c       do n = 2,Appnum
+c         sum_n = sum_n + ring_size(n-1)
+c         outer_top = receptor_y + sum_n
+c         inner_top = outer_top - ring_size(n-1)
+c         outer_bottom = receptor_y - sum_n
+c         inner_bottom = outer_bottom + ring_size(n-1)
+c         outer_east = receptor_x + sum_n
+c         inner_east = outer_east - ring_size(n-1)
+c         outer_west = receptor_x - sum_n
+c         inner_west = outer_west + ring_size(n-1)
+c           
+c         if ((i.le.outer_east.and.i.ge.outer_west.AND.
+c    &       j.le.outer_top.and.j.ge.outer_bottom).AND.
+c    &      .NOT.
+c    &      (i.le.inner_east.and.i.ge.inner_west.AND.
+c    &       j.le.inner_top.and.j.ge.inner_bottom)) then
+c           !Source is inside this ring
+c           AppemfracP(srnum,Appmap(l),n) = 1.0
+c           AppemfracA(i,j,Appmap(l),n) = 1.0
+c           !Erase Attribution from OTHER Category
+c           AppemfracP(srnum,Appmap(l),Appnum+1) = 0.0
+c           AppemfracA(i,j,Appmap(l),Appnum+1) = 0.0
+c         endif
+c       enddo
+c   
       !This is for Paris
-      !if (i.eq.58.and.j.eq.73) then
-      !  n=1   !Local Emissions
-      !  AppemfracP(srnum,Appmap(l),n) = 1.0
-      !  AppemfracA(i,j,Appmap(l),n) = 1.0
-      !else
-      !  n=2   !Everything Else
-      !  AppemfracP(srnum,Appmap(l),n) = 1.0
-      !  AppemfracA(i,j,Appmap(l),n) = 1.0
-      !endif
+      if (i.eq.58.and.j.eq.73) then
+        n=1   !Local Emissions
+        AppemfracP(srnum,Appmap(l),n) = 1.0
+        AppemfracA(i,j,Appmap(l),n) = 1.0
+      else
+        n=2   !Everything Else
+        AppemfracP(srnum,Appmap(l),n) = 1.0
+        AppemfracA(i,j,Appmap(l),n) = 1.0
+      endif
 cLOCATION CODE        
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       
@@ -306,17 +308,5 @@ c-----Check total
         enddo
       endif
 c
-      endif
-c
-      
-c      if (i.eq.65.and.j.eq.51.and.Appmap(l).eq.65) then
-c        print *,'Source Attribution at Pittsburgh 2008; Layer',k,':'
-c        do s=1,Appnum+3
-c          loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(Appmap(l)-1) +
-c     &          nx*ny*nz*MXTRK*(s-1)
-c          print *,'   Source ',s,':',Appconc(loc)
-c        enddo
-c      endif
-
-     
+      endif     
       end

@@ -652,7 +652,8 @@ c
         read(icld(1),ERR=7008) cldhdr
         call jstlft( cldhdr )
         call toupper( cldhdr )
-        if( cldhdr .EQ. 'CAMX CLOUD_RAIN' ) then
+        !if( cldhdr .EQ. 'CAMX CLOUD_RAIN' ) then
+        if( cldhdr .EQ. 'CAMX_V4.3 CLOUD_RAIN' ) then
           backspace(icld(1))
           read(icld(1),ERR=7008) cldhdr,nxcl,nycl,nzcl
           if (nxcl.ne.ncol(1) .or. nycl.ne.nrow(1) .or.
@@ -929,7 +930,8 @@ c
          call jstlft( cldhdr )
          call toupper( cldhdr )
          if( cldhdr .EQ. 'E   M   I   S  ' ) goto 7010
-         if( cldhdr .EQ. 'CAMX CLOUD_RAIN' ) then
+         !if( cldhdr .EQ. 'CAMX CLOUD_RAIN' ) then
+         if( cldhdr .EQ. 'CAMX_V4.3 CLOUD_RAIN' ) then
            backspace(icld(n))
            read(icld(n)) cldhdr,nxcl,nycl,nzcl
            if (nxcl.ne.ncol(n) .or. nycl.ne.nrow(n) .or.      

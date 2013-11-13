@@ -87,7 +87,7 @@ c
       dimension hght1d(MXLAYA),wind1d(MXLAYA),tempk1d(MXLAYA),
      1          dtdz1d(MXLAYA)
       real original !Added by Kristina 08/23/07
-      integer loc
+      integer loc, s, nx, ny, nz
 c
       data gamma,p0 /0.286,1000./
 c
@@ -96,9 +96,9 @@ c
 c-----Update concentration due to area source
 c
       if (larsrc) then
-      nx = 97
-      ny = 90
-      nz = 14
+      nx = ncol
+      ny = nrow
+      nz = nlay
 
         do 10 lar = 1,narspc
           l = larmap(lar)

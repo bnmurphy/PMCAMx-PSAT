@@ -516,11 +516,13 @@ c
                        if (ispc.le.ngas) then
                          orig(ispc) = con(ispc)*convfac
                        else
-                         if (Appmaprev(Appmap(ispc)).eq.ispc) then 
-                           orig(Appmaprev(Appmap(ispc))) = con(ispc)
-                         else
-                           orig(Appmaprev(Appmap(ispc))) = 
-     &                        orig(Appmaprev(Appmap(ispc))) + con(ispc)
+                         if (Appmap(ispc).ne.0) then
+                           if (Appmaprev(Appmap(ispc)).eq.ispc) then 
+                             orig(Appmaprev(Appmap(ispc))) = con(ispc)
+                           else
+                             orig(Appmaprev(Appmap(ispc))) = 
+     &                          orig(Appmaprev(Appmap(ispc))) + con(ispc)
+                           endif
                          endif
                        endif
                      enddo
@@ -543,27 +545,22 @@ c
                             final(ispc) = bdnl(ispc)*convfac
                          endif
                        else
-                         if (Appmaprev(Appmap(ispc)).eq.ispc) then 
-                           final(Appmaprev(Appmap(ispc))) = con(ispc)
-                         else
-                           final(Appmaprev(Appmap(ispc))) = 
-     &                        final(Appmaprev(Appmap(ispc))) + con(ispc)
+                         if (Appmap(ispc).ne.0) then
+                           if (Appmaprev(Appmap(ispc)).eq.ispc) then 
+                             final(Appmaprev(Appmap(ispc))) = con(ispc)
+                           else
+                             final(Appmaprev(Appmap(ispc))) = 
+     &                         final(Appmaprev(Appmap(ispc))) + con(ispc)
+                           endif
                          endif
                          if (final(ispc).eq.0.0) then
                             final(ispc) = bdnl(ispc)
                          endif
                        endif
                      enddo
-c		     print *,'Calling Appaero\n'
                      call Appaero(orig,final,i,j,k,convfac)
-c		     print *,'Done with Appaero i=',i,' j=',j,'\n'
                    endif
 
-                   if (i.eq.7.and.j.eq.78) then
-                     !print *,'Chemdriv: i=',i,' j=',j,' k=',k
-                     !ispc=17   
-                     !print *,'   orig(57)=',orig(57),'  final(57)=',final(57)
-                   endif
 c
 c-------------------End added 05/11/07--------------------------------
 c 

@@ -884,15 +884,6 @@ c
           Appconc(loc3) = Appconc(loc3)*(new(Appmaprev(spc))
      &                    /conv/tot)
         enddo
-        if (spc.eq.2.and.ij.eq.4.and.j.eq.3.and.k.eq.14) then
-         total3 = 0.0
-         do ict = 1,appnum+3
-          locB = i+nx*(j-1)+nx*ny*(k-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(ict-1)
-          total3 = total3 + appconc(locB)
-          !print *,'Appgas: spc=',spc,' appconc(NO2,',ict,')=',appconc(locB)
-         enddo
-         !print *,'Appgas: spc=',spc,' totNO2=',total3,' new/conv=',new(Appmaprev(2))/conv
-        endif
       enddo
 c
       end

@@ -180,7 +180,7 @@ c
 c-----Solve vertical mass adjustments using Crank-Nicholson solver
 c
             call vrtslv(nlay,i,j,igrd,deltat,ent1d,dil1d,d1d,c1d,
-     &                  fluxtop,sen1d,species(ispc),fc1,fc2,fc3,ldoipts)
+     &                  fluxtop,sen1d,species(ispc),fc1,fc2,fc3,ldoipts,ispc)
 c
 c======================== Process Analysis Begin ====================================
 c

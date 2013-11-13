@@ -1,5 +1,5 @@
       subroutine vrtslv(nlay,ii,jj,igrd,dtin,entrn,dilut,depth,conc,
-     &                  fluxtop,sens,spec,fc1,fc2,fc3,ldoipts)
+     &                  fluxtop,sens,spec,fc1,fc2,fc3,ldoipts, ispc)
 c
 c-----CAMx v4.02 030709
 c 
@@ -89,10 +89,11 @@ c
       real rr((MXLAYA+1)*(MXTRSP+1))
       real aa1(MXLAYA+1),bb1(MXLAYA+1),cc1(MXLAYA+1)
       real*8 fluxtop
+      integer ispc
 c
 c-----Entry point
 c
-      dt = dtin
+      dt = dtin   
       nsteps = 1
 c
 c-----Calculate some constants
@@ -240,8 +241,11 @@ c
           call trdiag(aa,bb,cc,rr,nlay+1,1)
         endif
 c             
-        do k = 1,nlay
-          if (rr(k).le.0.) then 
+        do k = 1,nlay+1
+          if (rr(k).le.0.and.k.ge.10) then !BNM added as a workaround
+            rr(k) = 0.1E-13                !for high-altitude, low concentrations
+          endif
+          if (rr(k).le.0.and.k.lt.10) then
             write(iout,'(//,a)') 'ERROR in VRTSLV:'
             write(iout,*) 'Negative concentration ',
      &                    'when doing advection in z-direction'

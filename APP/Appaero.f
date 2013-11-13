@@ -175,14 +175,9 @@ c     &       (n.ge.95.and.n.lt.104) ) goto 200
           loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(n-1) +
      &          nx*ny*nz*MXTRK*(s-1)
           total(n) = total(n) + Appconc(loc)
-          !if (n.eq.19) then
-          !  print *,'APPAERO: s=',s,' Appconc=',Appconc(loc)
-          !  print *,'         n=',n,' total(HCL)=',total(n)
-          !endif
         enddo
         if (n.le.sa_num_gas) conv = convfac
         if (n.gt.sa_num_gas) conv = 1
- 
 c
 c     CHECKING TOTALS AT BEGINNING
         if (abs(total(n)-orig(Appmaprev(n))).gt.
@@ -191,7 +186,7 @@ c     CHECKING TOTALS AT BEGINNING
           if ((abs(orig(Appmaprev(n))-bdnl(Appmaprev(n))*conv).lt.
      &         0.05*bdnl(Appmaprev(n))*conv).or.
      &        (n.eq.4).or.(n.eq.5).or.
-     &        (i.eq.1.or.i.eq.97.or.j.eq.1.or.j.eq.90).or.
+     &        (i.eq.1.or.i.eq.ncol(1).or.j.eq.1.or.j.eq.nrow(1)).or.
      &        (abs(total(n)-orig(Appmaprev(n))).lt.10*bdnl(Appmaprev(n))*conv)
      &         ) then
             do ict=1,Appnum+3
@@ -236,7 +231,6 @@ c     TOTALS FOR AEROSOL SPECIES -- ADD ALL SIZE SECTIONS TOGETHER
       enddo
 c
 c     SULFATE
-      !print *,'Appaero: Doing sulfate'
       do n=1,10
         a = coorA(1)-1+n
         g = coorG(1)
@@ -260,8 +254,12 @@ c     SULFATE
             Appconc(locSulf) = final(Appmaprev(16))*
      &                         Appconc(locSulf)/orig(Appmaprev(16))
           endif
-          if (Appconc(locA).eq.'NaN'.or.Appconc(locG).eq.'NaN') 
-     &      write(6,*) 'Problem in Appaero'
+          if (Appconc(locA).eq.'NaN'.or.Appconc(locG).eq.'NaN') then
+            write(6,*) 'Problem in Appaero'
+            write(6,*) '   i=',i,' j=',j,' k=',k,' s=',s
+            write(6,*) '   a=',a,' Appconc=',Appconc(locA)
+            write(6,*) '   g=',g,' Appconc=',Appconc(locG)
+          endif
         enddo
       enddo
 c
@@ -306,7 +304,8 @@ c     Remaining Species (semi-volatiles)
               stop
             endif
             Appconc(locA) = final(aspc)*frac
-            if (n.eq.nend) Appconc(locG) = final(gspc)*frac
+            !if (n.eq.10) Appconc(locG) = final(gspc)*frac
+            Appconc(locG) = final(gspc)*frac
             if (Appconc(locA).eq.'NaN'.or.Appconc(locG).eq.'NaN') 
      &        write(6,*) 'Problem in Appaero'
           enddo
@@ -392,10 +391,6 @@ c            stop
 c          endif
           tot = tot+Appconc(loc)
         enddo
-        if (spc.eq.17.and.i.eq.7.and.j.eq.78) then
-          print *,'Appaero: i=',i,' j=',j,' k=',k,' spc=',spc
-          print *,'     total=',tot,'  final=',final(loc2)
-        endif
         if (abs(tot-final(loc2)).gt.0.10*MIN(final(loc2),tot)) 
      &       then
 c          if (final(Appmaprev(n)).eq.bdnl(Appmaprev(n))) then
@@ -425,10 +420,6 @@ c          endif
           loc2 = Appmaprev(spc)
           Appconc(loc) = Appconc(loc)*final(loc2)/tot
         enddo
-        if (spc.eq.17.and.i.eq.7.and.j.eq.78) then
-          print *,'Appaero: i=',i,' j=',j,' k=',k,' spc=',spc
-          print *,'     total=',tot,'  final=',final(loc2)
-        endif
 c
  100    continue
 

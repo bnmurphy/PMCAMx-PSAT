@@ -88,7 +88,7 @@ c     sort by minimum diameter
             tempod=secsize(i)
             secsize(i)=secsize(i+1)
             secsize(i+1)=tempod
-            !BNM CHanged all accurences of nsp -> ns (2-23-11)
+            !BNM Changed all accurences of nsp -> ns (2-23-11)
             do kk=1,ns
                tempod=yx((i-1)*ns+kk)
                yx((i-1)*ns+kk)=yx(i*ns+kk)
