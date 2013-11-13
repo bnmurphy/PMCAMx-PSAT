@@ -114,12 +114,23 @@ c
         dx = dx/1000.
         dy = dy/1000.
       endif
+      !Ben added this line so that the model error checks
+      !with nlay if its a restart, with nlayrd if its the
+      !first day
+      if (lrstrt) then
+        nlay2 = nlay(1)
+      else
+        nlay2 = nlayrd
+      endif
       if (dx.ne.delx .or. dy.ne.dely) then
         write(iout,'(//,a)') 'WARNING in CNCPREP:'
         write(iout,*)'IC cell size not equal to model cell size'
         write(iout,*)'IC file: ',dx,dy,' model: ',delx,dely
       elseif (nx.ne.ncol(1) .or. ny.ne.nrow(1) 
-     &                          .or. nz.ne.nlay(1)) then
+       !&                          .or. nz.ne.nlay(1)) then
+       !Ben changed this line so the number of model layers could be
+       !reduced without having to change the input files
+     &                          .or. nz.ne.nlay2) then
         write(iout,'(//,a)') 'ERROR in CNCPREP:'
         write(iout,*)'IC grid size not equal to model grid size'
         write(iout,*)'IC file: ',nx,ny,nz,

@@ -49,7 +49,7 @@ c
       integer   MXCOL10, MXROW10, MXLAY10 
 c
 c      parameter ( MXCOL1  =  97, MXROW1  =  90, MXLAY1  =14 )
-      parameter ( MXCOL1  = 150, MXROW1  = 162, MXLAY1  =14 )
+      parameter ( MXCOL1  = 150, MXROW1  = 162, MXLAY1  =10 )
       parameter ( MXCOL2  =   0, MXROW2  =   0, MXLAY2  = 0 )
       parameter ( MXCOL3  =   0, MXROW3  =   0, MXLAY3  = 0 )
       parameter ( MXCOL4  =   0, MXROW4  =   0, MXLAY4  = 0 )
@@ -65,7 +65,7 @@ c
       integer   MXLAYA
 c
 c      parameter ( MXCOLA  =  97, MXROWA  =  90, MXLAYA  = 14)
-      parameter ( MXCOLA  = 150, MXROWA  = 162, MXLAYA  = 14)
+      parameter ( MXCOLA  = 150, MXROWA  = 162, MXLAYA  = 10)
 c
       integer   MX1D
       integer   MXCHDRN
@@ -268,7 +268,22 @@ c     MXTRK   -- maximum number of species that are tracked
 c----------------------------------------------------------------------
 c
       integer MXSOUR, MXTRK
-      parameter ( MXSOUR = 13, MXTRK = 161 )
+      parameter ( MXSOUR = 8, MXTRK = 160 )
       
       !MXTRK value here is copied from PSAT-2004. Should it be more for
       !the semivolatile organics implementation? -BNM
+
+c
+c------------------------------------------------
+c     For European Application, Ben is trying
+c     to speed up the code by only executing the
+c     bottom 10 layers. Still, all 14 must be 
+c     read from the relevant input files. So I'll
+c     define a variable to hold the true number of
+c     layers that exists in the input files.
+c
+c-------------------------------------------------
+c
+      integer NLAYRD
+      parameter (NLAYRD = 14)
+      

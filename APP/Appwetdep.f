@@ -53,7 +53,7 @@ c
                   app_wet_con = con(i,j,k,spc)
                 endif
 
-                if (Appmap(spc).lt.sa_num_sv .or. spc.eq.spc_first_bin+5) then
+                if (Appmap(spc).lt.sa_num_sv .or. spc.eq.spc_first_bin+sv_bin) then
                   do s=1,Appnum+3
                     loc = i+nx*(j-1)+nx*ny*(k-1)+nx*ny*nz*(Appmap(spc)-1)+
      &                  nx*ny*nz*MXTRK*(s-1)
@@ -110,7 +110,7 @@ c-------Check for total
                       app_wet_con = con(i,j,k,spc)
                   endif
 
-                if (Appmap(spc).lt.sa_num_sv .or. spc.eq.spc_first_bin+5) then
+                if (Appmap(spc).lt.sa_num_sv .or. spc.eq.spc_first_bin+sv_bin) then
                   total = 0.0
                   do s=1,Appnum+3
                     loc=i+nx*(j-1)+nx*ny*(k-1)+nx*ny*nz*(Appmap(spc)-1)+

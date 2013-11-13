@@ -42,7 +42,8 @@ c
       include 'flags.com'
       include 'App.com'  !Added by Kristina
 
-      character*2 clay(14)     !Added by BNM to carry naming for avrg layer output files
+      character*2 clay(MXLAYA)     !Added by BNM to carry naming for avrg layer output files
+      character*4 applay 
 c
 c======================== Source Apportion Begin =======================
 c
@@ -63,7 +64,7 @@ c======================== Process Analysis End   =======================
 c
       character*200 ctlfil, filroot, filtmp
       character*80  action
-      character*15  cldhdr
+      character*20  cldhdr
       logical       lexist
       integer       nopen
 c
@@ -130,14 +131,18 @@ cBNM  -  add new more .avrg output files to take output from higher layers
         nlayer = 1
       endif
       if (navspc.gt.0) then
-	iavg = nfils
-	data clay /'01','02','03','04','05','06','07','08','09',
-     &		   '10','11','12','13','14'/
+        iavg = nfils
 
-	do ilayer = 1,nlayer
+        do ilayer = 1,nlayer
+          if (ilayer.lt.10) then
+            write(clay(ilayer),'(A1,I1)') '0',ilayer
+          else
+            write(clay(ilayer),'(I2)') ilayer
+          endif
+
 c          if (l3davg) then
-		write(filroot(ii+1:),'(A)') '.avrg'//clay(ilayer)
-		iifil = 8
+            write(filroot(ii+1:),'(A)') '.avrg'//clay(ilayer)
+            iifil = 8
 c	  else
 c		write(filroot(ii+1:),'(A)') '.avrg'
 c		iifil = 6
@@ -248,173 +253,193 @@ c
 c        
 c       AVERAGE Apportionment File
 c
-        write(filroot(ii+1:),'(A)') '.A1'
-        filtmp = filroot
-        iAppoA(1) = nfils
-        nopen = nopen + 1
-        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
-        open(unit=iAppoA(1),file=filroot(1:ii+5),form='UNFORMATTED',
-     &                                       status= 'UNKNOWN',ERR=7005)
-        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo+1
-        write(iout,9002) '   File: ',filroot(1:ii+5)
-        nfils = nfils + 1
+        do ilayer = 1,nlay(1)
+          if (ilayer.lt.10) then
+            write(applay,'(A2,I1)') '.A',ilayer
+          else
+            write(applay,'(A2,I2)') '.A',ilayer
+          endif
 
-        write(filroot(ii+1:),'(A)') '.A2'
-        filtmp = filroot
-        iAppoA(2) = nfils
-        nopen = nopen + 1
-        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
-        open(unit=iAppoA(2),file=filroot(1:ii+5),form='UNFORMATTED',
+          write(filroot(ii+1:),'(A)') applay
+          filtmp = filroot
+          iAppoA(ilayer) = nfils
+          nopen = nopen + 1
+          action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
+          open(unit=iAppoA(ilayer),file=filroot(1:ii+5),form='UNFORMATTED',
      &                                       status= 'UNKNOWN',ERR=7005)
-        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo+2
-        write(iout,9002) '   File: ',filroot(1:ii+5)
-        nfils = nfils + 1
+          write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
+     &                  (unit):',iAppo
+          write(iout,9002) '   File: ',filroot(1:ii+5)
+          nfils = nfils + 1
+        enddo
+
+c        write(filroot(ii+1:),'(A)') '.A1'
+c        filtmp = filroot
+c        iAppoA(1) = nfils
+c        nopen = nopen + 1
+c        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
+c        open(unit=iAppoA(1),file=filroot(1:ii+5),form='UNFORMATTED',
+c     &                                       status= 'UNKNOWN',ERR=7005)
+c        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
+c     &                  (unit):',iAppo
+c        write(iout,9002) '   File: ',filroot(1:ii+5)
+c        nfils = nfils + 1
 c
-        write(filroot(ii+1:),'(A)') '.A3'
-        filtmp = filroot
-        iAppoA(3) = nfils
-        nopen = nopen + 1
-        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
-        open(unit=iAppoA(3),file=filroot(1:ii+5),form='UNFORMATTED',
-     &                                       status= 'UNKNOWN',ERR=7005)
-        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo+3
-        write(iout,9002) '   File: ',filroot(1:ii+5)
-        nfils = nfils + 1
+c        write(filroot(ii+1:),'(A)') '.A2'
+c        filtmp = filroot
+c        iAppoA(2) = nfils
+c        nopen = nopen + 1
+c        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
+c        open(unit=iAppoA(2),file=filroot(1:ii+5),form='UNFORMATTED',
+c     &                                       status= 'UNKNOWN',ERR=7005)
+c        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
+c     &                  (unit):',iAppo
+c        write(iout,9002) '   File: ',filroot(1:ii+5)
+c        nfils = nfils + 1
+cc
+c        write(filroot(ii+1:),'(A)') '.A3'
+c        filtmp = filroot
+c        iAppoA(3) = nfils
+c        nopen = nopen + 1
+c        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
+c        open(unit=iAppoA(3),file=filroot(1:ii+5),form='UNFORMATTED',
+c     &                                       status= 'UNKNOWN',ERR=7005)
+c        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
+c     &                  (unit):',iAppo
+c       write(iout,9002) '   File: ',filroot(1:ii+5)
+c        nfils = nfils + 1
 c
-        write(filroot(ii+1:),'(A)') '.A4'
-        filtmp = filroot
-        iAppoA(4) = nfils
-        nopen = nopen + 1
-        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
-        open(unit=iAppoA(4),file=filroot(1:ii+5),form='UNFORMATTED',
-     &                                       status= 'UNKNOWN',ERR=7005)
-        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo+4
-        write(iout,9002) '   File: ',filroot(1:ii+5)
-        nfils = nfils + 1
-c
-        write(filroot(ii+1:),'(A)') '.A5'
-        filtmp = filroot
-        iAppoA(5) = nfils
-        nopen = nopen + 1
-        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
-        open(unit=iAppoA(5),file=filroot(1:ii+5),form='UNFORMATTED',
-     &                                       status= 'UNKNOWN',ERR=7005)
-        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo+5
-        write(iout,9002) '   File: ',filroot(1:ii+5)
-        nfils = nfils + 1
-c
-        write(filroot(ii+1:),'(A)') '.A6'
-        filtmp = filroot
-        iAppoA(6) = nfils
-        nopen = nopen + 1
-        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
-        open(unit=iAppoA(6),file=filroot(1:ii+5),form='UNFORMATTED',
-     &                                       status= 'UNKNOWN',ERR=7005)
-        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo+6
-        write(iout,9002) '   File: ',filroot(1:ii+5)
-        nfils = nfils + 1
-c
-        write(filroot(ii+1:),'(A)') '.A7'
-        filtmp = filroot
-        iAppoA(7) = nfils
-        nopen = nopen + 1
-        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
-        open(unit=iAppoA(7),file=filroot(1:ii+5),form='UNFORMATTED',
-     &                                       status= 'UNKNOWN',ERR=7005)
-        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo+7
-        write(iout,9002) '   File: ',filroot(1:ii+5)
-        nfils = nfils + 1
-c
-        write(filroot(ii+1:),'(A)') '.A8'
-        filtmp = filroot
-        iAppoA(8) = nfils
-        nopen = nopen + 1
-        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
-        open(unit=iAppoA(8),file=filroot(1:ii+5),form='UNFORMATTED',
-     &                                       status= 'UNKNOWN',ERR=7005)
-        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo+8
-        write(iout,9002) '   File: ',filroot(1:ii+5)
-        nfils = nfils + 1
-c
-        write(filroot(ii+1:),'(A)') '.A9'
-        filtmp = filroot
-        iAppoA(9) = nfils
-        nopen = nopen + 1
-        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
-        open(unit=iAppoA(9),file=filroot(1:ii+5),form='UNFORMATTED',
-     &                                       status= 'UNKNOWN',ERR=7005)
-        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo+9
-        write(iout,9002) '   File: ',filroot(1:ii+5)
-        nfils = nfils + 1
-c
-        write(filroot(ii+1:),'(A)') '.A10'
-        filtmp = filroot
-        iAppoA(10) = nfils
-        nopen = nopen + 1
-        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
-        open(unit=iAppoA(10),file=filroot(1:ii+5),form='UNFORMATTED',
-     &                                       status= 'UNKNOWN',ERR=7005)
-        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo+10
-        write(iout,9002) '   File: ',filroot(1:ii+5)
-        nfils = nfils + 1
-c
-        write(filroot(ii+1:),'(A)') '.A11'
-        filtmp = filroot
-        iAppoA(11) = nfils
-        nopen = nopen + 1
-        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
-        open(unit=iAppoA(11),file=filroot(1:ii+5),form='UNFORMATTED',
-     &                                       status= 'UNKNOWN',ERR=7005)
-        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo+11
-        write(iout,9002) '   File: ',filroot(1:ii+5)
-        nfils = nfils + 1
-c
-        write(filroot(ii+1:),'(A)') '.A12'
-        filtmp = filroot
-        iAppoA(12) = nfils
-        nopen = nopen + 1
-        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
-        open(unit=iAppoA(12),file=filroot(1:ii+5),form='UNFORMATTED',
-     &                                       status= 'UNKNOWN',ERR=7005)
-        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo+12
-        write(iout,9002) '   File: ',filroot(1:ii+5)
-        nfils = nfils + 1
-c
-        write(filroot(ii+1:),'(A)') '.A13'
-        filtmp = filroot
-        iAppoA(13) = nfils
-        nopen = nopen + 1
-        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
-        open(unit=iAppoA(13),file=filroot(1:ii+5),form='UNFORMATTED',
-     &                                       status= 'UNKNOWN',ERR=7005)
-        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo+13
-        write(iout,9002) '   File: ',filroot(1:ii+5)
-        nfils = nfils + 1
-c
-        write(filroot(ii+1:),'(A)') '.A14'
-        filtmp = filroot
-        iAppoA(14) = nfils
-        nopen = nopen + 1
-        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
-        open(unit=iAppoA(14),file=filroot(1:ii+5),form='UNFORMATTED',
-     &                                       status= 'UNKNOWN',ERR=7005)
-        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo+14
-        write(iout,9002) '   File: ',filroot(1:ii+5)
-        nfils = nfils + 1
+c        write(filroot(ii+1:),'(A)') '.A4'
+c        filtmp = filroot
+c        iAppoA(4) = nfils
+c        nopen = nopen + 1
+c        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
+c        open(unit=iAppoA(4),file=filroot(1:ii+5),form='UNFORMATTED',
+c     &                                       status= 'UNKNOWN',ERR=7005)
+c        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
+c     &                  (unit):',iAppo
+c        write(iout,9002) '   File: ',filroot(1:ii+5)
+c        nfils = nfils + 1
+cc
+c        write(filroot(ii+1:),'(A)') '.A5'
+c        filtmp = filroot
+c        iAppoA(5) = nfils
+c        nopen = nopen + 1
+c        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
+c        open(unit=iAppoA(5),file=filroot(1:ii+5),form='UNFORMATTED',
+c     &                                       status= 'UNKNOWN',ERR=7005)
+c        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
+c     &                  (unit):',iAppo
+c        write(iout,9002) '   File: ',filroot(1:ii+5)
+c        nfils = nfils + 1
+cc
+c        write(filroot(ii+1:),'(A)') '.A6'
+c        filtmp = filroot
+c        iAppoA(6) = nfils
+c        nopen = nopen + 1
+c        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
+c        open(unit=iAppoA(6),file=filroot(1:ii+5),form='UNFORMATTED',
+c     &                                       status= 'UNKNOWN',ERR=7005)
+c        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
+c     &                  (unit):',iAppo
+c        write(iout,9002) '   File: ',filroot(1:ii+5)
+c        nfils = nfils + 1
+cc
+c        write(filroot(ii+1:),'(A)') '.A7'
+c        filtmp = filroot
+c        iAppoA(7) = nfils
+c        nopen = nopen + 1
+c        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
+c        open(unit=iAppoA(7),file=filroot(1:ii+5),form='UNFORMATTED',
+c     &                                       status= 'UNKNOWN',ERR=7005)
+c        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
+c     &                  (unit):',iAppo
+c        write(iout,9002) '   File: ',filroot(1:ii+5)
+c        nfils = nfils + 1
+cc
+c        write(filroot(ii+1:),'(A)') '.A8'
+c        filtmp = filroot
+c        iAppoA(8) = nfils
+c        nopen = nopen + 1
+c        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
+c        open(unit=iAppoA(8),file=filroot(1:ii+5),form='UNFORMATTED',
+c     &                                       status= 'UNKNOWN',ERR=7005)
+c        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
+c     &                  (unit):',iAppo
+c        write(iout,9002) '   File: ',filroot(1:ii+5)
+c        nfils = nfils + 1
+cc
+c        write(filroot(ii+1:),'(A)') '.A9'
+c        filtmp = filroot
+c        iAppoA(9) = nfils
+c        nopen = nopen + 1
+c        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
+c        open(unit=iAppoA(9),file=filroot(1:ii+5),form='UNFORMATTED',
+c     &                                       status= 'UNKNOWN',ERR=7005)
+c        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
+c     &                  (unit):',iAppo
+c        write(iout,9002) '   File: ',filroot(1:ii+5)
+c        nfils = nfils + 1
+cc
+c        write(filroot(ii+1:),'(A)') '.A10'
+c        filtmp = filroot
+c        iAppoA(10) = nfils
+c        nopen = nopen + 1
+c        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
+c        open(unit=iAppoA(10),file=filroot(1:ii+5),form='UNFORMATTED',
+c     &                                       status= 'UNKNOWN',ERR=7005)
+c        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
+c     &                  (unit):',iAppo
+c        write(iout,9002) '   File: ',filroot(1:ii+5)
+c        nfils = nfils + 1
+cc
+c        write(filroot(ii+1:),'(A)') '.A11'
+c        filtmp = filroot
+c        iAppoA(11) = nfils
+c        nopen = nopen + 1
+c        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
+c        open(unit=iAppoA(11),file=filroot(1:ii+5),form='UNFORMATTED',
+c     &                                       status= 'UNKNOWN',ERR=7005)
+c        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
+c     &                  (unit):',iAppo
+c        write(iout,9002) '   File: ',filroot(1:ii+5)
+c        nfils = nfils + 1
+cc
+c        write(filroot(ii+1:),'(A)') '.A12'
+c        filtmp = filroot
+c        iAppoA(12) = nfils
+c        nopen = nopen + 1
+c        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
+c        open(unit=iAppoA(12),file=filroot(1:ii+5),form='UNFORMATTED',
+c     &                                       status= 'UNKNOWN',ERR=7005)
+c        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
+c     &                  (unit):',iAppo
+c        write(iout,9002) '   File: ',filroot(1:ii+5)
+c        nfils = nfils + 1
+cc
+c        write(filroot(ii+1:),'(A)') '.A13'
+c        filtmp = filroot
+c        iAppoA(13) = nfils
+c        nopen = nopen + 1
+c        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
+c       open(unit=iAppoA(13),file=filroot(1:ii+5),form='UNFORMATTED',
+c     &                                       status= 'UNKNOWN',ERR=7005)
+c        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
+c     &                  (unit):',iAppo
+c        write(iout,9002) '   File: ',filroot(1:ii+5)
+c        nfils = nfils + 1
+cc
+c        write(filroot(ii+1:),'(A)') '.A14'
+c        filtmp = filroot
+c        iAppoA(14) = nfils
+c        nopen = nopen + 1
+c        action = 'Opening output APPORTIONMENT file #2 for coarse grid.'
+c        open(unit=iAppoA(14),file=filroot(1:ii+5),form='UNFORMATTED',
+c     &                                       status= 'UNKNOWN',ERR=7005)
+c        write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
+c     &                  (unit):',iAppo
+c        write(iout,9002) '   File: ',filroot(1:ii+5)
+c        nfils = nfils + 1
       endif
 
 c
@@ -479,11 +504,11 @@ c------------Added by Kristina Wagstrom 08/18/2006------------------------------
 c
 c-----Read in the file names for the Apportionment input files
 c
-      if (lApp) then
-      !Commented out by BNM since all are read from the same file
-c
-c       EMISSIONS files
-c
+c COMMENTED OUT BY BNM
+c      if (lApp) then
+cc
+cc       EMISSIONS files
+cc
 c        do i = 1,Appnum
 cc        Point Emissions File
 c          irec = irec + 1
@@ -514,7 +539,8 @@ c     &                                                     iAppiA(i)
 c          write(iout,9002) '   File: ',filtmp(:istrln(filtmp))
 c          nfils = nfils + 1
 c        enddo        
-      endif
+c      endif
+c END COMMENTED OUT BY BNM
 c
 c------------End Added 08/18/2006---------------------------------------------------
 c  
@@ -657,7 +683,8 @@ c
           backspace(icld(1))
           read(icld(1),ERR=7008) cldhdr,nxcl,nycl,nzcl
           if (nxcl.ne.ncol(1) .or. nycl.ne.nrow(1) .or.
-     &                                          nzcl.ne.nlay(1)) then
+       !&                                          nzcl.ne.nlay(1)) then
+     &                                          nzcl.ne.NLAYRD) then
             write(iout,'(//,a)') 'ERROR in OPENFILS:'
             write(iout,'(2A)')'Cloud/rain file dimensions do not',
      &                        ' match coarse grid.'
@@ -935,7 +962,8 @@ c
            backspace(icld(n))
            read(icld(n)) cldhdr,nxcl,nycl,nzcl
            if (nxcl.ne.ncol(n) .or. nycl.ne.nrow(n) .or.      
-     &                                         nzcl.ne.nlay(n)) then
+       !&                                         nzcl.ne.nlay(n)) then
+     &                                         nzcl.ne.NLAYRD) then
              write(iout,'(//,a)') 'ERROR in OPENFILS:'
              write(iout,'(2A)')'Cloud file dimensions do not',
      &                         ' match nested grid.'

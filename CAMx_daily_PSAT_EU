@@ -2,23 +2,25 @@
 #
 #   Script to Run PMCAMx for Europe May 01-29, 2008 test case
 #
-set INPUT  = "/home/bnmurphy/PMCAMx_EU_Input"
+set INPUT  = "/home/bnmurphy/Research/Trajectory/FINO_INPUT/code/input_May2008"
 
 set DATE    = $1
 set DATE2   = $2
 @ DATE3   = $DATE + 121
 @ DATE4   = $DATE + 120
 #
-set RUN     = "NTSOA.MAY.PSAT.070611"
+set RUN     = "NTSOA.MAY.PSAT.RDCLAY.082311"
 set OUTPUT  = "/home/bnmurphy/Research/Output/EUROPE/$RUN"
 #
 if ($DATE == "01") then
   mkdir -p $OUTPUT
   set RST  = "false"
   set RSTF = ""
+  set RSTA = ""
 else
   set RST  = "true"
   set RSTF = $OUTPUT/Eucaari.May.$DATE4.$RUN.inst.2
+  set RSTA = $OUTPUT/Eucaari.May.$DATE4.$RUN.App
 endif 
 echo $OUTPUT/Eucaari.May.$DATE4.$RUN.inst.2
 #
@@ -32,8 +34,8 @@ Run Message        |PMCAMx v4.0 Europe PM Test Run May 01-29 2008
 Root output name   |$OUTPUT/Eucaari.May.$DATE3.$RUN
 Start yr/mo/dy/hr  |08 05 $DATE2 0000.
 End   yr/mo/dy/hr  |08 05 $DATE2 2400.
-DT:max,met,ems,out |5. 60. 60. 60.
-nx,ny,nz           |150   162   14
+DT:max,met,ems,out |15. 60. 60. 60.
+nx,ny,nz           |150   162   12
 sCoordinate ID     |POLAR
 xorg,yorg,dx,dy    |0. 0. 36. 36. -32. 60. -27.528389 34.245880
 time zone          |0
@@ -159,11 +161,12 @@ Albedo/haze/ozone  |$INPUT/ahoz/ahomap.monthEU.08$DATE3.txt
 Point emiss        |
 Area emiss         |$INPUT/emis_ssoa/emneu5.08$DATE3.bin
 Restart file name  |$RSTF
+App. Restart name  |$RSTA
 ieof
 #
 #  --- Execute the model ---
 #
-/usr/bin/time ./CAMx.NTSOA.PSAT.EU
+/usr/bin/time ./CAMx.NTSOA.PSAT.EU.RDCLAY
 date 
 #
 

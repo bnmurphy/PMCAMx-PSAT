@@ -101,6 +101,9 @@ c
       real c1dsum2(ncol,nrow,nlay), fc1sum2(ncol,nrow,nlay)
       real fc2sum2(ncol,nrow,nlay), fc3sum2(ncol,nrow,nlay)
       integer nx, ny, nz, s
+      real fc1_t(MXLAYA+1,4), fc2_t(MXLAYA+1,4), fc3_t(MXLAYA+1,4),c1d_t(MXLAYA+1,4)
+      real deltat2
+      integer n, nsteps
 c
 c-----Entry point
 c

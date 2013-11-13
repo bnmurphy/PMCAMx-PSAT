@@ -62,6 +62,12 @@ c
            read(ihtp,end=7000) hr,idt,
      &                ((press(i,j,k),i=1,ncol),j=1,nrow)
          enddo
+         !Ben reading extra layers up top
+         do k = nlay+1,nlayrd
+           read(ihtp,end=7000) hr,idt,((dum,i=1,ncol),j=1,nrow)
+           read(ihtp,end=7000) hr,idt,((dum,i=1,ncol),j=1,nrow)
+         enddo
+         !BNM Done
 c
          if (.not.ly2k .and. idt.gt.100000) call juldate(idt)
          if (hr.ge.2400.) then
@@ -114,6 +120,12 @@ c
           read(iwnd,end=7000) ((windu(i,j,k),i=1,ncol),j=1,nrow)
           read(iwnd,end=7000) ((windv(i,j,k),i=1,ncol),j=1,nrow)
         enddo
+         !Ben reading extra layers up top
+         do k = nlay+1,nlayrd
+           read(iwnd,end=7000) ((dum,i=1,ncol),j=1,nrow)
+           read(iwnd,end=7000) ((dum,i=1,ncol),j=1,nrow)
+         enddo
+         !BNM Done
         read(iwnd,end=7000)
 
         if (.not.ly2k .and. idt.gt.100000) call juldate(idt)
@@ -151,6 +163,11 @@ c
           read(itmp,end=7000) hr,idt,
      &                ((tempk(i,j,k),i=1,ncol),j=1,nrow) 
         enddo
+         !Ben reading extra layers up top
+         do k = nlay+1,nlayrd
+           read(itmp,end=7000) hr,idt,((dum,i=1,ncol),j=1,nrow)
+         enddo
+         !BNM Done
 
         if (.not.ly2k .and. idt.gt.100000) call juldate(idt)
         if (hr.ge.2400.) then

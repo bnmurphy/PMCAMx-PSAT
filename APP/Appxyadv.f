@@ -59,12 +59,10 @@ c     Totals
             convfac = 1
           endif
 
-c          print *,'Appxyadv: i=',i,' j=',ij,' spc=',l,' Apptot=',Apptot(i)
-c          do src = 1,11
-c            loc = i + nx*(ij-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
-c     &            nx*ny*nz*MXTRK*(src-1)
-c            print *,'   src=',src,' Appconc=',Appconc(loc)
-c          enddo
+          if (Apptot(i).lt.0) then
+            print *,'Appxyadv: x-adv Neg Value at start ',Apptot(i)
+            print *,'     i=',i,' j=',ij,' k=',k,'  spc=',spc
+          endif    
           
           if (abs(Apptot(i)-AppFORE(i,ij,k,Appmaprev(spc))).gt.
      &        0.01*MIN(Apptot(i),AppFORE(i,ij,k,Appmaprev(spc))).or.
@@ -428,11 +426,12 @@ c-----Check total
      &                      fp(j-1),fp(j),fm(j),fm(j+1)
                 write(6,*) 'scale,depth,dx: ',
      &                      scale(j),dep(j),dx(j)
-                stop
+                  stop
+                endif
               endif
             enddo
             if (abs(total-AppAFT(i,j,k,Appmaprev(spc)))
-     &          .gt.0.06*MIN(AppAFT(i,j,k,Appmaprev(spc)),total)) then
+     &          .gt.0.05*MIN(AppAFT(i,j,k,Appmaprev(spc)),total)) then
               write(6,*) 'ERROR in Appxyadv: total incorrect'
               write(6,*) 'i,j,k,spc,xy?,ij: ',i,j,k,spc,xy,ij
               write(6,*) 'Actual Conc.', AppAFT(i,j,k,Appmaprev(spc))

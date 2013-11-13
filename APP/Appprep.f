@@ -91,6 +91,7 @@ c
       Appnam(54) = 'CAS4      '
       Appnam(55) = 'CAS5      '
       Appnam(56) = 'ALK4      '
+      Appnam(57) = 'RNO3      '
       Appnam(65) = 'PEC_      '
       Appnam(75) = 'POC_      '
       Appnam(85) = 'CRST_     '
@@ -144,7 +145,7 @@ c
      &       num(j)//Appnam(i*10+55)(isblk+2:10)
         enddo
       enddo
-      sa_num_gas = 56
+      sa_num_gas = 57
       sa_num_sv  = 125
       sv_bin = 6 - 1
 c

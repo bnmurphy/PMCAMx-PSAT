@@ -167,6 +167,8 @@ c
 c
 c-----Perform vertical transport
 c
+      deltat(igrd) = deltat(igrd) / 3
+      do n = 1,3
       call zadvec(.FALSE.,igrd,ncol(igrd),nrow(igrd),nlay(igrd),nspec,
      &             MAX(1,ntotsp),deltat(igrd),deltax(1,igrd),
      &             deltay(igrd),
@@ -177,6 +179,9 @@ c
      &             fluxes(1,igrd),ptloft,ptconc(MAX(ipsa3d(igrd),1)),
      &             tarray2,ipacl_2d(iptr2d(igrd)),
      &                                        ipacl_3d(iptr3d(igrd)) )
+      enddo
+      deltat(igrd) = deltat(igrd) * 3
+     
       call flush(6)
       call flush(iout)
 c

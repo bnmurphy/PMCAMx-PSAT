@@ -36,7 +36,7 @@ c
 c
       character*4 bcspec(10)
       integer bnddate
-      real bctmp(MX1D,MXLAYA,4,MXSPEC)
+      real bctmp(MX1D,MXLAYA,4,MXSPEC), bctmp1(MX1D,MXLAYA,4,MXSPEC)
 c
 c-----Entry point
 c
@@ -63,8 +63,17 @@ c
         do n = 1,4
           nc = nrow(1)
           if (n.gt.2) nc = ncol(1)
-         read(ibc) idum,(bcspec(j),j=1,10),iedge,
-     &              ((bctmp(i,k,n,l),k=1,nz),i=1,nc)
+          read(ibc) idum,(bcspec(j),j=1,10),iedge,
+       !&              ((bctmp(i,k,n,l),k=1,nz),i=1,nc)
+       !Ben is changing so BCs for the top unused layers are
+       !still read as they should be.
+     &              ((bctmp1(i,k,n,l),k=1,nlayrd),i=1,nc)
+          do k = 1,nz
+            do i = 1,nc
+              bctmp(i,k,n,l) = bctmp1(i,k,n,l)
+            enddo
+          enddo
+       !Done BNM
 CDEBUG BNM
 c	print *,'READBND: bcspec=',(bcspec(j),j=1,5),'  iedge=',iedge,' n=',n
 c	if (bcspec(1).eq.'P'.and.bcspec(2).eq.'O'.and.bcspec(3).eq.'A') then

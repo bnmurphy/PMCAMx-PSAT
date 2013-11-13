@@ -60,7 +60,14 @@ c
 c-----Number of advection steps per layer in coarse grid
 c
       do k = 1,nlay(1)
-        nadv(k,1) = INT( 0.999*deltat(1)/dtlay(k) ) + 1
+        !nadv(k,1) = INT( 0.999*deltat(1)/dtlay(k) ) + 1
+        !BNM Changed this to give more stability to the 
+        !advection scheme at high altitudes
+        if (k.lt.8) then
+          nadv(k,1) = INT( 0.999*deltat(1)/dtlay(k) ) + 3
+        else
+          nadv(k,1) = INT( 0.999*deltat(1)/dtlay(k) ) + 4
+        endif
       enddo
 c
 c-----Fine grids: make sure an integer number of fine grid time steps 

@@ -165,7 +165,6 @@ c     MAP GAS TO AEROSOL (the gas/aerosol pairs share an index)
 
 c
 c     GETTING TOTALS
-      !print *,'Appaero: Getting totals'
       do n=1,MXTRK
         if (Appmaprev(n).eq.0) goto 200
 c        if ( (n.gt.sa_num_gas .and. n.lt.65) .or.n.ge.162.or. 
@@ -264,7 +263,6 @@ c     SULFATE
       enddo
 c
 c     Remaining Species (semi-volatiles)
-      !print *,'Appaero: Doing semi-volatiles'
       do count=2,38
         nend = 1
         if (count.eq.36) nend=10  !It's PCL, do size resolved partitioning
@@ -304,8 +302,8 @@ c     Remaining Species (semi-volatiles)
               stop
             endif
             Appconc(locA) = final(aspc)*frac
-            !if (n.eq.10) Appconc(locG) = final(gspc)*frac
-            Appconc(locG) = final(gspc)*frac
+            if (n.eq.nend) Appconc(locG) = final(gspc)*frac
+            !Appconc(locG) = final(gspc)*frac
             if (Appconc(locA).eq.'NaN'.or.Appconc(locG).eq.'NaN') 
      &        write(6,*) 'Problem in Appaero'
           enddo
@@ -315,7 +313,6 @@ c
 c     Primary Emissions
 c     Two cases: Net condensation, Net evaporation
 c     Case 1: Net Condensation
-      !print *,'Appaero: Doing primary species'
       if ((final(Appmaprev(coorP(1)))-orig(Appmaprev(coorP(1)))).lt.0)
      &    then
         do count = 1,4
@@ -365,7 +362,6 @@ c
 c-------------------------------------------------------------------
 c------------------------CHECKS-------------------------------------
 c-------------------------------------------------------------------
-      !print *,'Appaero: Before Check'
       do spc=1,MXTRK
 
         if (Appmaprev(spc).eq.0) goto 100
@@ -424,6 +420,5 @@ c
  100    continue
 
       enddo
-c          
-      !print *,'Done with Appaero'
+c
       end

@@ -77,7 +77,7 @@ c     Checking the totals at the start
         original = 0.0
         Actconc = 0.0
         !print *,'Appemiss: l=',l,'  Appmap=',Appmap(l)
-        do isize = 1,6
+        do isize = 1,sv_bin+1
           original = original + conc1(i,j,k,l-size_bin+isize)
           Actconc  = Actconc  + conc1(i,j,k,l-size_bin+isize)
           !print *,'    isize=',isize,'  conc1=',conc1(i,j,k,l-size_bin+isize),' bdnl=',bdnl(l-size_bin+isize)
@@ -139,77 +139,28 @@ cTHIS CODE IS FOR PSAT APPLIED TO AGE
 cAGE CODE!!!!!! BNM
 
 cTHIS CODE IS FOR PSAT APPLIED TO SOURCE LOCATION
-c     
-c     !Set Receptor Location
-c     receptor_x = 65      !Pittsburgh (65,51)
-c     receptor_y = 51
-c     !receptor_x = 79      !New York (79,55)
-c     !receptor_y = 55
-c     !receptor_x = 70      !Duke Forest (70,38)
-c     !receptor_y = 38
-c     !receptor_x = 51      !Bowling Green, KY
-c     !receptor_y = 38
-c     ring_size(1) = 1
-c     ring_size(2) = 1
-c     ring_size(3) = 2
-c     ring_size(4) = 2
-c     ring_size(5) = 2
-c     ring_size(6) = 3
-c     ring_size(7) = 3
-c     ring_size(8) = 3
-c     ring_size(9) = 4
-c     ring_size(10) = 4
-
-c       AppemfracP(srnum,Appmap(l),Appnum+1) = 1.0
-c       AppemfracA(i,j,Appmap(l),Appnum+1) = 1.0
-c       do n=1,Appnum
-c         AppemfracP(srnum,Appmap(l),n) = 0.0
-c         AppemfracA(i,j,Appmap(l),n) = 0.0
-c       enddo
-
-c       !Loop Through Source Categories
-c       if (i.eq.receptor_x.and.j.eq.receptor_y) then
-c         !Local Emissions
-c         AppemfracP(srnum,Appmap(l),1) = 1.0
-c         AppemfracA(i,j,Appmap(l),1) = 1.0
-c         !Erase Attribution from OTHER Category
-c         AppemfracP(srnum,Appmap(l),Appnum+1) = 0.0
-c         AppemfracA(i,j,Appmap(l),Appnum+1) = 0.0
-c       endif
-
-c       sum_n = 0
-c       do n = 2,Appnum
-c         sum_n = sum_n + ring_size(n-1)
-c         outer_top = receptor_y + sum_n
-c         inner_top = outer_top - ring_size(n-1)
-c         outer_bottom = receptor_y - sum_n
-c         inner_bottom = outer_bottom + ring_size(n-1)
-c         outer_east = receptor_x + sum_n
-c         inner_east = outer_east - ring_size(n-1)
-c         outer_west = receptor_x - sum_n
-c         inner_west = outer_west + ring_size(n-1)
-c           
-c         if ((i.le.outer_east.and.i.ge.outer_west.AND.
-c    &       j.le.outer_top.and.j.ge.outer_bottom).AND.
-c    &      .NOT.
-c    &      (i.le.inner_east.and.i.ge.inner_west.AND.
-c    &       j.le.inner_top.and.j.ge.inner_bottom)) then
-c           !Source is inside this ring
-c           AppemfracP(srnum,Appmap(l),n) = 1.0
-c           AppemfracA(i,j,Appmap(l),n) = 1.0
-c           !Erase Attribution from OTHER Category
-c           AppemfracP(srnum,Appmap(l),Appnum+1) = 0.0
-c           AppemfracA(i,j,Appmap(l),Appnum+1) = 0.0
-c         endif
-c       enddo
-c   
-      !This is for Paris
-      if (i.eq.58.and.j.eq.73) then
+      do n=1,Appnum+1
+        AppemfracP(srnum,Appmap(l),n) = 0.0
+        AppemfracA(i,j,Appmap(l),n) = 0.0
+      enddo
+      if (i.ge.58.and.i.le.59.and.j.ge.71.and.j.le.75) then
         n=1   !Local Emissions
         AppemfracP(srnum,Appmap(l),n) = 1.0
         AppemfracA(i,j,Appmap(l),n) = 1.0
+      elseif (i.ge.56.and.i.le.61.and.j.ge.69.and.j.le.77) then
+        n=2   !Less than 100 km
+        AppemfracP(srnum,Appmap(l),n) = 1.0
+        AppemfracA(i,j,Appmap(l),n) = 1.0
+      elseif (i.ge.44.and.i.le.73.and.j.ge.57.and.j.le.89) then
+        n=3   !Less than 500 km
+        AppemfracP(srnum,Appmap(l),n) = 1.0
+        AppemfracA(i,j,Appmap(l),n) = 1.0
+      elseif (i.ge.33.and.i.le.84.and.j.ge.46.and.j.le.100) then
+        n=4   !Less than 1000 km
+        AppemfracP(srnum,Appmap(l),n) = 1.0
+        AppemfracA(i,j,Appmap(l),n) = 1.0
       else
-        n=2   !Everything Else
+        n=5   !Everything Else
         AppemfracP(srnum,Appmap(l),n) = 1.0
         AppemfracA(i,j,Appmap(l),n) = 1.0
       endif

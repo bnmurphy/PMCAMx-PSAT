@@ -115,7 +115,10 @@ c
         write(iout,*)'BC cell size not equal to model cell size'
         write(iout,*)'BC file: ',dx,dy,' model: ',delx,dely
         write(iout,*)
-      elseif (nx.ne.ncol(1) .or. ny.ne.nrow(1) .or. nz.ne.nlay(1)) then
+      !elseif (nx.ne.ncol(1) .or. ny.ne.nrow(1) .or. nz.ne.nlay(1)) then
+      !Ben changed this line so that the number of model layers could be
+      !reduced and the top input layers could be disregarded.
+      elseif (nx.ne.ncol(1) .or. ny.ne.nrow(1) .or. nz.ne.nlayrd) then
         write(iout,'(//,a)') 'ERROR in BNDPREP:'
         write(iout,*)'BC grid size not equal to model grid size'
         write(iout,*)'BC file: ',nx,ny,nz,

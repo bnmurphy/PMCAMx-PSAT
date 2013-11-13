@@ -99,6 +99,7 @@ c
       dimension tsrf(ngcol,ngrow),psptim(ngcol,ngrow),
      &          tsnext(ngcol,ngrow)
       character*60 string
+
 c
 c-----Entry point
 c
@@ -132,6 +133,15 @@ c
            read(iunit,end=7000) hr,idt,
      &                        ((pnext(i,j,k),i=1,ngcol),j=1,ngrow) 
          enddo   
+         !Ben added this so that the extra input layers will be read even
+         !though they won't be used.
+         do k = nglay+1,nlayrd
+           read(iunit,end=7000) hr,idt,
+     &                        ((dum,i=1,ngcol),j=1,ngrow) 
+           read(iunit,end=7000) hr,idt,
+     &                        ((dum,i=1,ngcol),j=1,ngrow) 
+         enddo   
+         !Done BNM
 c
          if (.not.ly2k .and. idt.gt.100000) call juldate(idt)
          if (hr.ge.2400.) then
@@ -206,6 +216,13 @@ c
           read(iunit,end=7000) ((unext(i,j,k),i=1,ngcol),j=1,ngrow)
           read(iunit,end=7000) ((vnext(i,j,k),i=1,ngcol),j=1,ngrow)
         enddo
+         !Ben added this so that the extra input layers will be read even
+         !though they won't be used.
+         do k = nglay+1,nlayrd
+           read(iunit,end=7000) ((dum,i=1,ngcol),j=1,ngrow) 
+           read(iunit,end=7000) ((dum,i=1,ngcol),j=1,ngrow) 
+         enddo   
+         !Done BNM
         read(iunit,end=7000) dum
 c
         if (.not.ly2k .and. idt.gt.100000) call juldate(idt)
@@ -258,7 +275,14 @@ c
         do k = 1,nglay
           read(iunit,end=7000) hr,idt,
      &                 ((tnext(i,j,k),i=1,ngcol),j=1,ngrow)
-        enddo
+        enddo                      
+         !Ben added this so that the extra input layers will be read even
+         !though they won't be used.
+         do k = nglay+1,nlayrd
+           read(iunit,end=7000) hr,idt, 
+     &                        ((dum,i=1,ngcol),j=1,ngrow) 
+         enddo   
+         !Done BNM
 c
         if (.not.ly2k .and. idt.gt.100000) call juldate(idt)
         if (hr.ge.2400.) then
@@ -305,6 +329,13 @@ c
             read(iunit,end=7000) hr,idt,
      &               ((vapor(i,j,k),i=1,ngcol),j=1,ngrow)
           enddo
+         !Ben added this so that the extra input layers will be read even
+         !though they won't be used.
+         do k = nglay+1,nlayrd
+           read(iunit,end=7000) hr,idt, 
+     &                        ((dum,i=1,ngcol),j=1,ngrow) 
+         enddo   
+         !Done BNM
 c
           if (.not.ly2k .and. idt.gt.100000) call juldate(idt)
           if (hr.ge.2400.) then
@@ -367,6 +398,14 @@ c
             read(iunit,end=7000,err=7001)
      &           ((cldod(i,j,k),i=1,ngcol),j=1,ngrow) 
           enddo 
+         !Ben added this so that the extra input layers will be read even
+         !though they won't be used.
+         do k = nglay+1,nlayrd
+           read(iunit,end=7000) ((dum,i=1,ngcol),j=1,ngrow) 
+           read(iunit,end=7000) ((dum,i=1,ngcol),j=1,ngrow) 
+           read(iunit,end=7000) ((dum,i=1,ngcol),j=1,ngrow) 
+         enddo   
+         !Done BNM
 c
           if (.not.ly2k .and. idt.gt.100000) call juldate(idt)
           if (hr.ge.2400.) then
@@ -427,6 +466,13 @@ c
           read(iunit,end=7000,err=7002) hr,idt,
      &               ((rkvgrd(i,j,k),i=1,ngcol),j=1,ngrow)
         enddo
+         !Ben added this so that the extra input layers will be read even
+         !though they won't be used.
+         do k = nglay+1,nlayrd
+           read(iunit,end=7000) hr,idt, 
+     &                        ((dum,i=1,ngcol),j=1,ngrow) 
+         enddo   
+         !Done BNM
 c
         if (.not.ly2k .and. idt.gt.100000) call juldate(idt)
         if (hr.ge.2400.) then

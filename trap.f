@@ -140,6 +140,7 @@ c
 c
 c-----Titrate NO against O3 at night
 c
+      NO2case = 0
       nstrt = 1
       tmp = 0.0
       if(ldark) then

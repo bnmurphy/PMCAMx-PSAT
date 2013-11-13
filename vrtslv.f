@@ -74,6 +74,7 @@ c
 c============================ Process Analysis Begin ================================
 c
       real fc1(MXLAYA+1), fc2(MXLAYA+1), fc3(MXLAYA+1)
+      real fc1_t(MXLAYA+1,4), fc2_t(MXLAYA+1,4), fc3_t(MXLAYA+1,4)
       real aa_old(MXLAYA+1), cc_old(MXLAYA+1)
       logical ldoipts
 c
@@ -90,10 +91,11 @@ c
       real aa1(MXLAYA+1),bb1(MXLAYA+1),cc1(MXLAYA+1)
       real*8 fluxtop
       integer ispc
+      real conc_t(nlay+1,4)
 c
 c-----Entry point
 c
-      dt = dtin   
+      dt = dtin
       nsteps = 1
 c
 c-----Calculate some constants
@@ -269,17 +271,17 @@ c
             fc3(k) = -pnp1(k)*dilut(k)*rr(k)
             if (entrn(k).ge.0. .and. entrn(k-1).ge.0.) then
               fc1(k) = -pnp1(k)*entrn(k-1)*rr(k)
-c              fc2(k) = -cc_old(k)*rr(k+1)
+              !fc2(k) = -cc_old(k)*rr(k+1)
               fc2(k) = pnp1(k)*entrn(k)*rr(k+1) !Changed by Kristina 07/09/07 (Match CAMx4.4)
 
             elseif (entrn(k).lt.0. .and. entrn(k-1).lt.0.) then
-c              fc1(k) = -aa_old(k)*rr(k-1)
+              !fc1(k) = -aa_old(k)*rr(k-1)
               fc1(k) = -pnp1(k)*entrn(k-1)*rr(k-1) !Changed by Kristina 07/09/07 (Match CAMx4.4)
               fc2(k) =  pnp1(k)*entrn(k)*rr(k)
             elseif (entrn(k).ge.0. .and. entrn(k-1).lt.0.) then
-c              fc1(k) = -aa_old(k)*rr(k-1)
+              !fc1(k) = -aa_old(k)*rr(k-1)
               fc1(k) = -pnp1(k)*entrn(k-1)*rr(k-1) !Changed by Kristina 07/09/07 (Match CAMx4.4)
-c              fc2(k) = -cc_old(k)*rr(k+1)
+              !fc2(k) = -cc_old(k)*rr(k+1)
               fc2(k) = pnp1(k)*entrn(k)*rr(k+1) !Changed by Kristina 07/09/07 (Match CAMx4.4)
             else
               fc1(k) = -pnp1(k)*entrn(k-1)*rr(k)
@@ -289,7 +291,7 @@ c              fc2(k) = -cc_old(k)*rr(k+1)
           fc1(1) = 0.
           fc3(1) = -pnp1(1)*dilut(1)*rr(1)
           if (entrn(1).ge.0.) then
-c            fc2(1) = -cc_old(1)*rr(2)
+            !fc2(1) = -cc_old(1)*rr(2)
             fc2(1) = pnp1(1)*entrn(1)*rr(2) !Changed by Kristina 07/09/07 (Match CAMx4.4)
           else
             fc2(1) =  pnp1(1)*entrn(1)*rr(1)
@@ -317,7 +319,7 @@ c
 c
 c===============================DDM End================================
 c
-      enddo
+      enddo   !nsteps
 c
       return
       end

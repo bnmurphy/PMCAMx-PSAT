@@ -45,9 +45,11 @@ c
       include 'chmstry.com'
       include 'flags.com'
 c
-      character*4 icspec(10)
+      character*4 icspec(10), cdum
       dimension cinit(MXCOLA,MXROWA)
       character*10 tpspc
+      real dum
+      integer idum
 c
 c-----Entry point
 c
@@ -67,7 +69,17 @@ c
       do lread = 1,nicspc
         do k = 1,nz
           read(iunit) idum,(icspec(n),n=1,10), 
-     &                ((cinit(i,j),i=1,nx),j=1,ny) 
+     &                ((cinit(i,j),i=1,nx),j=1,ny)
+          !Ben added this so that the extra layers from the input file will
+          !be read even though they won't be used.
+          if (k.eq.nz.and..not.lrstrt) then
+            do k1 = nz+1,nlayrd
+              read(iunit) idum,(cdum,n=1,10), 
+     &                ((dum,i=1,nx),j=1,ny)
+            enddo
+          endif
+          !Done BNM
+
           if ((idat1.lt.date .or. (idat1.eq.date .and. tim1.le.time)) 
      &                 .and. (idat2.gt.date .or. (idat2.eq.date .and. 
      &                                            tim2.gt.time))) then

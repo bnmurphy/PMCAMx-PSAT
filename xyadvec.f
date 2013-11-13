@@ -100,6 +100,8 @@ c
       integer s, nx, ny, nz !Added by Kristina 08/23/07
       integer isize, spc_first_bin
       real fpsum(MX1D), fmsum(MX1D)
+
+      real c1d_save(MX1D), c1d_sum, c1d_sum2
 c
 c======================== Process Analysis Begin ====================================
 c

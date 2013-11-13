@@ -156,9 +156,9 @@ c
 c
 c-----Update concentration due to point sources
 c
-      nx = 97
-      ny = 90
-      nz = 14
+      nx = ncol
+      ny = nrow
+      nz = nlay
 
       if (lptsrc) then
         do 50 lsrc = 1,nsrc

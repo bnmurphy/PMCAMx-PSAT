@@ -79,13 +79,15 @@ c     This is disabled in this version as marked by c***
 c
 c***      logical STEEPEN
 c***      parameter (STEEPEN=.false.)
-c***      parameter (ETA1=20.0, ETA2=0.05, EPS=0.01)
+      parameter (ETA1=20.0, ETA2=0.05, EPS=0.01)
       parameter (TWO3RDS=2./3.)
 c
 c***      real fm(MX1D),fp(MX1D),cm(MX1D),cl(MX1D),cr(MX1D),dc(MX1D),
 c***     &     c6(MX1D),d2c(MX1D),eta(MX1D),etabar(MX1D),cld(MX1D),crd(MX1D)
       real fm(MX1D),fp(MX1D),cm(MX1D),cl(MX1D),cr(MX1D),dc(MX1D),
-     &     c6(MX1D)
+     &     c6(MX1D),d2c(MX1D),eta(MX1D),etabar(MX1D),cld(MX1D),crd(MX1D)
+c*      real fm(MX1D),fp(MX1D),cm(MX1D),cl(MX1D),cr(MX1D),dc(MX1D),
+c*     &     c6(MX1D)
 c
 c-----Entry point 
 c
@@ -151,43 +153,44 @@ c
 c-----Optional discontinuty capturing
 c     This is disbaled completely in this version 
 c
-c***      if (STEEPEN) then
-c***        do i = 2,nn-1
-c***          eta(i) = 0.
-c***          cld(i) = con(i)
-c***          crd(i) = con(i)
-c***        enddo
-c***c 
-c***c-----Finite diff approximation to 2nd derivative
-c***c
-c***        do i = 3,nn-2
-c***          d2c(i) = (con(i+1) - 2.*con(i) + con(i-1))/6.
-c***        enddo
-c***c
-c***c-----No discontinuity detection near the boundary: cells 2, 3, NN-2, NN-1
-c***c 
-c***        do i = 4,nn-3  
-c***c 
-c***c-----Compute etabars
-c***c 
-c***          if ((-d2c(i+1)*d2c(i-1).gt.0.) .and.
-c***     &        (abs(con(i+1) - con(i-1)) -
-c***     &         EPS*min(abs(con(i+1)),abs(con(i-1))).gt.0.)) then
-c***            etabar(i) = -zeta*(d2c(i+1) - d2c(i-1))/
-c***     &                  (con(i+1) - con(i-1))
-c***          else
-c***            etabar(i) = 0.
-c***          endif
-c***          eta(i) = max(0.,min(ETA1*(etabar(i) - ETA2),1.)) 
-c***          crd(i) = con(i+1) - 0.5*dc(i+1)
-c***          cld(i) = con(i-1) + 0.5*dc(i-1)
-c***        enddo
-c***c
-c***        do i = 2,nn-1
-c***          cr(i) = cm(i+1) + eta(i)*(crd(i) - cm(i+1))
-c***          cl(i) = cm(i) + eta(i)*(cld(i) - cm(i))
-c***        enddo
-c***      endif
+c     BNM turned it back on for PSAT Europe domain
+c      if (STEEPEN) then
+        do i = 2,nn-1
+          eta(i) = 0.
+          cld(i) = con(i)
+          crd(i) = con(i)
+        enddo
+c 
+c-----Finite diff approximation to 2nd derivative
+c
+        do i = 3,nn-2
+          d2c(i) = (con(i+1) - 2.*con(i) + con(i-1))/6.
+        enddo
+c
+c-----No discontinuity detection near the boundary: cells 2, 3, NN-2, NN-1
+c 
+        do i = 4,nn-3  
+c 
+c-----Compute etabars
+c 
+          if ((-d2c(i+1)*d2c(i-1).gt.0.) .and.
+     &        (abs(con(i+1) - con(i-1)) -
+     &         EPS*min(abs(con(i+1)),abs(con(i-1))).gt.0.)) then
+            etabar(i) = -zeta*(d2c(i+1) - d2c(i-1))/
+     &                  (con(i+1) - con(i-1))
+          else
+            etabar(i) = 0.
+          endif
+          eta(i) = max(0.,min(ETA1*(etabar(i) - ETA2),1.)) 
+          crd(i) = con(i+1) - 0.5*dc(i+1)
+          cld(i) = con(i-1) + 0.5*dc(i-1)
+        enddo
+c
+        do i = 2,nn-1
+          cr(i) = cm(i+1) + eta(i)*(crd(i) - cm(i+1))
+          cl(i) = cm(i) + eta(i)*(cld(i) - cm(i))
+        enddo
+c      endif
 c
 c-----Generate piecewise parabolic distributions
 c

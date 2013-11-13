@@ -43,14 +43,14 @@ c
       include 'App.com'
 c
 c
-      real old(MXSPEC),new(MXSPEC+1),frac(56,MXSOUR),r(MXRXN)
+      real old(MXSPEC),new(MXSPEC+1),frac(sa_num_gas,MXSOUR),r(MXRXN)
       integer i,j,k,s,loc,n,loc2,loc3,loc4,spc,ict,NO2case,isrc
-      real total(56),tot,conv,total2(56),test,NO2cons(3)
+      real total(sa_num_gas),tot,conv,total2(sa_num_gas),test,NO2cons(3)
       real NXOYtot,oldNO(MXTRK),dt,dummy,NO3conc
       real NOxTotal, NOxRemain, NOconc(MXSOUR),NOxfrac(MXSOUR)
-      real gPBZN,gMPAN,gPAN2,gPAN,gHNO3,gNPHE,gHONO,gHNO4,gXN
+      real gPBZN,gMPAN,gPAN2,gPAN,gHNO3,gNPHE,gHONO,gHNO4,gXN,gRNO3
       real NOxSplit(MXSOUR),NOxFracs(MXSOUR)
-      real lPBZN,lMPAN,lPAN2,lPAN,lHNO3,lHONO,lHNO4
+      real lPBZN,lMPAN,lPAN2,lPAN,lHNO3,lHONO,lHNO4,lRNO3
       real NOxTotNew,modelTot,NO3new,NOxEnd
       real cycPAN,cycPAN2,cycMPAN,cycHONO
       real dPAN,dPAN2,dMPAN,dHONO
@@ -109,7 +109,15 @@ c         Adjust NO and NO2 concentrations
      &               nx*ny*nz*MXTRK*(ict-1)
               NXOYtot = NXOYtot+Appconc(loc4)
             enddo
-            if (NO2case.eq.1) then
+            
+            if (NO2case.eq.0) then
+              do ict=1,Appnum+3
+                loc3 = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(n-1) +
+     &                 nx*ny*nz*MXTRK*(ict-1)
+                Appconc(loc3) = Appconc(loc3)*(old(Appmaprev(n))
+     &                        /conv/total(n))
+              enddo
+            elseif (NO2case.eq.1) then
               do ict=1,Appnum+3
                 loc3 = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(n-1) +
      &                 nx*ny*nz*MXTRK*(ict-1)
@@ -199,10 +207,11 @@ c
 c     Calculate Final Gas Concentrations
 c
 c
-c     NOx calculations
+c     NOx calculations: NO, NO2, N2O5 and NO3
       NOxTotal = old(Appmaprev(1))+old(Appmaprev(2))+old(Appmaprev(4))+
      &           NO3conc
-c
+c     Write gain and loss terms for non-NOx species from the
+c     perspective of gain and loss to the NOx family
       gPBZN = +( 1.000)*r( 90)
       lPBZN = +( 1.000)*r( 91)
       gMPAN = +( 1.000)*r(102)
@@ -218,6 +227,11 @@ c
      &        +( 1.000)*r(156)+( 1.000)*r(157)+( 1.000)*r(160)
      &        +( 0.500)*r(163)+( 0.150)*r(172)
       lHNO3 = +( 1.000)*r( 27)+( 1.000)*r( 28)
+      gRNO3 = +( 1.000)*r(115)+( 0.572)*r(172)+( 0.310)*r(176)
+     &        +( 0.813)*r(191)+( 0.276)*r(195)+( 0.511)*r(206)
+     &        +( 0.321)*r(210)+( 1.000)*r( 62)
+      lRNO3 = +( 1.000)*r(176)+( 1.000)*r(177)
+      
       gHONO = +( 1.000)*r( 21)
       lHONO = +( 1.000)*r( 22)+( 1.000)*r( 23)+( 1.000)*r( 24)
       gHNO4 = +( 1.000)*r( 32)
@@ -233,6 +247,30 @@ c
       dPAN  = gPAN-lPAN
       dPAN2 = gPAN2-lPAN2
       dMPAN = gMPAN-lMPAN
+
+      !KRISTINA'S CODE
+      !gPBZN = +( 1.000)*r( 90)
+      !lPBZN = +( 1.000)*r( 91)
+      !gMPAN = +( 1.000)*r(102)
+      !lMPAN = +( 1.000)*r(103)
+      !gPAN2 = +( 1.000)*r( 79)
+      !lPAN2 = +( 1.000)*r( 80)
+      !gPAN  = +( 1.000)*r( 69)
+      !lPAN  = +( 1.000)*r( 70)
+      !gNPHE = +( 1.000)*r(117)+( 1.000)*r(121)+( 1.000)*r(122)
+      !gHNO3 = +( 2.000)*r( 13)+( 1.000)*r( 25)+( 0.200)*r( 39)
+      !&        +( 1.000)*r(129)+( 1.000)*r(132)+( 1.000)*r(135)
+      !&        +( 1.000)*r(148)+( 1.000)*r(151)+( 1.000)*r(154)
+      !&        +( 1.000)*r(156)+( 1.000)*r(157)+( 1.000)*r(160)
+      !&        +( 0.500)*r(163)+( 0.150)*r(172)
+      !lHNO3 = +( 1.000)*r( 27)+( 1.000)*r( 28)
+      !gHONO = +( 1.000)*r( 21)
+      !lHONO = +( 1.000)*r( 22)+( 1.000)*r( 23)+( 1.000)*r( 24)
+      !gHNO4 = +( 1.000)*r( 32)
+      !lHNO4 = +( 1.000)*r( 33)+( 1.000)*r( 34)+( 1.000)*r( 35)
+      !gXN   = +( 2.000)*r(120)+( 0.500)*r(163)+( 0.278)*r(172)
+      !&        +( 0.352)*r(176)+( 1.000)*r(187)+( 0.250)*r(195)
+      !&        +( 0.489)*r(206)+( 0.288)*r(210)
       
       if (dPAN.gt.0) then
          ngPAN = dPAN
@@ -263,16 +301,24 @@ c
          nlHONO = -1*dHONO
       endif
 
+      !Added Gain and Loss of RNO3 to these calculations: BNM 11-14-12
       NOxRemain = NOxTotal + (-1*gPBZN-gHNO3-ngHONO-ngPAN-ngPAN2-ngMPAN
-     &            -gHNO4-gNPHE-gXN-0.5*cycPAN-0.5*cycPAN2-0.5*cycHONO
+     &            -gHNO4-gNPHE-gXN-gRNO3-0.5*cycPAN-0.5*cycPAN2-0.5*cycHONO
      &            -0.5*cycMPAN)*dt
-      !NOxEnd = NOxTotal + (-1*gPBZN-gHNO3-dHONO-dPAN-dPAN2-dMPAN
-      !&            -gHNO4-gNPHE-gXN+lPBZN+lHNO3+lHNO4)*dt
       NOxEnd = NOxTotal + (-1*gPBZN-gHNO3-dHONO-dPAN-dPAN2-dMPAN
-     &            -gHNO4-gNPHE-gXN+lPBZN+lHNO3+3*lHNO4)*dt
+     &            -gHNO4-gNPHE-gXN-gRNO3+lPBZN+lHNO3+lHNO4+lRNO3)*dt
       modelTot = new(Appmaprev(1))+new(Appmaprev(2))+new(Appmaprev(4))+
      &           NO3new
-      if (abs(modelTot-NOxEnd).gt.0.1*MIN(modelTot,NOxEnd)) then
+
+      !KRISTINA
+      ! NOxRemain = NOxTotal + (-1*gPBZN-gHNO3-ngHONO-ngPAN-ngPAN2-ngMPAN
+      !&            -gHNO4-gNPHE-gXN-0.5*cycPAN-0.5*cycPAN2-0.5*cycHONO
+      !&            -0.5*cycMPAN)*dt
+      ! NOxEnd = NOxTotal + (-1*gPBZN-gHNO3-dHONO-dPAN-dPAN2-dMPAN
+      !&            -gHNO4-gNPHE-gXN+lPBZN+lHNO3+lHNO4)*dt
+      ! modelTot = new(Appmaprev(1))+new(Appmaprev(2))+new(Appmaprev(4))+
+      !&           NO3new
+      if (abs(modelTot-NOxEnd).gt.0.05*MIN(modelTot,NOxEnd)) then
          write(6,*) 'Big diff in end concentrations',modelTot,NOxEnd,
      &              i,j,k,NO3new,NO3conc
       endif
@@ -280,21 +326,22 @@ c
       NOxTotNew=0.0
       do s=1,Appnum+3
          if (NOxRemain.gt.0) then
-         NOxSplit(s)=NOxTotal*frac(2,s)-dt*(gNPHE+gXN+gPBZN+gHNO4+gHNO3+
+         NOxSplit(s)=NOxTotal*frac(2,s)-dt*(gNPHE+gXN+gPBZN+gHNO4+gHNO3+gRNO3+
      &               0.5*cycHONO+ngHONO+0.5*cycPAN+0.5*cycPAN2+
      &               0.5*cycMPAN+ngMPAN+ngPAN+ngPAN2)*frac(2,s)+
      &               dt*(lHNO3*frac(11,s)+lHNO4*frac(20,s)+
      &               lPBZN*frac(13,s)+(nlHONO+0.5*cycHONO)*frac(10,s)+
      &               (nlPAN+0.5*cycPAN)*frac(3,s)+
      &               (nlMPAN+0.5*cycMPAN)*frac(18,s)+
-     &               (nlPAN2+0.5*cycPAN2)*frac(14,s))
+     &               (nlPAN2+0.5*cycPAN2)*frac(14,s)+lRNO3*frac(57,s))
          else
             write(6,*) 'NOx used up ...',i,j,k,NOxRemain,NOxTotal
            NOxSplit(s)=(NOxRemain+lPAN2+lMPAN+lPBZN+lHNO4+lPAN+lHNO3+
-     &                  lHONO)*(lPAN2*frac(14,s)+lMPAN*frac(18,s)
+     &                  lHONO+lRNO3) * (lPAN2*frac(14,s)+lMPAN*frac(18,s)
      &                  +lPAN*frac(3,s)+lHNO3*frac(11,s)+lHONO*
-     &                  frac(10,s)+lPBZN*frac(13,s)+lHNO4*frac(20,s))/
-     &                  (lPAN2+lMPAN+lPBZN+lHNO4+lPAN+lHNO3+lHONO)
+     &                   frac(10,s)+lPBZN*frac(13,s)+lHNO4*frac(20,s)
+     &                  +lRNO3*frac(57,s))/
+     &                  (lPAN2+lMPAN+lPBZN+lHNO4+lPAN+lHNO3+lHONO+lRNO3)
          endif
 c
          NOxTotNew = NOxTotNew+NOxSplit(s)
@@ -345,9 +392,23 @@ c
         loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(n-1) + 
      &        nx*ny*nz*MXTRK*(s-1)
         loc2 = Appmaprev(n)
+
+        
         Appconc(loc) = (old(loc2)*frac(n,s)
      &                 + dt*(( 1.000)*r( 69)*frac(2,s)
      &                 +     (-1.000)*r( 70)*frac(n,s) ))/conv
+        !print *,'Appgas: i=',i,' j=',j,' k=',k,' s=',s
+        !if (Appconc(loc).lt.0.and.abs(Appconc(loc)).lt.1e-9) then
+        !  print *,'  Appconc= ',Appconc(loc),'  bdnl=',bdnl(loc2),' conv=',conv
+        !  Appconc(loc) = bdnl(loc2)/conv
+        !  print *,'  Appconc reassigned to: ',Appconc(loc),'  bdnl=',bdnl(loc2),' conv=',conv
+        !endif
+      !if (i.eq.105.and.j.eq.2) then
+      ! print *,'Appgas: PAN. s=',s,' k=',k, ' frac(2,s) = ',frac(2,s)
+      ! print *,'   frac(n,s)=',frac(n,s),'  old(PAN)=',old(loc2)
+      ! print *,'   Appconc(PAN) =', Appconc(loc),' NOxfracs(s)=',NOxFracs(s)
+      !endif
+     
         !NXOY
         n=4
         loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(n-1) + 
@@ -404,6 +465,9 @@ c
         Appconc(loc) = (old(loc2)*frac(n,s)
      &                 +dt*( (1.00)*r(102)*frac(2,s)
      &                      +(-1.0)*r(103)*frac(n,s) ))/conv
+        !if (Appconc(loc).lt.0.and.abs(Appconc(loc)).lt.1e-9) then
+        !  Appconc(loc) = bdnl(loc2)/conv
+        !endif
       
         !HNO4
         n=20
@@ -414,6 +478,18 @@ c
      &                 +dt*( (1.00)*r(32)*frac(2,s)
      &                      +((-1.0)*r(33)+(-1.0)*r(34)
      &                      + (-1.0)*r(35))*frac(n,s)  ))/conv
+
+        !RNO3 - Added by BNM 11-14-12
+        n=57
+        loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(n-1) + 
+     &        nx*ny*nz*MXTRK*(s-1)
+        loc2 = Appmaprev(n)
+        Appconc(loc) = (old(loc2)*frac(n,s)
+     &                 +dt*((+( 1.000)*r( 62)
+     &                       +( 1.000)*r(115)+( 0.572)*r(172)+( 0.310)*r(176)
+     &                       +( 0.813)*r(191)+( 0.276)*r(195)+( 0.511)*r(206)
+     &                       +( 0.321)*r(210))*frac(2,s) 
+     &                       +((-1.0)*r(176)+(-1.0)*r(177))*frac(n,s) ))/conv
 
 
         !SULF (only produced)
@@ -809,7 +885,7 @@ c
         Appconc(loc)=new(loc2)*frac(n,s)/conv
 
         !BLANK GAS INDICES (Change if you add species!!!)
-        do n=57,64
+        do n=58,64
           loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(n-1) +
      &        nx*ny*nz*MXTRK*(s-1)
           Appconc(loc)=0.0
