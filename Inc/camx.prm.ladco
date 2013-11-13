@@ -268,7 +268,7 @@ c     MXTRK   -- maximum number of species that are tracked
 c----------------------------------------------------------------------
 c
       integer MXSOUR, MXTRK
-      parameter ( MXSOUR = 8, MXTRK = 160 )
+      parameter ( MXSOUR = 8, MXTRK = 144 )
       
       !MXTRK value here is copied from PSAT-2004. Should it be more for
       !the semivolatile organics implementation? -BNM
@@ -277,7 +277,7 @@ c
 c------------------------------------------------
 c     For European Application, Ben is trying
 c     to speed up the code by only executing the
-c     bottom 10 layers. Still, all 14 must be 
+c     bottom 12 layers. Still, all 14 must be 
 c     read from the relevant input files. So I'll
 c     define a variable to hold the true number of
 c     layers that exists in the input files.

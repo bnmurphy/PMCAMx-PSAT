@@ -25,7 +25,7 @@ c
       include 'flags.com'
       include 'App.com'
 c
-      integer i,j,ISUND
+      integer i,j,ISUND, PM_indx
       character*2 num(10)
       logical match
 c
@@ -35,118 +35,119 @@ c
 c
 c-----Assigning species to the apportionment name array
 c
-      Appnam(1)  = 'NO        '
-      Appnam(2)  = 'NO2       '
-      Appnam(3)  = 'PAN       '
-      Appnam(4)  = 'NXOY      '
-      Appnam(5)  = 'OLE1      '
-      Appnam(6)  = 'OLE2      '
-      Appnam(7)  = 'TERP      '
-      Appnam(8)  = 'ALK5      '
-      Appnam(9)  = 'ARO1      '
-      Appnam(10) = 'HONO      '
-      Appnam(11) = 'HNO3      '
-      Appnam(12) = 'ISOP      '
-      Appnam(13) = 'PBZN      '
-      Appnam(14) = 'PAN2      '
-      Appnam(15) = 'SO2       '
-      Appnam(16) = 'SULF      '
-      Appnam(17) = 'NH3       '
-      Appnam(18) = 'MPAN      '
-      Appnam(19) = 'HCL       '
-      Appnam(20) = 'HNO4      '
-      Appnam(21) = 'ARO2      '
-      Appnam(22) = 'CPO1      '
-      Appnam(23) = 'CPO2      '
-      Appnam(24) = 'CPO3      '
-      Appnam(25) = 'CPO4      '
-      Appnam(26) = 'CPO5      '
-      Appnam(27) = 'CPO6      '
-      Appnam(28) = 'CPO7      '
-      Appnam(29) = 'CPO8      '
-      Appnam(30) = 'COO1      '
-      Appnam(31) = 'COO2      '
-      Appnam(32) = 'COO3      '
-      Appnam(33) = 'COO4      '
-      Appnam(34) = 'COO5      '
-      Appnam(35) = 'COO6      '
-      Appnam(36) = 'COO7      '
-      Appnam(37) = 'COO8      '
-      Appnam(38) = 'CNS1      '
-      Appnam(39) = 'CNS2      '
-      Appnam(40) = 'CNS3      '
-      Appnam(41) = 'CNS4      '
-      Appnam(42) = 'CNS5      '
-      Appnam(43) = 'CNS6      '
-      Appnam(44) = 'CNS7      '
-      Appnam(45) = 'CNS8      '
-      Appnam(46) = 'CBS1      '
-      Appnam(47) = 'CBS2      '
-      Appnam(48) = 'CBS3      '
-      Appnam(49) = 'CBS4      '
-      Appnam(50) = 'CBS5      '
-      Appnam(51) = 'CAS1      '
-      Appnam(52) = 'CAS2      '
-      Appnam(53) = 'CAS3      '
-      Appnam(54) = 'CAS4      '
-      Appnam(55) = 'CAS5      '
-      Appnam(56) = 'ALK4      '
-      Appnam(57) = 'RNO3      '
-      Appnam(65) = 'PEC_      '
-      Appnam(75) = 'POC_      '
-      Appnam(85) = 'CRST_     '
-      Appnam(95) = 'PCL_      '
-      Appnam(105) = 'NA_       '
-      Appnam(115) = 'PSO4_     '
-      Appnam(125) = 'APO1      '
-      Appnam(126) = 'APO2      '
-      Appnam(127) = 'APO3      '
-      Appnam(128) = 'APO4      '
-      Appnam(129) = 'APO5      '
-      Appnam(130) = 'APO6      '
-      Appnam(131) = 'APO7      '
-      Appnam(132) = 'APO8      '
-      Appnam(133) = 'AOO1      '
-      Appnam(134) = 'AOO2      '
-      Appnam(135) = 'AOO3      '
-      Appnam(136) = 'AOO4      '
-      Appnam(137) = 'AOO5      '
-      Appnam(138) = 'AOO6      '
-      Appnam(139) = 'AOO7      '
-      Appnam(140) = 'AOO8      '
-      Appnam(141) = 'ANS1      '
-      Appnam(142) = 'ANS2      '
-      Appnam(143) = 'ANS3      '
-      Appnam(144) = 'ANS4      '
-      Appnam(145) = 'ANS5      '
-      Appnam(146) = 'ANS6      '
-      Appnam(147) = 'ANS7      '
-      Appnam(148) = 'ANS8      '
-      Appnam(149) = 'ABS1      '
-      Appnam(150) = 'ABS2      '
-      Appnam(151) = 'ABS3      '
-      Appnam(152) = 'ABS4      '
-      Appnam(153) = 'ABS5      '
-      Appnam(154) = 'AAS1      '
-      Appnam(155) = 'AAS2      '
-      Appnam(156) = 'AAS3      '
-      Appnam(157) = 'AAS4      '
-      Appnam(158) = 'AAS5      '
-      Appnam(159) = 'PNO3      '
-      Appnam(160) = 'PNH4      '
+c      Appnam(1)  = 'NO        '
+c      Appnam(2)  = 'NO2       '
+c      Appnam(3)  = 'PAN       '
+c      Appnam(4)  = 'NXOY      '
+      Appnam(1)  = 'OLE1      '
+      Appnam(2)  = 'OLE2      '
+      Appnam(3)  = 'TERP      '
+      Appnam(4) = 'ALK4      '
+      Appnam(5)  = 'ALK5      '
+      Appnam(6)  = 'ARO1      '
+c      Appnam(10) = 'HONO      '
+c      Appnam(11) = 'HNO3      '
+      Appnam(7) = 'ISOP      '
+c      Appnam(13) = 'PBZN      '
+c      Appnam(14) = 'PAN2      '
+      Appnam(8) = 'SO2       '
+      Appnam(9) = 'SULF      '
+      Appnam(10) = 'NH3       '
+c      Appnam(18) = 'MPAN      '
+      Appnam(11) = 'HCL       '
+c      Appnam(20) = 'HNO4      '
+      Appnam(12) = 'ARO2      '
+      Appnam(13) = 'CPO1      '
+      Appnam(14) = 'CPO2      '
+      Appnam(15) = 'CPO3      '
+      Appnam(16) = 'CPO4      '
+      Appnam(17) = 'CPO5      '
+      Appnam(18) = 'CPO6      '
+      Appnam(19) = 'CPO7      '
+      Appnam(20) = 'CPO8      '
+      Appnam(21) = 'COO1      '
+      Appnam(22) = 'COO2      '
+      Appnam(23) = 'COO3      '
+      Appnam(24) = 'COO4      '
+      Appnam(25) = 'COO5      '
+      Appnam(26) = 'COO6      '
+      Appnam(27) = 'COO7      '
+      Appnam(28) = 'COO8      '
+      Appnam(29) = 'CNS1      '
+      Appnam(30) = 'CNS2      '
+      Appnam(31) = 'CNS3      '
+      Appnam(32) = 'CNS4      '
+      Appnam(33) = 'CNS5      '
+      Appnam(34) = 'CNS6      '
+      Appnam(35) = 'CNS7      '
+      Appnam(36) = 'CNS8      '
+      Appnam(37) = 'CBS1      '
+      Appnam(38) = 'CBS2      '
+      Appnam(39) = 'CBS3      '
+      Appnam(40) = 'CBS4      '
+      Appnam(41) = 'CBS5      '
+      Appnam(42) = 'CAS1      '
+      Appnam(43) = 'CAS2      '
+      Appnam(44) = 'CAS3      '
+      Appnam(45) = 'CAS4      '
+      Appnam(46) = 'CAS5      '
+c      Appnam(57) = 'RNO3      '
+      Appnam(50) = 'PEC_      '
+      Appnam(60) = 'POC_      '
+      Appnam(70) = 'CRST_     '
+      Appnam(80) = 'PCL_      '
+      Appnam(90) = 'NA_       '
+      Appnam(100) = 'PSO4_     '
+      Appnam(110) = 'APO1      '
+      Appnam(111) = 'APO2      '
+      Appnam(112) = 'APO3      '
+      Appnam(113) = 'APO4      '
+      Appnam(114) = 'APO5      '
+      Appnam(115) = 'APO6      '
+      Appnam(116) = 'APO7      '
+      Appnam(117) = 'APO8      '
+      Appnam(118) = 'AOO1      '
+      Appnam(119) = 'AOO2      '
+      Appnam(120) = 'AOO3      '
+      Appnam(121) = 'AOO4      '
+      Appnam(122) = 'AOO5      '
+      Appnam(123) = 'AOO6      '
+      Appnam(124) = 'AOO7      '
+      Appnam(125) = 'AOO8      '
+      Appnam(126) = 'ANS1      '
+      Appnam(127) = 'ANS2      '
+      Appnam(128) = 'ANS3      '
+      Appnam(129) = 'ANS4      '
+      Appnam(130) = 'ANS5      '
+      Appnam(131) = 'ANS6      '
+      Appnam(132) = 'ANS7      '
+      Appnam(133) = 'ANS8      '
+      Appnam(134) = 'ABS1      '
+      Appnam(135) = 'ABS2      '
+      Appnam(136) = 'ABS3      '
+      Appnam(137) = 'ABS4      '
+      Appnam(138) = 'ABS5      '
+      Appnam(139) = 'AAS1      '
+      Appnam(140) = 'AAS2      '
+      Appnam(141) = 'AAS3      '
+      Appnam(142) = 'AAS4      '
+      Appnam(143) = 'AAS5      '
+c      Appnam(159) = 'PNO3      '
+      Appnam(144) = 'PNH4      '
       !Appnam(161) = 'PCL_      '
 c
 c-----Assign full names to all the PM species
 c
+      PM_indx = 50
       do i=1,6
-          isblk=INDEX(Appnam(i*10+55),' ')
+          isblk=INDEX(Appnam((i-1)*10+PM_indx),' ')
         do j=1,10
-          Appnam(i*10+54+j)=Appnam(i*10+55)(1:isblk-1)//
-     &       num(j)//Appnam(i*10+55)(isblk+2:10)
+          Appnam((i-1)*10+(PM_indx-1)+j)=Appnam((i-1)*10+PM_indx)(1:isblk-1)//
+     &       num(j)//Appnam((i-1)*10+PM_indx)(isblk+2:10)
         enddo
       enddo
-      sa_num_gas = 57
-      sa_num_sv  = 125
+      sa_num_gas = 46
+      sa_num_sv  = 110
       sv_bin = 6 - 1
 c
 c-----Match tracers to modeled species
@@ -165,8 +166,7 @@ c
             match = .TRUE.
           elseif (j.ge.sa_num_sv .and.  !Semivolatile Aerosol
      &          spname(i)(1:4).eq.Appnam(j)(1:4) ) then
-            ISUND=INDEX(spname(i),'_')
-            if (spname(i)(ISUND:ISUND+2).eq.'_1 ') then
+            if (spname(i)(5:7).eq.'_1 ') then
               !Match the bulk Source Apportionment of SV 
               !aerosols to the index number of the matching
               !aerosol's lowest size bin
@@ -175,7 +175,7 @@ c
               match = .TRUE.
             elseif (spname(i)(5:7).eq.'_2 '.or.spname(i)(5:7).eq.'_3 '.or.
      &              spname(i)(5:7).eq.'_4 '.or.spname(i)(5:7).eq.'_5 '.or.
-     &              spname(i)(5:7).eq.'_6 ' ) then
+     &              spname(i)(5:7).eq.'_6 ') then
               !Match the bulk Source Apportionment of SV 
               !aerosols to the index number of the matching
               !aerosol's lowest size bin

@@ -26,12 +26,8 @@ c
 c
       real dconc,Actconc,total,conv,original
       integer i,j,k,l,srnum,type,spc,s,nx,ny,nz,n,m,test
-      integer isize, size_bin, loc
+      integer isize, size_bin
       real conc1(ncol(1),nrow(1),nlay(1),nspec)
-
-      integer receptor_x, receptor_y, ring_size(20), sum_n
-      integer inner_top, inner_bottom, outer_top, outer_bottom
-      integer inner_east, outer_east, inner_west, outer_west
 c
       spc = Appmap(l)
       if (spc.eq.0) return
@@ -53,7 +49,6 @@ c     Checking the totals at the start
      &        nx*ny*nz*MXTRK*(s-1)
         !print *,'    Appconc=',Appconc(loc),'  total=',total
         if (Appconc(loc).lt.bdnl(l)*conv) Appconc(loc) = bdnl(l)*conv
-        !if (Appconc(loc).eq.'NaN') Appconc(loc) = bdnl(l)*conv
         total = total + Appconc(loc)
         !print *,'    Appconc=',Appconc(loc),'  total=',total
       enddo
@@ -103,7 +98,7 @@ c     Checking the totals at the start
           enddo
         elseif (abs(original-bdnl(l)).lt.0.05*bdnl(l).or.
      &         abs(total-original).lt.0.05*MIN(original,total).or.
-     &         abs(total-original).lt.(Appnum+4)*bdnl(l)*conv
+     &         abs(total-original).lt.12*bdnl(l)*conv
      &          ) then
           do s = 1,Appnum+3
             loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(Appmap(l)-1) +
@@ -115,12 +110,6 @@ c     Checking the totals at the start
      &                 Appmap(l),l,type
           write(6,*) 'Total,old,bdnl:',total,original,bdnl(l)*conv,
      &               bdnl(l)
-          write(6,*) '  Source Apportionment:'
-          do s = 1,Appnum+3
-            loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(Appmap(l)-1) +
-     &            nx*ny*nz*MXTRK*(s-1)
-            write(6,*)'       s=',s,'  Appconc=',Appconc(loc)
-          enddo
           write(6,*) 'New: ',Actconc
           stop
         endif
@@ -166,7 +155,10 @@ cTHIS CODE IS FOR PSAT APPLIED TO SOURCE LOCATION
       endif
 cLOCATION CODE        
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-      
+
+
+
+
 c
       if (Appmap(l).ne.0) then
         do s = 3,Appnum+3
@@ -259,5 +251,18 @@ c-----Check total
         enddo
       endif
 c
-      endif     
+      endif
+      if (i.eq.4.and.j.eq.3.and.k.eq.14) then
+       print *,'spc =',l,'  Appspc=',Appmap(l) 
+       print *,'i=',i,'  j=',j
+       loc = 4+nx*(3-1) + nx*ny*(1-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(1-1)
+       print *,'Appemiss: Appconc(i=4,j=3,spc=2,s=1)=',Appconc(loc)
+       loc = 4+nx*(3-1) + nx*ny*(1-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(2-1)
+       print *,'Appemiss: Appconc(i=4,j=3,spc=2,s=2)=',Appconc(loc)
+       loc = 4+nx*(3-1) + nx*ny*(1-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(3-1)
+       print *,'Appemiss: Appconc(i=4,j=3,spc=2,s=3)=',Appconc(loc)
+       loc = 4+nx*(3-1) + nx*ny*(1-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(4-1)
+       print *,'Appemiss: Appconc(i=4,j=3,spc=2,s=4)=',Appconc(loc)
+      endif
+c
       end

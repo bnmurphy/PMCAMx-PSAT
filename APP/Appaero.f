@@ -29,7 +29,7 @@ c
       integer i,j,k,aspc,gspc,n,s,loc,locA,locG,ii,jj,kk,v
       integer nx,ny,nz,a,g,coorA(38),coorG(38),count
       real total(MXTRK),frac,allsize(38,MXSOUR),allsizetot(38)
-      integer loc2,loc3,loc4,spc,coorP(5), nend
+      integer loc2,loc3,loc4,spc,coorP(5), nend, NAERAPP, SULF_IND
 c
       nx = ncol(1)
       ny = nrow(1)
@@ -77,91 +77,94 @@ c
       MW(35) = 150 !CAS5
       MW(36) = 36.5 !HCl
       MW(37) = 17 !NH3
-      MW(38) = 63 !HNO3
+c woNOx      MW(38) = 63 !HNO3
 c
 c     MAP GAS TO AEROSOL (the gas/aerosol pairs share an index)
-      coorA(1) = 115 !PSO4
-      coorA(2) = 125 !APO1
-      coorA(3) = 126 !APO2
-      coorA(4) = 127 !APO3
-      coorA(5) = 128 !APO4
-      coorA(6) = 129 !APO5
-      coorA(7) = 130 !APO6
-      coorA(8) = 131 !APO7
-      coorA(9) = 132 !APO8
-      coorA(10) = 133 !AOO1
-      coorA(11) = 134 !AOO2
-      coorA(12) = 135 !AOO3
-      coorA(13) = 136 !AOO4
-      coorA(14) = 137 !AOO5
-      coorA(15) = 138 !AOO6
-      coorA(16) = 139 !AOO7
-      coorA(17) = 140 !AOO8
-      coorA(18) = 141 !ANS1
-      coorA(19) = 142 !ANS2
-      coorA(20) = 143 !ANS3
-      coorA(21) = 144 !ANS4
-      coorA(22) = 145 !ANS5
-      coorA(23) = 146 !ANS6
-      coorA(24) = 147 !ANS7
-      coorA(25) = 148 !ANS8
-      coorA(26) = 149 !ABS1
-      coorA(27) = 150 !ABS2
-      coorA(28) = 151 !ABS3
-      coorA(29) = 152 !ABS4
-      coorA(30) = 153 !ABS5
-      coorA(31) = 154 !AAS1
-      coorA(32) = 155 !AAS2
-      coorA(33) = 156 !AAS3
-      coorA(34) = 157 !AAS4
-      coorA(35) = 158 !AAS5
-      coorA(36) = 95  !PCL
+      coorA(1) = 100 !PSO4
+      coorA(2) = 110 !APO1
+      coorA(3) = 111 !APO2
+      coorA(4) = 112 !APO3
+      coorA(5) = 113 !APO4
+      coorA(6) = 114 !APO5
+      coorA(7) = 115 !APO6
+      coorA(8) = 116 !APO7
+      coorA(9) = 117 !APO8
+      coorA(10) = 118 !AOO1
+      coorA(11) = 119 !AOO2
+      coorA(12) = 120 !AOO3
+      coorA(13) = 121 !AOO4
+      coorA(14) = 122 !AOO5
+      coorA(15) = 123 !AOO6
+      coorA(16) = 124 !AOO7
+      coorA(17) = 125 !AOO8
+      coorA(18) = 126 !ANS1
+      coorA(19) = 127 !ANS2
+      coorA(20) = 128 !ANS3
+      coorA(21) = 129 !ANS4
+      coorA(22) = 130 !ANS5
+      coorA(23) = 131 !ANS6
+      coorA(24) = 132 !ANS7
+      coorA(25) = 133 !ANS8
+      coorA(26) = 134 !ABS1
+      coorA(27) = 135 !ABS2
+      coorA(28) = 136 !ABS3
+      coorA(29) = 137 !ABS4
+      coorA(30) = 138 !ABS5
+      coorA(31) = 139 !AAS1
+      coorA(32) = 140 !AAS2
+      coorA(33) = 141 !AAS3
+      coorA(34) = 142 !AAS4
+      coorA(35) = 143 !AAS5
+      coorA(36) = 80  !PCL
       !coorA(36) = 161 !PCL
-      coorA(37) = 160 !PNH4
-      coorA(38) = 159 !PNO3
-      coorG(1) = 15 !SO2
-      coorG(2) = 22 !CPO1
-      coorG(3) = 23 !CPO2
-      coorG(4) = 24 !CPO3
-      coorG(5) = 25 !CPO4
-      coorG(6) = 26 !CPO5
-      coorG(7) = 27 !CPO6
-      coorG(8) = 28 !CPO7
-      coorG(9) = 29 !CPO8
-      coorG(10) = 30 !COO1
-      coorG(11) = 31 !COO2
-      coorG(12) = 32 !COO3
-      coorG(13) = 33 !COO4
-      coorG(14) = 34 !COO5
-      coorG(15) = 35 !COO6
-      coorG(16) = 36 !COO7
-      coorG(17) = 37 !COO8
-      coorG(18) = 38 !CNS1
-      coorG(19) = 39 !CNS2
-      coorG(20) = 40 !CNS3
-      coorG(21) = 41 !CNS4
-      coorG(22) = 42 !CNS5
-      coorG(23) = 43 !CNS6
-      coorG(24) = 44 !CNS7
-      coorG(25) = 45 !CNS8
-      coorG(26) = 46 !CBS1
-      coorG(27) = 47 !CBS2
-      coorG(28) = 48 !CBS3
-      coorG(29) = 49 !CBS4
-      coorG(30) = 50 !CBS5
-      coorG(31) = 51 !CAS1
-      coorG(32) = 52 !CAS2
-      coorG(33) = 53 !CAS3
-      coorG(34) = 54 !CAS4
-      coorG(35) = 55 !CAS5
-      coorG(36) = 19 !HCL
-      coorG(37) = 17 !NH3
-      coorG(38) = 11 !HNO3
+      coorA(37) = 144 !PNH4
+c woNOx      coorA(38) = 159 !PNO3
+      coorG(1) = 8 !SO2
+      coorG(2) = 13 !CPO1
+      coorG(3) = 14 !CPO2
+      coorG(4) = 15 !CPO3
+      coorG(5) = 16 !CPO4
+      coorG(6) = 17 !CPO5
+      coorG(7) = 18 !CPO6
+      coorG(8) = 19 !CPO7
+      coorG(9) = 20 !CPO8
+      coorG(10) = 21 !COO1
+      coorG(11) = 22 !COO2
+      coorG(12) = 23 !COO3
+      coorG(13) = 24 !COO4
+      coorG(14) = 25 !COO5
+      coorG(15) = 26 !COO6
+      coorG(16) = 27 !COO7
+      coorG(17) = 28 !COO8
+      coorG(18) = 29 !CNS1
+      coorG(19) = 30 !CNS2
+      coorG(20) = 31 !CNS3
+      coorG(21) = 32 !CNS4
+      coorG(22) = 33 !CNS5
+      coorG(23) = 34 !CNS6
+      coorG(24) = 35 !CNS7
+      coorG(25) = 36 !CNS8
+      coorG(26) = 37 !CBS1
+      coorG(27) = 38 !CBS2
+      coorG(28) = 39 !CBS3
+      coorG(29) = 40 !CBS4
+      coorG(30) = 41 !CBS5
+      coorG(31) = 42 !CAS1
+      coorG(32) = 43 !CAS2
+      coorG(33) = 44 !CAS3
+      coorG(34) = 45 !CAS4
+      coorG(35) = 46 !CAS5
+      coorG(36) = 11 !HCL
+      coorG(37) = 10 !NH3
+c woNOx      coorG(38) = 11 !HNO3
       !Primary species
-      coorP(1) = 65
-      coorP(2) = 75
-      coorP(3) = 85
-      coorP(4) = 105
+      coorP(1) = 50
+      coorP(2) = 60
+      coorP(3) = 70
+      coorP(4) = 90
+
+      NAERAPP = 37
+      SULF_IND = 9
 
 c
 c     GETTING TOTALS
@@ -184,7 +187,7 @@ c     CHECKING TOTALS AT BEGINNING
      &      orig(Appmaprev(n)).eq.bdnl(Appmaprev(n))*conv) then 
           if ((abs(orig(Appmaprev(n))-bdnl(Appmaprev(n))*conv).lt.
      &         0.05*bdnl(Appmaprev(n))*conv).or.
-     &        (n.eq.4).or.(n.eq.5).or.
+c     &        (n.eq.4).or.(n.eq.5).or.
      &        (i.eq.1.or.i.eq.ncol(1).or.j.eq.1.or.j.eq.nrow(1)).or.
      &        (abs(total(n)-orig(Appmaprev(n))).lt.10*bdnl(Appmaprev(n))*conv)
      &         ) then
@@ -214,7 +217,7 @@ c     CHECKING TOTALS AT BEGINNING
 c
       conv = convfac
 c     TOTALS FOR AEROSOL SPECIES -- ADD ALL SIZE SECTIONS TOGETHER
-      do count=1,38
+      do count=1,NAERAPP
         allsizetot(count) = 0.0
         nend = 1
         if (count.eq.1.or.count.eq.36) nend = 10 !Sulfate and Chloride
@@ -248,10 +251,10 @@ c     SULFATE
           endif
           if (n.eq.10) then
             Appconc(locG) = final(gspc)*Appconc(locG)/orig(gspc)
-            locSulf = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(16-1) +
+            locSulf = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(SULF_IND-1) +
      &             nx*ny*nz*MXTRK*(s-1)
-            Appconc(locSulf) = final(Appmaprev(16))*
-     &                         Appconc(locSulf)/orig(Appmaprev(16))
+            Appconc(locSulf) = final(Appmaprev(SULF_IND))*
+     &                         Appconc(locSulf)/orig(Appmaprev(SULF_IND))
           endif
           if (Appconc(locA).eq.'NaN'.or.Appconc(locG).eq.'NaN') then
             write(6,*) 'Problem in Appaero'
@@ -263,9 +266,9 @@ c     SULFATE
       enddo
 c
 c     Remaining Species (semi-volatiles)
-      do count=2,38
+      do count=2,NAERAPP
         nend = 1
-        if (count.eq.36) nend=10  !It's PCL, do size resolved partitioning
+        if (count.eq.36) nend=10 !It's PCL, do size-resolved partitioning
         do n=1,nend  !BNM remove size from semivolatiles
           a = coorA(count)-1+n
           g = coorG(count)

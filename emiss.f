@@ -119,6 +119,9 @@ c
               dmass = aremis(i,j,lar)*deltat*1e6
               dconc = REAL(dmass)/vol
               armass(l) = armass(l) + dmass
+              if (conc(i,j,1,l).lt.0) then
+                print *,'Emiss: i=',i,' j=',j,' l=',l,' conc=',conc(i,j,1,l)
+              endif
 c
 c----------------Added by Kristina 08/23/07--------------------
 c
@@ -130,7 +133,8 @@ c
 c
 c------------Added by Kristina 05/04/07-------------------------
 c           
-              if (lApp) call Appemiss (dconc,i,j,1,l,2,1,conc(i,j,1,l)
+
+              if (lApp) call Appemiss (dconc,i,j,1,l,2,1,conc
      &                                 ,original)
 c
 c------------End Added 05/04/07------------------------------
@@ -221,7 +225,7 @@ c
 c
 c------------Added by Kristina 05/04/07-------------------------
 c
-            if(lApp) call Appemiss (dconc,i,j,k,l,1,lsrc,conc(i,j,k,l)
+            if(lApp) call Appemiss (dconc,i,j,k,l,1,lsrc,conc
      &                              ,original)
 c
 

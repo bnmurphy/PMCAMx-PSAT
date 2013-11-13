@@ -80,6 +80,7 @@ c
       real inptim,emstim,haztim,ozntim,bndtim,wrttim,endtim 
       character*20 version
       character*10 name
+      integer i
 c
       data version /'CAMx v4.02, 03-07-09'/
 c

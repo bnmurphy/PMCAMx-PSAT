@@ -227,11 +227,14 @@ c-----Check total
       do k=1,nz
  100    total = 0.0
         check = 0.0
-       do s=1,Appnum+3
+        do s=1,Appnum+3
           loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &          nx*ny*nz*MXTRK*(s-1)
           total = total + Appconc(loc)
         enddo
+        if (spc.eq.8.and.i.eq.2.and.j.eq.2) then
+          print *,'Appxyadv: SO2 Total=',total,' old=',Actconc(k)
+        endif
        do s=1,Appnum+3
           loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &          nx*ny*nz*MXTRK*(s-1)
@@ -283,21 +286,16 @@ c            if (Appconc(loc2).lt.0) then
 c            endif
           endif
         enddo
-        do s=1,Appnum+3
-          loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
-     &          nx*ny*nz*MXTRK*(s-1)
-          total = total + Appconc(loc)
-        enddo
-        if (abs(total-Actconc(k)).gt.0.01*Actconc(k)) then
-         if (k.lt.9
+        if (abs(total-Actconc(k)).gt.0.10*Actconc(k) ) then
+          if (k.lt.9
      &         ) then
-          write(6,*) 'ERROR in Appzadv: total incorrect'
-          write(6,*) 'i,j,k,spc: ',i,j,k,spc
-          write(6,*) 'Actual Conc.', Actconc(k)
-          write(6,*) 'total ', total
-          write(6,*) 'fc1,fc2,fc3: ',f1(k),f2(k),f3(k)
-          do s=1,Appnum+3
-            loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
+            write(6,*) 'ERROR in Appzadv: total incorrect'
+            write(6,*) 'i,j,k,spc: ',i,j,k,spc
+            write(6,*) 'Actual Conc.', Actconc(k)
+            write(6,*) 'total ', total
+            write(6,*) 'fc1,fc2,fc3: ',f1(k),f2(k),f3(k)
+            do s=1,Appnum+3
+              loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &            nx*ny*nz*MXTRK*(s-1)
               write(6,*) s,Appconc(loc),original(k,s),original(k-1,s)
             enddo

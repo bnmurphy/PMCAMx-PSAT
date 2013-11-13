@@ -117,7 +117,7 @@ c-------Check for total
      &                    nx*ny*nz*MXTRK*(s-1)
                     total = total + Appconc(loc)
                     if (Appconc(loc).lt.0) then
-                      write(6,*) 'Negative Value in Appxyadv'
+                      write(6,*) 'Negative Value in Appwetdep'
                       write(6,*) 'i,j,k,spc,s: ',i,j,k,Appmap(spc),s
                       write(6,*) 'Appconc(loc): ', Appconc(loc)
                       write(6,*) 'Actual Conc.',con(i,j,k,spc)
@@ -130,6 +130,9 @@ c-------Check for total
                       stop
                      endif
                   enddo
+                  if (spc.eq.55.and.i.eq.2.and.j.eq.2) then
+                    print *,'Appwetdep: SO2 Total=',total,' old=',con(i,j,k,spc)
+                  endif
                   if (abs(total-app_wet_con)
      &               .gt.0.01*app_wet_con) then
 c                  if (abs(total-con(i,j,k,spc))

@@ -105,7 +105,7 @@ linux:
 	@csh chktracer camx.prm.$(DOMAIN) CAMx.$(DOMAIN).linux
 	@ln -s camx.prm.$(DOMAIN) $(INC)/camx.prm
 #	make model FC="pgf77" FLGS="-I$(INC) -O2 -tp k8-32 -pc 64 -Kieee -Mdalign -Mextend -Mnoframe -byteswapio -Wl,-Bstatic" TARGT="CAMx.$(DOMAIN).linux" DUM=dummy
-	make model FC="pgf77" FLGS="-I$(INC) -O2 -tp k8-64 -pc 64 -Kieee -Mdalign -Mextend -Mnoframe -byteswapio -mcmodel=medium -Mlarge_arrays -L/usr/pgi/linux86-64/6.0/libso -lpgftnrtl " TARGT="CAMx.$(DOMAIN).linux" DUM=dummy
+	make model FC="pgf77" FLGS="-I$(INC) -g -O1 -tp k8-64 -pc 64 -Kieee -Mdalign -Mextend -Mnoframe -byteswapio -mcmodel=medium -Mlarge_arrays -L/usr/pgi/linux86-64/6.0/libso -lpgftnrtl " TARGT="CAMx.$(DOMAIN).linux" DUM=dummy
 
 linuxomp:
 	@rm -f $(INC)/camx.prm

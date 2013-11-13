@@ -70,5 +70,6 @@ c
         tmp2 = w1*rk12 + (1.-w1)*rk22
         rk(i) = w2*tmp1 + (1.-w2)*tmp2
       enddo
-c
+
+      
       end

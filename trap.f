@@ -375,10 +375,10 @@ c	print *,'time = ',time, 'cncrad(NO3) = ',cncrad(kNO3)
 c	print *,'time = ',time, 'cncrad(HO2) = ',cncrad(kHO2)
 c	endif
 
-	bnmradcnc(1,ichm,jchm,kchm) = cncrad(kOH)
-	bnmradcnc(2,ichm,jchm,kchm) = cncrad(kNO3)
+        bnmradcnc(1,ichm,jchm,kchm) = cncrad(kOH)
+        bnmradcnc(2,ichm,jchm,kchm) = cncrad(kNO3)
 c	bnmradcnc(3,ichm,jchm,kchm) = cncrad(kN2O5)
-	bnmradcnc(3,ichm,jchm,kchm) = cncrad(kHO2)
+        bnmradcnc(3,ichm,jchm,kchm) = cncrad(kHO2)
 
 c----------------------------------------------------------
 
@@ -444,27 +444,29 @@ c-----Added by Kristina 06/21/2007-------------------------------------------
 c
 c      call Appgas(cncold,conc,rrxn,ii,jj,kk,dt,convfac,NO2case,NO2cons,
 c     &            NO3conc,NO3new)
-      !print *,'Starting Appgas i=',ii,' j=',jj
+      !print *,'Calling Appgas'
       call Appgas(cncold,conc,rrxn,ii,jj,kk,dt,convfac,NO2case,NO2cons,
-     &            NO3conc,NO3new)     
-      !print *,'Finished Appgas i=',ii,' j=',jj
+     &            NO3conc,NO3new)    
+      !print *,'Done with Appgas'
       nx = MXCOL1
       ny = MXROW1
       nz = MXLAY1
       total = 0.0
-      do s = 1,appnum+3
-        loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(s-1)
-        total = total + appconc(loc)
-        !print *,'Trap: After Appgas. Appconc(NO2,',s,')=',Appconc(loc)
-      enddo
-      !print *,'Trap: After Appgas. NO2 Total=',total,' conc=',conc(kno2)*convfac
-      total = 0.0
-      do s = 1,appnum+3
-        loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(4-1)+nx*ny*nz*MXTRK*(s-1)
-        total = total + appconc(loc)
-        !print *,'Trap: After Appgas. Appconc(NXOY,',s,')=',Appconc(loc)
-      enddo
-      !print *,'Trap: After Appgas. NXOY Total=',total,' conc=',conc(knxoy)*convfac
+c woNOx      do s = 1,appnum+3
+c        loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(s-1)
+c        total = total + appconc(loc)
+c        !print *,'Trap: After Appgas. Appconc(NO2,',s,')=',Appconc(loc)
+c      enddo
+c      !print *,'Trap: After Appgas. NO2 Total=',total,' conc=',conc(kno2)*convfac
+c      total = 0.0
+c      do s = 1,appnum+3
+c        loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(4-1)+nx*ny*nz*MXTRK*(s-1)
+c        total = total + appconc(loc)
+c        !print *,'Trap: After Appgas. Appconc(NXOY,',s,')=',Appconc(loc)
+c      enddo
+c      !print *,'Trap: After Appgas. NXOY Total=',total,' conc=',conc(knxoy)*convfac
+c woNOx
+
 c
 c-------------End Added 06/21/2007--------------------------------------------
 c
@@ -493,40 +495,36 @@ c
         ltest = .true.
       endif
       !print *,'Trap: AT NXOY. NXOY=',conc(knxoy)*convfac,' NO2=',conc(kno2)*convfac
-      
-      !BNM Added to resolve NXOY problems in PSAT (NXOY=4)
-      !Find the largest source contribiution to NXOY and correct
-      !it for the new value
-      nx = MXCOL1
-      ny = MXROW1
-      nz = MXLAY1
-      total = 0.0
-      do s = 1,appnum+3
-        loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(4-1)+nx*ny*nz*MXTRK*(s-1)
-        total = total + appconc(loc)
-      enddo
-      !print *,'Trap: AT NXOY'
-      NXOYcrctn = conc(knxoy)*convfac - total
-      total2 = total + NXOYcrctn
-      !Need to take conc(knxoy) away from a combination of the
-      !sources based on how much is there already
-      !print *,'Trap: After NXOY Assignment. Corr=',NXOYcrctn,
-      !&        ' total=',total
-      do s = 1,appnum+3
-        loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(4-1)+nx*ny*nz*MXTRK*(s-1)
-        fracApp = appconc(loc)/total
-        if (fracApp.gt.0.001 .or. appconc(loc).gt.bdnl(knxoy)*convfac) then
-          appconc(loc) = appconc(loc) + NXOYcrctn*fracApp
-        endif
-      enddo            
-      !BNM Added to resolve NXOY problems in PSAT
-      total = 0.0
-      do s = 1,appnum+3
-        loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(4-1)+nx*ny*nz*MXTRK*(s-1)
-        total = total + appconc(loc)
-        !print *,'Trap: After Appgas. Appconc(NXOY,',s,')=',Appconc(loc)
-      enddo
-      !print *,'Trap: After Appgas. NXOY Total=',total,' conc=',conc(knxoy)*convfac
+
+c woNOx
+c      !BNM Added to resolve NXOY problems in PSAT (NXOY=4)
+c      !Find the largest source contribiution to NXOY and correct
+c      !it for the new value
+c      nx = MXCOL1
+c      ny = MXROW1
+c      nz = MXLAY1
+c      total = 0.0
+c      do s = 1,appnum+3
+c        loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(4-1)+nx*ny*nz*MXTRK*(s-1)
+c        total = total + appconc(loc)
+c      enddo
+c      !print *,'Trap: AT NXOY'
+c      NXOYcrctn = conc(knxoy)*convfac - total
+c      total2 = total + NXOYcrctn
+c      !Need to take conc(knxoy) away from a combination of the
+c      !sources based on how much is there already
+c      !print *,'Trap: After NXOY Assignment. Corr=',NXOYcrctn,
+c      !&        ' total=',total
+c      do s = 1,appnum+3
+c        loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(4-1)+nx*ny*nz*MXTRK*(s-1)
+c        fracApp = appconc(loc)/total
+c        if (fracApp.gt.0.001 .or. appconc(loc).gt.bdnl(knxoy)*convfac) then
+c          appconc(loc) = appconc(loc) + NXOYcrctn*fracApp
+c        endif
+c      enddo            
+c      !BNM Added to resolve NXOY problems in PSAT
+
+
 c
 c======================== DDM Begin =======================
 c
@@ -563,43 +561,38 @@ c
       conc(kno2) = amax1(
      &             bdnl(kno2), (conc(kno2) - conc(knxoy)))
 
-      !BNM Added to resolve NO2 problems in PSAT (NO2 = 2)
-      !Find the largest source of NO2 and apply NXOY correction
-      !print *,'Trap: After NXOY. Total=',total,' conc=',conc(knxoy)*convfac
-      total = 0.0
-      do s = 1,appnum+3
-        loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(s-1)
-        total = total + appconc(loc)
-        !print *,'Trap: Before NXOY Correction. Appconc(NO2,',s,')=',Appconc(loc)
-      enddo
-      !print *,'Trap: Before NO2. Total=',total,' conc=',conc(kno2)*convfac
-      total2 = amax1(bdnl(kno2)*convfac, total - conc(knxoy)*convfac)
-      if (total2.ne.bdnl(kno2)*convfac) then
-        !Need to take conc(knxoy) away from a combination of the
-        !sources based on how much is there already
-        do s = 1,appnum+3
-          loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(s-1)
-          fracApp = appconc(loc)/total
-          if (appconc(loc).gt.bdnl(kno2)*convfac/100) then
-            appconc(loc) = appconc(loc) - conc(knxoy)*convfac*fracApp
-          endif
-        enddo            
-      else
-        do s = 1,appnum+3
-          loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(s-1)
-          appconc(loc) = bdnl(kno2)*convfac
-        enddo
-      endif
-      !print *,'Trap: Past NO2. Total=',total,' conc=',conc(kno2)*convfac
-      total = 0.0
-      do s = 1,appnum+3
-        loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(s-1)
-        total = total + appconc(loc)
-        !print *,'Trap: After Correction. Appconc(NO2,',s,')=',Appconc(loc)
-      enddo
-      !print *,'Trap: Past NO2. Total2=',total,' conc=',conc(kno2)*convfac
+c woNOx
+c      !BNM Added to resolve NO2 problems in PSAT (NO2 = 2)
+c      !Find the largest source of NO2 and apply NXOY correction
+c      !print *,'Trap: After NXOY. Total=',total,' conc=',conc(knxoy)*convfac
+c      total = 0.0
+c      do s = 1,appnum+3
+c        loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(s-1)
+c        total = total + appconc(loc)
+c        !print *,'Trap: Before NXOY Correction. Appconc(NO2,',s,')=',Appconc(loc)
+c      enddo
+c      !print *,'Trap: Before NO2. Total=',total,' conc=',conc(kno2)*convfac
+c      total2 = amax1(bdnl(kno2)*convfac, total - conc(knxoy)*convfac)
+c      if (total2.ne.bdnl(kno2)*convfac) then
+c        !Need to take conc(knxoy) away from a combination of the
+c        !sources based on how much is there already
+c        do s = 1,appnum+3
+c          loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(s-1)
+c          fracApp = appconc(loc)/total
+c          if (appconc(loc).gt.bdnl(kno2)*convfac/100) then
+c            appconc(loc) = appconc(loc) - conc(knxoy)*convfac*fracApp
+c          endif
+c        enddo            
+c      else
+c        do s = 1,appnum+3
+c          loc = ii+nx*(jj-1)+nx*ny*(kk-1)+nx*ny*nz*(2-1)+nx*ny*nz*MXTRK*(s-1)
+c          appconc(loc) = bdnl(kno2)*convfac
+c        enddo
+c      endif
+c      !print *,'Trap: Past NO2. Total=',total,' conc=',conc(kno2)*convfac
+c      !BNM Added to resolve NO2 problems in PSAT
+c woNOx
       
-      !BNM Added to resolve NO2 problems in PSAT
 c
 c======================== DDM Begin =======================
 c

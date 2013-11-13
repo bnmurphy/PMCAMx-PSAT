@@ -58,6 +58,9 @@ c     Totals
           else
             convfac = 1
           endif
+          if (spc.eq.8.and.i.eq.2.and.ij.eq.2) then
+            print *,'Appxyadv: SO2 Total=',Apptot(i),' old=',AppFORE(i,ij,k,Appmaprev(spc))
+          endif
 
           if (Apptot(i).lt.0) then
             print *,'Appxyadv: x-adv Neg Value at start ',Apptot(i)
@@ -70,8 +73,8 @@ c     Totals
             if (abs(AppFORE(i,ij,k,Appmaprev(spc))-bdnl(Appmaprev(spc))
      &          *convfac).lt.0.05*bdnl(Appmaprev(spc))*convfac.or.
      &          abs(Apptot(i)-AppFORE(i,ij,k,Appmaprev(spc)).le.
-     &               11*bdnl(Appmaprev(spc))*convfac) .or.
-     &          spc.eq.5) then
+     &               11*bdnl(Appmaprev(spc))*convfac)) then ! .or.
+c     &          spc.eq.5) then
               do s = 1,Appnum+3
                 loc = i + nx*(ij-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &                nx*ny*nz*MXTRK*(s-1)
@@ -85,7 +88,7 @@ c     Totals
                 Original(i,s)=Appconc(loc)
               enddo
               Apptot(i) = AppFORE(i,ij,k,Appmaprev(spc))
-            elseif (i.eq.1.or.i.eq.ncol(1).or.j.eq.1.or.j.eq.nrow(1)) then  !BNMchanged 96->97
+            elseif (i.eq.1.or.i.eq.ncol(1).or.j.eq.1.or.j.eq.nrow(1)) then  
               do s = 1,Appnum+3
                 loc = i + nx*(ij-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &                nx*ny*nz*MXTRK*(s-1)
@@ -125,7 +128,7 @@ c           BOUNDARY CELLS DO NOT CHANGE
      &               nx*ny*nz*(Appmaprev(spc)-1)
               !Appconc(loc)=conc(loc3)*(Original(i,s)/Apptot(i))
               Appconc(loc)=AppFORE(i,ij,k,Appmaprev(spc))*(Original(i,s)/Apptot(i)) 
-c
+
             !elseif (i.eq.1.and.(fm(2).ne.0 .or. fp(1).ne.0) ) then
             !  loc = i + nx*(ij-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &      !        nx*ny*nz*MXTRK*(s-1)
@@ -138,7 +141,7 @@ c
             !  Appconc(loc)=Appconc(loc) - ( fp(i)*Original(i,s)/
      &      !               Apptot(i) + fm(i+1)*Original(i+1,s)/
      &      !               Apptot(i+1) )*scale(i)/dep(i)
-c
+
             !elseif (i.eq.MX1D.and.fm(MX1D-1).eq.0) then
             !elseif (i.eq.MXCOL1.and.fp(MXCOL1-1).eq.0.and.fm(MXCOL1).eq.0) then
             elseif (i.eq.MXCOL1) then
@@ -148,7 +151,7 @@ c
      &               nx*ny*nz*(Appmaprev(spc)-1)
               !Appconc(loc)=conc(loc3)*(Original(i,s)/Apptot(i))
               Appconc(loc)=AppFORE(i,ij,k,Appmaprev(spc))*(Original(i,s)/Apptot(i)) 
-c
+
             !elseif (i.eq.MX1D.and.fm(MX1D-1).ne.0) then
             !elseif (i.eq.MXCOL1.and.(fp(MXCOL1-1).ne.0 .or. fm(MXCOL1).ne.0) ) then
             !  loc = i + nx*(ij-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
@@ -188,10 +191,6 @@ c           NON-BOUNDARY CELLS
 c
       elseif (xy.eq.2) then !Y-Advection
 c
-      !if (k.eq.1.and.ij.eq.2) then 
-      !  loc = 2+nx*(18-1)+nx*ny*(1-1)+nx*ny*nz*(130-1)+nx*ny*nz*MXTRK*(4-1)
-      !  print *,'Appyadv: spc=',spc,' Appconc(i=2,j=18,spc=130,s=4)=',Appconc(loc)
-      !endif
 c       Totals
 
         do j=1,MXROW1
@@ -211,15 +210,22 @@ c       Totals
           else
             convfac = 1
           endif
+          if (spc.eq.8.and.ij.eq.2.and.j.eq.2) then
+            print *,'Appxyadv: SO2 Total=',Apptot(j),' old=',AppFORE(ij,j,k,Appmaprev(spc))
+          endif
 
+          if (Apptot(j).lt.0) then
+            print *,'Appxyadv: y-adv Neg Value at start ',Apptot(j)
+            print *,'     i=',ij,' j=',j,' k=',k,'  spc=',spc
+          endif    
 
           if (abs(Apptot(j)-AppFORE(ij,j,k,Appmaprev(spc))).gt.
      &        0.02*MIN(Apptot(j),AppFORE(ij,j,k,Appmaprev(spc)))) then
             if (abs(AppFORE(ij,j,k,Appmaprev(spc))-bdnl(Appmaprev(spc))*convfac)
      &          .lt.0.05*AppFORE(ij,j,k,Appmaprev(spc)).or.
      &          abs(Apptot(j)-AppFORE(ij,j,k,Appmaprev(spc)).le.
-     &               11*bdnl(Appmaprev(spc))*convfac) .or.
-     &          spc.eq.5) then
+     &               11*bdnl(Appmaprev(spc))*convfac)) then ! .or.
+c     &          spc.eq.5) then
               do s = 1,Appnum+3
                 loc = ij + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &                nx*ny*nz*MXTRK*(s-1)
@@ -420,16 +426,17 @@ c-----Check total
                   do v=1,Appnum+3
                     loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &                  nx*ny*nz*MXTRK*(v-1)
-                  write(6,*) v,Appconc(loc),Original(j,v),Original(j+1,v)
-                enddo
-                write(6,*) 'fp(i-1),fp(i),fm(i),fm(i+1):',
+                    write(6,*) v,Appconc(loc),Original(j,v),Original(j+1,v)
+                  enddo
+                  write(6,*) 'fp(i-1),fp(i),fm(i),fm(i+1):',
      &                      fp(j-1),fp(j),fm(j),fm(j+1)
-                write(6,*) 'scale,depth,dx: ',
+                  write(6,*) 'scale,depth,dx: ',
      &                      scale(j),dep(j),dx(j)
                   stop
                 endif
               endif
             enddo
+
             if (abs(total-AppAFT(i,j,k,Appmaprev(spc)))
      &          .gt.0.05*MIN(AppAFT(i,j,k,Appmaprev(spc)),total)) then
               write(6,*) 'ERROR in Appxyadv: total incorrect'

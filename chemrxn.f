@@ -70,6 +70,7 @@ c
      &		      masschem,masspart, deltax(1,igrd),		!<- BNM 6/30/09
      &		      deltay(igrd), depth(iptr3d(igrd)) )		!<- BNM 6/2/09
         tcpu = dtime(tarray2)
+
         write(*,'(a,f10.3)') '   CPU = ', tarray2(1)
         write(iout,'(a,f10.3)') '   CPU = ', tarray2(1)
         call flush(6)
