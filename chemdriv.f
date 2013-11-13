@@ -463,14 +463,11 @@ c        print *,'CHEMDRIV: Con(cbs1,Before chem)=',con(KCBS1)
 c         loc = 73+97*(6-1)+90*97*(1-1)+97*90*14*(14-1)+97*90*14*490*(1-1)
 c         print *,'Chemdriv: Appconc(73,6,1,PAN2)=',
 c     &           (Appconc(loc+97*90*14*490*(is-1)),is=1,4) 
-
-c                  print *,'Starting from trap'
                  call trap(rxnrate5,radslvr5,ratejac5,rateslo5,dtchem,
      &             ldark(i,j),water(i,j,k),atm,O2,CH4,H2,con,crad,
      &             avgrad,tcell,
      &             sddm,nddmsp,ngas,ddmjac5,lddm,nirrrxn,titrt,rrxn_irr,
      &             lirr,i,j,k,convfac) !Kristina added i,j,k,changes on 06/21/07
-c                  print *,'Back from trap'
 
 C END <- BNM 
 
@@ -554,7 +551,7 @@ c
                            endif
                          endif
                          if (final(ispc).eq.0.0) then
-                            final(ispc) = bdnl(ispc)
+                           final(ispc) = bdnl(ispc)
                          endif
                        endif
                      enddo

@@ -21,3 +21,14 @@ CAMx.Budget.FUNC1.063009 - Same as Base-Case but with new fragmentation option f
 			   I can compare with the base-case and make sure code is working correctly.
 CAMx.Budget.P07S05.063009 - First sensitivity case. FUNC(POA) = 0.7; FRAG(POA) = 0.3
 						    FUNC(SOA) = 0.5; FRAG(SOA) = 0.5
+
+
+=================
+PSAT
+PMCAMx_PSAT_EUROPE_RDCLAY - Take away top 4 layers because pressure is too low
+PMCAMx_PSAT_EUROPE_woNOx - Take away NOy family from the PSAT treatment since
+    they weren't acting very stable (finally ran with this modeification in place).
+PMCAMx_PSAT_EUROPE_SECTOR - Panos (university of Aegean) made source-resolved 
+    emissions files that are in text format. The CAMx emissions reading routines
+    and the PSAT emissions assignment routines need to be modified to accomodate 
+    this.  (1-12-12)

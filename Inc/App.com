@@ -39,7 +39,8 @@ c
       real AppemfracP(120000,MXSPEC,MXSOUR-2)
       real modvdep(MXCOL1,MXROW1,MXSPEC)
       real saconc(MXCOL1,MXROW1,MXLAY1,MXTRK*MXSOUR)
-      integer sv_bin
+      integer AppEmissNum, AppEmissMap(40)
+      character*200 AppEmissFile(40)
 c
       common /App/ Appconc,Appnum,Appnam,Appmap,Appct,
      &             Appavg, AppFORE, AppAFT
@@ -48,5 +49,6 @@ c
       common /App4/ AppemisP, AppemisA
       common /App5/ modvdep, sa_num_gas, sa_num_sv
       common /App6/ saconc, sv_bin
+      common /App6/ AppEmissNum, AppEmissFile, AppEmissMap
 c     
 c     END

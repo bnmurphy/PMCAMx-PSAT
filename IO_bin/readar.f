@@ -69,9 +69,9 @@ c
 c
 c-------Added by Kristina 04/13/2007-------------------------------------
 c
-c      if (lApp) call Appreadar(aremis,narspc)
+      if (lApp) call Appreadar(aremis,narspc,tim1)
 c      if(lApp) call Appsetar(aremis,narspc)
-      if(lApp) call Appsetar     !BNM
+c      if(lApp) call Appsetar     !BNM
 c
 c----------End Added 04/13/2007-----------------------------------------
 c

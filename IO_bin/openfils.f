@@ -268,7 +268,7 @@ c
           open(unit=iAppoA(ilayer),file=filroot(1:ii+5),form='UNFORMATTED',
      &                                       status= 'UNKNOWN',ERR=7005)
           write(iout,9000)'Output APPORTIONMENT file #2 coarse grid 
-     &                  (unit):',iAppo
+     &                  (unit):',iAppoA(ilayer)
           write(iout,9002) '   File: ',filroot(1:ii+5)
           nfils = nfils + 1
         enddo
@@ -504,43 +504,24 @@ c------------Added by Kristina Wagstrom 08/18/2006------------------------------
 c
 c-----Read in the file names for the Apportionment input files
 c
-c COMMENTED OUT BY BNM
-c      if (lApp) then
-cc
-cc       EMISSIONS files
-cc
-c        do i = 1,Appnum
-cc        Point Emissions File
-c          irec = irec + 1
-c          action = 'Reading emissions filename - point'
-c          read(inp,'(20X,A)',ERR=7001,END=7004) filtmp
-c          iAppiP(i) = nfils
-c          inquire(file=filtmp,exist=lexist)
-c          if( .NOT. lexist ) goto 7002
-c          nopen = nopen + 1
-c          open(unit=iAppiP(i),file=filtmp,form='UNFORMATTED',
-c     &                status='OLD',ERR=7000)
-c          write(iout,9000)'Emissions file            (unit):',
-c     &                                                     iAppiP(i)
-c          write(iout,9002) '   File: ',filtmp(:istrln(filtmp))
-c          nfils = nfils + 1
-cc        Area Emissions File
-c          irec = irec + 1
-c          action = 'Reading emissions filename - area'
-c          read(inp,'(20X,A)',ERR=7001,END=7004) filtmp
-c          iAppiA(i) = nfils
-c          inquire(file=filtmp,exist=lexist)
-c          if( .NOT. lexist ) goto 7002
-c          nopen = nopen + 1
-c          open(unit=iAppiA(i),file=filtmp,form='UNFORMATTED',
-c     &            status='OLD',ERR=7000)
-c          write(iout,9000)'Emissions file            (unit):',
-c     &                                                     iAppiA(i)
-c          write(iout,9002) '   File: ',filtmp(:istrln(filtmp))
-c          nfils = nfils + 1
-c        enddo        
-c      endif
-c END COMMENTED OUT BY BNM
+      if (lApp) then
+c
+c       EMISSIONS files
+c
+        read(inp,'(20x,I)',ERR=7001,END=7004) AppEmissNum
+        do i = 1,AppEmissNum
+          !Area Emissions File
+          action = 'Reading emissions filename - Area'
+          read(inp,'(20X,I2,1x,A)',ERR=7001,END=7004) AppEmissMap(i), filtmp
+          inquire(file=filtmp,exist=lexist)
+          if( .NOT. lexist ) goto 7002
+          write(iout,9000)'Emissions file            (unit):',i
+          write(iout,9002) '   File: ',filtmp(:istrln(filtmp))
+          
+          AppEmissFile(i) = filtmp
+         enddo        
+
+      endif
 c
 c------------End Added 08/18/2006---------------------------------------------------
 c  

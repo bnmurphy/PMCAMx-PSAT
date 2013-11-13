@@ -458,7 +458,7 @@ $(APP)/Appaero.o \
 $(APP)/Appgas.o \
 $(APP)/vdepread.o \
 $(APP)/Appalign.o \
-#$(APP)/Appreadar.o \
+$(APP)/Appreadar.o \
 #$(APP)/Appreadpt.o \
 
 model: 	$(OBJCTS)

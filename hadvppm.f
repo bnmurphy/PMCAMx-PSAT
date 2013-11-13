@@ -82,8 +82,6 @@ c***      parameter (STEEPEN=.false.)
       parameter (ETA1=20.0, ETA2=0.05, EPS=0.01)
       parameter (TWO3RDS=2./3.)
 c
-c***      real fm(MX1D),fp(MX1D),cm(MX1D),cl(MX1D),cr(MX1D),dc(MX1D),
-c***     &     c6(MX1D),d2c(MX1D),eta(MX1D),etabar(MX1D),cld(MX1D),crd(MX1D)
       real fm(MX1D),fp(MX1D),cm(MX1D),cl(MX1D),cr(MX1D),dc(MX1D),
      &     c6(MX1D),d2c(MX1D),eta(MX1D),etabar(MX1D),cld(MX1D),crd(MX1D)
 c*      real fm(MX1D),fp(MX1D),cm(MX1D),cl(MX1D),cr(MX1D),dc(MX1D),
