@@ -105,8 +105,7 @@ c
          nsecx2   = neqsec
          call heqdyn(t0,t1,q)
       else
-         write(6,*)'ERROR: AEROSOL MODULE should be ',
-     &             'MADM,EQUI,orHYBR.'
+         write(6,*)'ERROR: AEROSOL MODULE should be MADM, EQUI, or HYBR.'
          stop
       endif
 
@@ -126,6 +125,7 @@ c     if HYBR failed try EQUI after restore q, dsec, qn & qtot0
         aerm='EQUI'
         goto 100
       endif
+
 c
 c     Linear Interpolation Routine
       do i=1,nexti

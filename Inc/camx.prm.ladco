@@ -63,16 +63,16 @@ c
       integer   MXROWA
       integer   MXLAYA
 c
-      parameter ( MXCOLA  = 97, MXROWA  = 90, MXLAYA  = 14)
+      parameter ( MXCOLA  =  97, MXROWA  =  90, MXLAYA  = 14)
 c
       integer   MX1D
       integer   MXCHDRN
       integer   MXGRID
       integer   MXSECT
 c
-      parameter ( MX1D    =  97 )
-      parameter ( MXCHDRN =   3 )
-      parameter ( MXGRID  =  10 )
+      parameter ( MX1D    = 160 ) !BNM changed from 160 to 100
+      parameter ( MXCHDRN =  1 )  !BNM changed from 3 to 1
+      parameter ( MXGRID  =  1 )  !BNM changed from 10 to 1 - 2/16/11
       parameter ( MXSECT  =  10 )
 c
 c-----------------------------------------------------------------------
@@ -107,18 +107,18 @@ c
       integer   NSPNAM
       integer   NRADNM
 c
-      parameter ( MXSPEC  =   164 )
-      parameter ( MXRADCL =    12 )
+      parameter ( MXSPEC  =   592 ) ! BNM changed from 520 when added NTSOA
+      parameter ( MXRADCL =    18 )
       parameter ( MXPHT1  =     6 )
-      parameter ( MXPHT2  =    10 )
+      parameter ( MXPHT2  =    24 )
       parameter ( NTEMPR  =   101 )
-      parameter ( TEMPLO  = 120.0 )
+      parameter ( TEMPLO  = 100.0 ) ! 220 for July
       parameter ( TEMPHI  = 320.0 )
       parameter ( NPRESR  =    10 )
-      parameter ( PRESLO  = 126.0 )
+      parameter ( PRESLO  = 100.0 ) ! 326 for July
       parameter ( PRESHI  = 1100. )
-      parameter ( MXRXN   =   100 )
-      parameter ( NSPNAM  =   228 )
+      parameter ( MXRXN   =   245 )
+      parameter ( NSPNAM  =   592 ) ! BNM changed from 520 when added NTSOA
       parameter ( NRADNM  =    26 )
 c
 c-----------------------------------------------------------------------
@@ -159,8 +159,8 @@ c
       integer   MXHRS
 
       parameter ( MXPTSRC = 120000 )
-      parameter ( MXPIG   = 25000 )
-      parameter ( MXHRS   =   250 )
+      parameter ( MXPIG   = 0 )     !BNM changed from 25000 to 0
+      parameter ( MXHRS   =   30 )  !BNM changed from 250 to 30
 c
 c-----------------------------------------------------------------------
 c     Parameters for dimensioning the scratch vectors:
@@ -247,8 +247,8 @@ c
       real      PGROFAC
       real      DXYMAX
 c                 
-      parameter ( GRESPIG = 1 )
-      parameter ( IRONPIG = 2 )
+      parameter ( GRESPIG = 1 )  
+      parameter ( IRONPIG = 2 )  
       parameter ( MXRECTR = 3 )
       parameter ( FLEAK = .25 )
       parameter ( LEAKON = .TRUE. )
@@ -257,16 +257,15 @@ c
       parameter ( PGROFAC = 1.0 )
       parameter ( DXYMAX = 0.0 )
 c
-c-------------------------------------------------------------------------
+c----------------------------------------------------------------------
 c     Parameters for Apportionment
 c
-c     MXSOUR  -- maximum number of source types that can be tracked
+c     MXSOUR  -- mximum number of source types that can be tracked
 c     MXTRK   -- maximum number of species that are tracked
-c-------------------------------------------------------------------------
+c----------------------------------------------------------------------
 c
-      integer MXSOUR
-      integer MXTRK
-c
-      parameter ( MXSOUR = 14 )
-      parameter ( MXTRK = 154 )
-
+      integer MXSOUR, MXTRK
+      parameter ( MXSOUR = 6, MXTRK = 490 )
+      
+      !MXTRK value here is copied from PSAT-2004. Should it be more for
+      !the semivolatile organics implementation? -BNM

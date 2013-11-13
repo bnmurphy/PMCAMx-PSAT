@@ -50,18 +50,21 @@ c
       include 'camx.prm'
       include 'bndary.com'
       include 'chmstry.com'
-      include 'flags.com'
 
       include 'deposit.com'
       include 'section.inc'
 c
 c======================== Source Apportion Begin =======================
+c======================== DDM Begin ====================================
 c
       include 'tracer.com'
-      real relc, relc0, c0ddm(MXTRSP), c0trac(MXTRSP)
+      real fc2r, fr2c, delnul, c0trac(MXTRSP), tmtrac(MXTRSP)
       real delnox, delvoc, delo3, c0nox, c0voc, c0o3
-      real concnox, concvoc, conco3, c0noxtr, c0voctr, c0o3tr
+      real concnox, concvoc, conco3, dnlnox, dnlvoc, dnlo3
+      logical lzerc, levap, lddmopt2
+      data lddmopt2 /true/
 c
+c======================== DDM End ======================================
 c========================= Source Apportion End ========================
 c
 c
@@ -78,7 +81,8 @@ c
      &     pwc(ncol,nrow,nlay),depth(ncol,nrow,nlay)
       integer idfin(ncol,nrow)
       real conc(ncol,nrow,nlay,nspcs),depfld(ncol,nrow,3*nspcs)
-      real*8 fluxes(nspcs,11)
+      real*8 fluxes(nspcs,13)
+      real   tmassi(MXSPEC,MXLAYA), tmassb(MXSPEC,MXLAYA), tsplit(MXSPEC), tdiff(MXSPEC)
       real c0(MXSPEC),rr(MXLAYA),volrat(MXLAYA),tmass(MXSPEC)
       real delr(MXSPEC)
       logical lcloud,ltop,lfreez
@@ -102,6 +106,14 @@ c
         do 20 i = i1,i2
           icl = i
           if (idfin(i,j).gt.igrid) goto 20
+
+C-----Initialize In-Cloud and Below-Cloud Mass Gains
+          do k = 1,nlay
+            do l = 1,nspcs
+              tmassi(l,k) = 0
+              tmassb(l,k) = 0
+            enddo
+          enddo
 c
 c-----Scan column for layers containing precipitation bottom/top
 c
@@ -137,7 +149,7 @@ c
           enddo
           do k = kbot,ktop
             volrat(k) = pwc(i,j,k)/rhoh2o            ! drop volume/air volume
-            rr(k) = (volrat(k)/1.08e-7)**1.225       ! rainfall rate (mm/hr)
+            rr(k) = (volrat(k)/1.0e-7)**1.14         ! rainfall rate (mm/hr)
           enddo
 c
 c======================== Source Apportion Begin =======================
@@ -145,12 +157,9 @@ c
           c0o3 = 0.
           c0nox = 0.
           c0voc = 0.
-          c0o3tr = 0.
-          c0noxtr = 0.
-          c0voctr = 0.
-          do l=1,MXTRSP
-            c0trac(l) = 0.
-          enddo
+          dnlo3 = 0.
+          dnlnox = 0.
+          dnlvoc = 0.
 c
 c======================== Source Apportion End =======================
 c
@@ -169,30 +178,46 @@ c
             rhoair = 100.*press(i,j,k)/(rd*tempk(i,j,k))
 c
 c======================== Source Apportion Begin =======================
+c======================== DDM Begin ====================================
 c
-            delo3 = 0.
-            delnox = 0.
-            delvoc = 0.
-            conco3 = 0.
-            concnox = 0.
-            concvoc = 0.
+            if( lddm .OR. ltrace .AND. tectyp .NE. RTRAC ) then
+               if (ltop) then
+                  do l=1,MXTRSP
+                     c0trac(l) = 0.
+                     tmtrac(l) = 0.
+                  enddo
+               else
+                  do l=1,MXTRSP
+                     c0trac(l) = tmtrac(l) / rainvol
+                  enddo
+               endif
+               delo3 = 0.
+               delnox = 0.
+               delvoc = 0.
+               conco3 = 0.
+               concnox = 0.
+               concvoc = 0.
+            endif
 c
+c======================== DDM End ======================================
 c======================== Source Apportion End =======================
 c
 c
-c-----Calculate scavenging for gas species
+c-----Calculate scavenging for soluble gas species
 c
             do 40 l = 1,ngas
+              if( henry0(l).LT.1.e-6 ) goto 40
               delc = 0.
               delm = 0.
-              if (ltop) then
-                tmass(l) = 0.
-              endif
+              if (ltop) tmass(l) = 0.
+              tmassi(l,k) = 0   !BNM Split in-cloud and below deposition
+              tmassb(l,k) = 0   !BNM "  "  "  "  "
+
               c0(l) = tmass(l) / rainvol
               convfac = densfac*(273./tempk(i,j,k))*(press(i,j,k)/1013.)
               cmin = bdnl(l)*convfac
               conc(i,j,k,l) = amax1(cmin,conc(i,j,k,l))
-
+c
               call scavrat(.false.,lcloud,lfreez,rr(k),
      &                     tempk(i,j,k),cwc(i,j,k),depth(i,j,k),rhoair,
      &                     conc(i,j,k,l),c0(l),henry0(l),tfact(l),
@@ -202,6 +227,7 @@ c
 c-----Calculate the delc limit if Henry's Law equilibrium is reached
 c
               dclim = (cgas*hlaw - c0(l))*volrat(k)
+              dclim2 = (2.0*cgas*hlaw - c0(l))*volrat(k)
 c
 c-----Combine scavenging of gas disolved in cloudwater (dscav) and
 c     dissolution of gas into rainwater (gscav), limited by diffusion
@@ -212,66 +238,59 @@ c
               scav = amax1(scav,-16.)
 c
               delc = conc(i,j,k,l)*(1. - exp(-scav))
-              if (scav.gt.0.) then
-                delc = amin1(delc,conc(i,j,k,l)-cmin)
-                if (dclim.gt.0.) delc = amin1(delc,dclim)
-              elseif (scav.lt.0.) then
-                delc = amax1(delc,dclim)
+c
+c-----Range checks on scavenging if delc > 0 (i.e., cell to rain)
+c       delc < conc(i,j,k,l)-cmin keeps cell concentration > cmin
+c       delc < dclim because scavenging does not super-saturate
+c     Range checks on scavenging if delc < 0 (i.e., rain to cell)
+c       decreasing rain volume may super-saturate rain
+c       delc < dclim2 prevents super-saturation exceeding factor of 2
+c       delc > -c0(l)*volrat(k) keeps rain concentration > 0.
+c       delc > MIN(0.,dclim) prevents rain going below saturation
+c
+              if (delc.gt.0.) then
+                delc = MIN(delc,conc(i,j,k,l)-cmin,dclim)
+              else
+                delc = MIN(delc,dclim2)
+                delc = MAX(delc,-c0(l)*volrat(k),MIN(0.,dclim))
               endif
 c
 c======================== Source Apportion Begin =======================
 c
               if( ltrace .AND. tectyp .NE. RTRAC ) then
-                 if( lo3sp(l) ) then
-                     delo3 = delo3  + delc
-                     conco3 = conco3 + conc(i,j,k,l)
-                 else if( lnoxsp(l) ) then
-                     delnox = delnox  + delc
-                     concnox = concnox + conc(i,j,k,l)
-                 else if( lvocsp(l) ) then
-                     delvoc = delvoc  + delc * crbnum(l)
-                     concvoc = concvoc + conc(i,j,k,l) * crbnum(l)
-                 endif
 c
-c   --- call scarate again with nothing in the rain to get the concentration
-c       moving into the rain ---
+c   --- call scavrate again with nothing in the rain to get the
+c       concentration moving into the rain ---
 c
                  call scavrat(.false.,lcloud,lfreez,rr(k),
      &                     tempk(i,j,k),cwc(i,j,k),depth(i,j,k),rhoair,
-     &                     conc(i,j,k,l),cmin,henry0(l),tfact(l),
+     &                     conc(i,j,k,l),0.,henry0(l),tfact(l),
      &                     diffrat(l),0.,0.,hlaw,cgas,dscav,gscav,
      &                     gdiff,ascav)
-c
-c-----Calculate the delc limit if Henry's Law equilibrium is reached
-c
-                 dclim = (cgas*hlaw - cmin)*volrat(k)
-c
-c-----Combine scavenging of gas disolved in cloudwater (dscav) and
-c     dissolution of gas into rainwater (gscav), limited by diffusion
-c     factor.  Rapid diffusion defeats dscav and enables gscav
-c
+                 dnlim = (cgas*hlaw - cmin)*volrat(k)
                  scav = (dscav*(1. - gdiff) + gscav*gdiff)*deltat
                  scav = amin1(scav, 16.)
                  scav = amax1(scav,-16.)
-c
                  delnul = conc(i,j,k,l)*(1. - exp(-scav))
-                 if (scav.gt.0.) then
-                   delnul = amin1(delnul,conc(i,j,k,l)-cmin)
-                   if (dclim.gt.0.) delnul = amin1(delnul,dclim)
-                 elseif (scav.lt.0.) then
-                   delnul = amax1(delnul,dclim)
-                 endif
+                 delnul = MIN(delnul,conc(i,j,k,l)-cmin,dnlim)
+                 delnul = MAX(delnul,0.)
 c
 c  --- calculate the amount moving into the rain ---
 c
                  if( lo3sp(l) ) then
-                     c0o3tr = c0o3tr  + delnul
+                     delo3 = delo3  + delc
+                     conco3 = conco3 + conc(i,j,k,l)
+                     dnlo3 = dnlo3  + delnul
                      c0o3 = c0o3  + c0(l)
                  else if( lnoxsp(l) ) then
-                     c0noxtr = c0noxtr  + delnul
+                     delnox = delnox  + delc
+                     concnox = concnox + conc(i,j,k,l)
+                     dnlnox = dnlnox  + delnul
                      c0nox = c0nox  + c0(l)
                  else if( lvocsp(l) ) then
-                     c0voctr = c0voctr  + delnul * crbnum(l)
+                     delvoc = delvoc  + delc * crbnum(l)
+                     concvoc = concvoc + conc(i,j,k,l) * crbnum(l)
+                     dnlvoc = dnlvoc  + delnul * crbnum(l)
                      c0voc = c0voc  + c0(l) * crbnum(l)
                  endif
               endif
@@ -282,55 +301,88 @@ c
 c======================== DDM Begin =======================
 c
               if( lddm ) then
-                 relc = delc/conc(i,j,k,l)
 c
-c   --- call scarate again with nothing in the rain to get the concentration
-c       moving into the rain ---
+c   --- call scavrate again with nothing in the rain to get the
+c       flux into the rain ---
 c
-                 call scavrat(.false.,lcloud,lfreez,rr(k),
-     &                     tempk(i,j,k),cwc(i,j,k),depth(i,j,k),rhoair,
-     &                     conc(i,j,k,l),cmin,henry0(l),tfact(l),
-     &                     diffrat(l),0.,0.,hlaw,cgas,dscav,gscav,
-     &                     gdiff,ascav)
+c                 if( c0(l) .EQ. 0.0 ) then
+c                    delnul = delc
+c                 else
+c                    call scavrat(.false.,lcloud,lfreez,rr(k),
+c     &                     tempk(i,j,k),cwc(i,j,k),depth(i,j,k),rhoair,
+c     &                     conc(i,j,k,l),0.,henry0(l),tfact(l),
+c     &                     diffrat(l),0.,0.,hlaw,cgas,dscav,gscav,
+c     &                     gdiff,ascav)
+c                    dnlim = (cgas*hlaw - cmin)*volrat(k)
+c                    scav = (dscav*(1. - gdiff) + gscav*gdiff)*deltat
+c                    scav = amin1(scav, 16.)
+c                    scav = amax1(scav,-16.)
+c                    delnul = conc(i,j,k,l)*(1. - exp(-scav))
+c                    if (delnul.gt.0.) then
+c                      delnul = MIN(delnul,conc(i,j,k,l)-cmin,dnlim)
+c                    else
+c                      delnul = 0.
+c                    endif
+c                 endif
 c
-c-----Calculate the delc limit if Henry's Law equilibrium is reached
+c  --- calculate the relative fluxes between cell and rain and
+c      determine whether the cell concentration is at lower bound ---
 c
-                 dclim = (cgas*hlaw - cmin)*volrat(k)
+c                 fc2r = MAX( 0., delnul/conc(i,j,k,l) )
+c                 if( c0(l) .LT. 1.0e-20 ) then
+c                    fr2c = 0.
+c                 else
+c                   fr2c = MAX( 0. , (delnul-delc)/c0(l) )
+c                 endif
 c
-c-----Combine scavenging of gas disolved in cloudwater (dscav) and
-c     dissolution of gas into rainwater (gscav), limited by diffusion
-c     factor.  Rapid diffusion defeats dscav and enables gscav
+c  --- Convert delc to flux ---
 c
-                 scav = (dscav*(1. - gdiff) + gscav*gdiff)*deltat
-                 scav = amin1(scav, 16.)
-                 scav = amax1(scav,-16.)
-c
-                 delnul = conc(i,j,k,l)*(1. - exp(-scav))
-                 if (scav.gt.0.) then
-                   delnul = amin1(delnul,conc(i,j,k,l)-cmin)
-                   if (dclim.gt.0.) delnul = amin1(delnul,dclim)
-                 elseif (scav.lt.0.) then
-                   delnul = amax1(delnul,dclim)
-                 endif
-c
-c  --- calculate the relative difference ---
-c
-                 if( c0(l) .EQ. 0 ) then
-                    relc0 = 0.
+                 if( delc.GT.0. ) then
+                    fc2r = delc/conc(i,j,k,l)
+                    fr2c = 0.
+                 elseif( c0(l) .GT. 1.0e-20 ) then
+                    fc2r = 0.
+                    fr2c = -delc/c0(l)
                  else
-                    relc0 = delnul / c0(l)
+                    fc2r = 0.
+                    fr2c = 0.
                  endif
 c
-c  --- call routine to apply the changes to tracer species --- 
+c  --- check for saturation ---
+c
+                 if ( ((tmass(l)+delc*cellvol)/rainvol)/
+     &                 ((conc(i,j,k,l)-delc)*hlaw) .GT. 0.999 ) then
+                    fc2r = 0.
+                 endif
+c
+c  --- check for special situations ---
+c
+                 levap = .FALSE.
+                 if( kbot.GT.1 .and. k.EQ.kbot ) levap = .TRUE.
+                 lzerc = .FALSE.
+                 if( conc(i,j,k,l) .LE. 1.1*cmin ) lzerc = .TRUE.
+c
+c  --- call routine to apply the changes to sensitivities ---
 c 
-                 call adjddmc0(l,igrid,icl,jcl,kcl,relc,relc0,c0ddm)
+                 call adjddmc0(l,igrid,icl,jcl,kcl,fc2r,fr2c,
+     &                         c0trac,tmtrac,cellvol,rainvol,lzerc,
+     &                         levap)
               endif
 c
 c======================== DDM End =======================
 c
+c
+c-----Update the cell concentration and rain mass
+c
               conc(i,j,k,l) = conc(i,j,k,l) - delc
               delm = delc*cellvol
               tmass(l) = tmass(l) + delm
+C---------------Split Mass Accounting of In-Cloud and Below-Cloud Deposition--(BNM)
+                if (lcloud) then
+                  tmassi(l,k) = delm
+                else
+                  tmassb(l,k) = delm
+                endif
 c
 c======================== Process Analysis Begin ====================================
 c
@@ -350,9 +402,12 @@ c
 c======================== Source Apportion Begin =======================
 c
             if( ltrace .AND. tectyp .NE. RTRAC ) then
+               levap = .FALSE.
+               if( kbot.GT.1 .and. k.EQ.kbot ) levap = .TRUE.
                call adjstc0(igrid,icl,jcl,kcl,delo3,delnox,delvoc,
-     &                 conco3,concnox,concvoc,c0o3tr,c0noxtr,c0voctr,
-     &                                        c0o3,c0nox,c0voc,c0trac)
+     &                 conco3,concnox,concvoc,dnlo3,dnlnox,dnlvoc,
+     &                 c0o3,c0nox,c0voc,c0trac,tmtrac,cellvol,rainvol,
+     &                 levap)
             endif
 c
 c======================== Source Apportion End =======================
@@ -450,7 +505,10 @@ c<-
               do 50 l = ngas+1,nspec
                 delc = 0.
                 delm = 0.
-                if (k.eq.ktop) tmass(l) = 0.
+                if (ltop) tmass(l) = 0.
+                tmassi(l,k) = 0         !BNM split in-cloud and below cloud deposition
+                tmassb(l,k) = 0         !BNM "   "   "   "
+
                 cmin = bdnl(l)
                 conc(i,j,k,l) = amax1(cmin,conc(i,j,k,l))
 cbk                psize = sqrt(dcut(l,1)*dcut(l,2))*1.e-6
@@ -469,6 +527,13 @@ c
                 conc(i,j,k,l) = conc(i,j,k,l) - delc
                 delm = delc*cellvol
                 tmass(l) = tmass(l) + delm
+C---------------Split Mass Accounting of In-Cloud and Below-Cloud Deposition--(BNM)
+                if (lcloud) then
+                  tmassi(l,k) = delm
+                else
+                  tmassb(l,k) = delm
+                endif
+
 c
 c======================== Process Analysis Begin ====================================
 c
@@ -495,13 +560,24 @@ c
             cellvol = deltax(j)*deltay*depth(i,j,kbot)
             do l = 1,nspec
               conc(i,j,kbot,l) = conc(i,j,kbot,l) + tmass(l)/cellvol
+              tmass(l) = 0.
+              do k = 1,14
+                tmassi(l,k) = 0
+                tmassb(l,k) = 0
+              enddo
             enddo
 c
 c-----Otherwise rain reaches the ground, increment deposition flux arrays
 c
           else
             do l = 1,nspec
-              fluxes(l,11) = fluxes(l,11) - tmass(l)
+C BNM 	     Toggle which flux to put mass loss into depending
+C		on whether or not a cloud is present
+              do k = 1,14
+                fluxes(l,12) = fluxes(l,12) - tmassi(l,k)  !In-Cloud Loss
+                fluxes(l,13) = fluxes(l,13) - tmassb(l,k)  !Below-Cloud Loss
+              enddo
+C END <- BNM
               do ll = 1,navspc
                 if (l .eq. lavmap(ll)) then
                   depfld(i,j,navspc+ll) = depfld(i,j,navspc+ll) +
@@ -523,6 +599,7 @@ c
       if (lApp) call Appwetdep(conc)
 c
 c-------------End Added 05/08/07-------------------------------------
+c
 c
       return
       end

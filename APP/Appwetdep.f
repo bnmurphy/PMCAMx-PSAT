@@ -1,6 +1,6 @@
       subroutine Appwetdep(con)
 c
-c     This subroutine handles the changes in apportionment due to emissions. 
+c     This subroutine handles the changes in apportionment due to wet deposition. 
 c  
 c     DEVELOPED BY: 
 c     Kristina Wagstrom
@@ -8,24 +8,11 @@ c     Carnegie Mellon University (Chemical Engineering)
 c     04/13/2007
 c
 c     CALLED BY:
-c     
+c     wetdep 
 c
 c     ROUTINES CALLED:
 c     none
 c
-c     VARIABLES (common):
-c     Appnam  - Apportionment species names
-c     Appmap  - Mapping values between model and apportionment 
-c     MXSPEC  - Maximum number of species
-c     MXTRK   - Maximum number of tracked species
-c     AppemisP- Mapping between apportionment and emissions species - point
-c     AppemisA- Mapping between apportionment and emissions species - area
-c     
-c     VARIABLES (declared):
-c     i,j     - Counters
-c     match   - Check whether a match was found
-c     num     - Numbers 1-10 in text form
-c     
       include 'camx.prm'
       include 'camx.com'
       include 'camxfld.com'
@@ -38,7 +25,7 @@ c
       include 'App.com'
 c
       real con(MXCOL1,MXROW1,MXLAY1,MXSPEC),total
-      integer i,j,k,s,spc,nx,ny,nz
+      integer i,j,k,s,spc,nx,ny,nz,v
 c
       nx = ncol(1)
       ny = nrow(1)
@@ -48,21 +35,21 @@ c
         do j=1,ny
           do k=1,nz
             do spc=1,MXSPEC
-              total = 0
-              do s=1,Appnum+3
-                loc = i+nx*(j-1)+nx*ny*(k-1)+nx*ny*nz*(Appmap(spc)-1)+
+              if (Appmap(spc).ne.0) then
+                total = 0
+                do s=1,Appnum+3
+                  loc = i+nx*(j-1)+nx*ny*(k-1)+nx*ny*nz*(Appmap(spc)-1)+
      &                nx*ny*nz*MXTRK*(s-1)
-                total = total + Appconc(loc)
-              enddo
-              do s=1,Appnum+3
-                if (Appmap(spc).ne.0) then
+                  total = total + Appconc(loc)
+                enddo
+                do s=1,Appnum+3
                   loc = i+nx*(j-1)+nx*ny*(k-1)+nx*ny*nz*(Appmap(spc)-1)+
      &                  nx*ny*nz*MXTRK*(s-1)
                   Appconc(loc) = con(i,j,k,spc)*Appconc(loc)/total
                   if (Appconc(loc).eq.'NaN') 
      &              write(6,*) 'Problem in Appwetdep',i,j,k,spc,s
-                endif
-              enddo
+                enddo
+              endif
             enddo
           enddo
         enddo
@@ -112,10 +99,10 @@ c-------Check for total
                       write(6,*) 'Appconc(loc): ', Appconc(loc)
                       write(6,*) 'Actual Conc.',con(i,j,k,spc)
                       write(6,*) 'total ', total
-                      do s=1,Appnum+3
+                      do v=1,Appnum+3
                         loc = i+nx*(j-1)+nx*ny*(k-1)+nx*ny*nz*(spc-1) +
-     &                        nx*ny*nz*MXTRK*(s-1)
-                        write(6,*) s,Appconc(loc)
+     &                        nx*ny*nz*MXTRK*(v-1)
+                        write(6,*) v,Appconc(loc)
                       enddo
                       stop
                      endif

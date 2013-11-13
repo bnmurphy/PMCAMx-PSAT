@@ -13,18 +13,6 @@ c
 c     ROUTINES CALLED:
 c     none
 c
-c     VARIABLES (common):
-c     spname  - Modeled species names
-c     Appnam  - Apportionment species names
-c     Appmap  - Mapping values between model and apportionment 
-c     MXSPEC  - Maximum number of species
-c     MXTRK   - Maximum number of tracked species
-c     
-c     VARIABLES (declared):
-c     i,j     - Counters
-c     match   - Check whether a match was found
-c     num     - Numbers 1-10 in text form
-c     
       include 'camx.prm'
       include 'camx.com'
       include 'camxfld.com'
@@ -39,12 +27,13 @@ c
       real areaemis(MXCOL1,MXROW1,MXSPEC)
       real Appemis(MXCOL1,MXROW1,MXTRK)
       character*4 name1(10)
-      integer s
+      integer s, nareasp
       logical match
 c
 c-----Initialize the fractions array
 c
         write(6,*) 'Reading Apportionment Area emissions'
+        write(6,*) 'Date: ',date
         do i=1,MXCOL1
           do j=1,MXROW1
             do k=1,MXSPEC

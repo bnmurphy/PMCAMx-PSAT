@@ -71,6 +71,13 @@ c
       include 'grid.com'
       include 'pigsty.com'
       include 'flags.com'
+      include 'soap.com'
+c--------------------Added by Kristina Wagstrom 12/15/2010------------------
+c
+      include 'App.com'
+c
+c--------------------End Added 12/15/2010-----------------------------------
+c
 c
 c======================== Source Apportion Begin =======================
 c
@@ -84,12 +91,6 @@ c
       include 'procan.com'
 c
 c========================= Process Analysis End ========================
-c
-c------------------------Added by Kristina Wagstrom 08/18/2006----------
-c
-      include 'App.com'
-c
-c------------------------End Added 08/18/2006--------------------------
 c
 c     integer begdate,inpdate,emsdate,wrtdate,enddate,hazdate,ozndate,
       integer inpdate,emsdate,wrtdate,enddate,hazdate,ozndate,
@@ -181,7 +182,7 @@ c
  8000 format(//,30x,20('*'),/,30x,a,/,30x,20('*'),//) 
       write(iout,8001) runmsg(:istrln(runmsg))
       write(idiag,8001) runmsg(:istrln(runmsg))
- 8001 format(/,a,/)
+ 8001 format(/,a,/)      
 c
 c-----Read run control
 c
@@ -558,24 +559,22 @@ c
 c
 c========================= Source Apportion End ========================
 c
-c-----------------------------------------------------------------------
-c--------------------------Added by Kristina Wagstrom (08/2006)---------
+c---------------------Added by Kristina Wagstrom 12/15/2010-------------
 c-----Check for Apportionment flag
 c
       irec = irec + 1
-      action = 'Reading the flag for Apportionment.'
-      read(inp,'(A)',ERR=7001,END=7004) inprec 
+      action = 'Reading the flag for apportionment.'
+      read(inp,'(A)',ERR=7001,END=7004) inprec
       read(inprec(21:),'(L10)',ERR=7002,END=7002) lApp
 c
-c-----Read in the number of sources to track
+c------Read in the number of sources to track
 c
-      if ( lApp ) then
-        read(inp,'(A)',ERR=7001,END=7004) inprec 
-        read(inprec(21:),*,ERR=7002,END=7002) Appnum
+      if (lApp) then
+         read(inp,'(A)',ERR=7001,END=7004) inprec
+         read(inprec(21:),*,ERR=7002,END=7002) Appnum
       endif
 c
-c------------------------End Added by Kristina Wagstrom-----------------
-c-----------------------------------------------------------------------
+c--------------------End Added by Kristina Wagstrom ---------------------
 c
 c-----Perform checks on run control parameters
 c
@@ -924,6 +923,7 @@ c
 c-----Read chemistry files
 c
       call chmprep
+c      call readsoap
 c
 c----Prepare met file for netCDF
 c
@@ -1401,12 +1401,12 @@ c
         enddo
       endif
 c
-c-------------Added by Krsitina Wagstrom 08/19/2006-------------------
+c------------Added by Kristina Wagstrom 12/15/2010----------------
 c
       if (lApp) call Appprep()
       if (lApp) call Appemmap()
 c
-c-------------End Added 08/19/2006------------------------------------
+c-------------End Added 12/15/2010----------------------------------------------
 c
 c======================== DDM Begin ====================================
 c

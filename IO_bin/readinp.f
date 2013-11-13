@@ -130,7 +130,7 @@ c
            read(iunit,end=7000) hr,idt,
      &                        ((hnext(i,j,k),i=1,ngcol),j=1,ngrow) 
            read(iunit,end=7000) hr,idt,
-     &                        ((pnext(i,j,k),i=1,ngcol),j=1,ngrow)
+     &                        ((pnext(i,j,k),i=1,ngcol),j=1,ngrow) 
          enddo   
 c
          if (.not.ly2k .and. idt.gt.100000) call juldate(idt)

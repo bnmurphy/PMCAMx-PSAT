@@ -95,7 +95,7 @@ c
      &          ro1d(MXLAYA)
       real cnc(MXCOLA,MXROWA),sns(MXCOLA,MXROWA,MXTRSP),
      &     rho(MXCOLA,MXROWA)
-      real*8 fluxes(nspc,11),fluxbot
+      real*8 fluxes(nspc,13),fluxbot
       character*20 strz, strxy
       real flxsa(8),original(MXCOL1,MXROW1,MXSOUR),Apptot(MXCOL1,MXROW1) !Added by Kristina 05/08/07
       integer nx,ny,nz
@@ -197,14 +197,6 @@ c
             endif
 c
 c========================= Process Analysis End =====================================
-c
-c-----------Added by Kristina 05/08/07----------------------------------------
-c
-c            if (lApp.and.Appmap(ispc).ne.0) then
-c              call Appvdiff(fcup,fcdn,i,j,Appmap(ispc),c1d)
-c            endif
-c
-c-------------End Added 05/08/07-------------------------------------------
 c
             do k = 1,nlay
               conc(i,j,k,ispc) = c1d(k)

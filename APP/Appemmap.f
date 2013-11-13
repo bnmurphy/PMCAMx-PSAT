@@ -70,7 +70,7 @@ c      Header Line 4 (mspec(l),l=1,nspec)
 c
          read(iAppiP(s)) (ptspec1(n),n=1,nptspc1)
          do i=1,nAppP(s)
-           do j=1,154
+           do j=1,MXTRK
               if (ptspec1(i).eq.Appnam(j)) then
 c                write(6,*) 'POINT: Found #',i,': ',Appnam(j),j
                 AppemisP(s,i)=j    !Emissions --> Modeled
@@ -103,7 +103,7 @@ c
 c-----Match and Map Species
 c
          do i=1,nAppA(s)
-           do j=1,154
+           do j=1,MXTRK
              if (arspec1(i).eq.Appnam(j)) then
 c               write(6,*) 'AREA: Found #',i,': ',Appnam(j),j
                AppemisA(s,i)=j

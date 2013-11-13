@@ -32,7 +32,7 @@ c
       include 'bndary.com'
       include 'grid.com'
       include 'chmstry.com'
-      include 'flags.com'
+      include 'flags.com' !Added by Kristina 12/15/2010
 c
       character*4 bcspec(10)
       integer bnddate
@@ -63,10 +63,19 @@ c
         do n = 1,4
           nc = nrow(1)
           if (n.gt.2) nc = ncol(1)
-          read(ibc) idum,(bcspec(j),j=1,10),iedge,
-     &              ((bctmp(i,k,n,l),k=1,nz),i=1,nc) 
+         read(ibc) idum,(bcspec(j),j=1,10),iedge,
+     &              ((bctmp(i,k,n,l),k=1,nz),i=1,nc)
+CDEBUG BNM
+c	print *,'READBND: bcspec=',(bcspec(j),j=1,5),'  iedge=',iedge,' n=',n
+c	if (bcspec(1).eq.'P'.and.bcspec(2).eq.'O'.and.bcspec(3).eq.'A') then
+c	  print *,'         nc=',nc,'  bctmp=',(bctmp(j,5,n,l),j=1,nc)
+c	endif
+C END BN<
+
         enddo
       enddo
+c
+
       write(iout,'(a40,2(f7.0,i8.5))')
      &  'Read boundary condition file at ',tim1,idat1,tim2,idat2
       if ((idat1.lt.date .or. (idat1.eq.date .and. tim1.le.time)) .and.
@@ -93,11 +102,11 @@ c
               if (lbc.gt.0 .and. bctmp(j,k,1,lbc).gt.bdnl(l)) 
      &          conc(n4d) = convfac*bctmp(j,k,1,lbc)
 c
-c--------------Added by Kristina Wagstrom 08/18/2006----------------
+c--------------Added by Kristina Wagstrom 12/15/2010-------------
 c
               if (lApp) call Appbnd(i,j,k,l,n4d)
 c
-c--------------End Added 08/18/2006---------------------------------
+c--------------End Added 12/15/2010------------------------------
 c
               i = iend(j) + 1
               n3d = i + ncol(1)*(j - 1) + ncol(1)*nrow(1)*(k - 1)
@@ -111,15 +120,12 @@ c
               if (lbc.gt.0 .and. bctmp(j,k,2,lbc).gt.bdnl(l)) 
      &          conc(n4d) = convfac*bctmp(j,k,2,lbc)
 c
-c--------------Added by Kristina Wagstrom 08/18/2006----------------
+c--------------Added by Kristina Wagstrom 12/15/2010----------
 c
               if (lApp) call Appbnd(i,j,k,l,n4d)
 c
-c--------------End Added 08/18/2006---------------------------------
+c-------------End Added 12/15/2010----------------------------
 c
-c              if (l.ge.75.and.l.le.80) then
-c                conc(n4d)=1.8d-1
-c              endif
  40         continue
 c
             do 45 i = 1,ncol(1) 
@@ -136,11 +142,11 @@ c
               if (lbc.gt.0 .and. bctmp(i,k,3,lbc).gt.bdnl(l))
      &          conc(n4d) = convfac*bctmp(i,k,3,lbc)
 c
-c--------------Added by Kristina Wagstrom 08/18/2006----------------
+c---------------Added by Kristina Wagstrom 12/15/2010-------------
 c
               if (lApp) call Appbnd(i,j,k,l,n4d)
 c
-c--------------End Added 08/18/2006---------------------------------
+c--------------End Added 12/15/2010-------------------------------
 c
               j = jend(i) + 1 
               n3d = i + ncol(1)*(j - 1) + ncol(1)*nrow(1)*(k - 1) 
@@ -152,20 +158,14 @@ c
               endif
               conc(n4d) = convfac*bdnl(l)
               if (lbc.gt.0 .and. bctmp(i,k,4,lbc).gt.bdnl(l))
-     &            conc(n4d) = convfac*bctmp(i,k,4,lbc)
+     &            conc(n4d) = convfac*bctmp(i,k,4,lbc) 
 c
-c--------------Added by Kristina Wagstrom 08/18/2006----------------
+c---------------Added by Kristina Wagstrom 12/15/2010--------------
 c
               if (lApp) call Appbnd(i,j,k,l,n4d)
 c
-c--------------End Added 08/18/2006--------------------------------- 
-c
-c              if (l.ge.75.and.l.le.80) then
-c                conc(n4d)=1.8d-1
-c              endif
-c                    if (i.eq.5.and.k.eq.1) then
-c                      write(6,*)lbc,l,conc(n4d)
-c                    endif
+c---------------End Added 12/15/2010-------------------------------
+c 
  45         continue 
  50       continue
  60     continue

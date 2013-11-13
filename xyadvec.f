@@ -92,7 +92,7 @@ c
       real cnco3(MX1D), cncvoc(MX1D), cncnox(MX1D)
       real c1d0(MX1D),fpc(MX1D),fmc(MX1D)
       real sen1d(MX1D,MXTRSP)
-      real*8 fluxes(nspc,11),flux1,flux2
+      real*8 fluxes(nspc,13),flux1,flux2
       real*8 fluxtmp(MXSPEC,8,MXLAYA)
       dimension tarray2(2)
       real fp(MX1D),fm(MX1D),dep(MX1D) !Kristina Added 05/08/07
@@ -186,7 +186,8 @@ c
 c
 c--------Added by Kristina 08/23/07-------------------------------------
 c
-              original(i,j,k,ispc) = conc(i,j,k,ispc)
+              !original(i,j,k,ispc) = conc(i,j,k,ispc)
+              AppFORE(i,j,k,ispc) = conc(i,j,k,ispc)
 c
 c-------------End Added 08/23/07---------------------------------------
 c
@@ -219,7 +220,7 @@ c
      &                                   flux2,saflux,fpc,fmc,fc1,fc2)
             elseif( iadvct .eq. 3) then
               call hadvppm(nn,dtuse,dx(j),c1d,v1d,m1d,flxarr,flux1,
-     &                                flux2,saflux,fc1,fc2,fp,fm) !Kristina 5/8/07 -- Added fp and fm
+     &              flux2,saflux,fc1,fc2,fp,fm) !Kristina 5/8/07 -- Added fp and fm
             endif
 c
 c======================== DDM Begin =======================
@@ -330,13 +331,14 @@ c
 c-----------Added by Kristina 05/08/07-------------------------------
 c
             if (lApp.and.Appmap(ispc).ne.0) then
-              do i=1,MX1D
+              do i=1,MXCOL1
                 fp(i)=fp(i)/dy
                 fm(i)=fm(i)/dy
                 dep(i) = depth(i,j,k)
+                AppAFT(i,j,k,ispc) = conc(i,j,k,ispc)  !BNM Added
               enddo
-              call Appxyadv(fp,fm,Appmap(ispc),1,k,j,conc,dep,m1d,
-     &                      original)
+              call Appxyadv(fp,fm,Appmap(ispc),1,k,j,dep,m1d,
+     &                      dy)  !Ben added dy just for consistency
             endif
 c
 c-----------End Added 05/08/07-------------------------------------
@@ -441,7 +443,8 @@ c
 c
 c--------Added by Kristina 08/23/07-------------------------------------
 c
-              original(i,j,k,ispc) = conc(i,j,k,ispc)
+              !original(i,j,k,ispc) = conc(i,j,k,ispc) BNM replaced
+              AppFORE(i,j,k,ispc) = conc(i,j,k,ispc)
 c
 c-------------End Added 08/23/07---------------------------------------
 c
@@ -580,11 +583,21 @@ c
 c-----------Added by Kristina 05/08/07-------------------------------
 c
             if (lApp.and.Appmap(ispc).ne.0) then
-              do j=1,MX1D
+              do j=1,MXROW1
                 dep(j) = depth(i,j,k)
+                AppAFT(i,j,k,ispc) = conc(i,j,k,ispc) !BNM
               enddo
-              call Appxyadv(fp,fm,Appmap(ispc),2,k,i,conc,dep,m1d,
-     &                      original,dx)
+	      !if (k.eq.1.and.i.eq.2) then
+	      !nx = 97
+	      !ny = 90
+	      !nz = 14
+              !loc = 2+nx*(18-1)+nx*ny*(1-1)+nx*ny*nz*(130-1)+nx*ny*nz*MXTRK*(4-1)
+              !print *,'XYADVEC: before Appyadvec. Appconc(...)=',Appconc(loc)
+	      !endif
+              call Appxyadv(fp,fm,Appmap(ispc),2,k,i,dep,m1d,
+     &                      dx)
+              !loc = 2+nx*(18-1)+nx*ny*(1-1)+nx*ny*nz*(130-1)+nx*ny*nz*MXTRK*(4-1)
+              !print *,'XYADVEC: after Appyadvec. i=',i,' k=',k,' Appconc(...)=',Appconc(loc)
             endif
 c
 c-----------End Added 05/08/07-------------------------------------

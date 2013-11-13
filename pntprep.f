@@ -80,13 +80,13 @@ c
         if (ii.lt.1 .or. ii.gt.ncol(1) .or. jj.lt.1 .or.
      &      jj.gt.nrow(1)) then
           indxpt(n) = 0
-          write(idiag,'(a,i5,2x,2i7,a)')'Source outside domain: ',
+          write(idiag,'(a,i7,2x,2i7,a)')'Source outside domain: ',
      &           n,ii,jj,'  --- not modeled'
         elseif (ibeg(jj).eq.-999 .or. jbeg(ii).eq.-999 .or.
      &          ii.lt.ibeg(jj) .or. ii.gt.iend(jj) .or.
      &          jj.lt.jbeg(ii) .or. jj.gt.jend(ii)) then
           indxpt(n) = 0
-          write(idiag,'(a,i5,2x,2i7,a)')'Source in boundary cells: ',
+          write(idiag,'(a,i7,2x,2i7,a)')'Source in boundary cells: ',
      &           n,ii,jj,'  --- not modeled'
         endif
  30   continue

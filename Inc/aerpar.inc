@@ -49,7 +49,7 @@ c
       parameter (ngcc =  3)          ! hydrochloric acid
       parameter (ngc4 =  4)          ! gas-phase sulfate
       parameter (ngco =  5)          ! gas-phase organics
-      parameter (ngcspec = 5)        ! number of condensible gas-phase species
+      parameter (ngcspec = 44)        ! number of condensible gas-phase species
 c
 c condensible gas-phase components in global gas-phase array
 c
@@ -60,11 +60,11 @@ c
       parameter (ngc =  3)           ! hydrochloric acid
       parameter (ng4 =  4)           ! gas-phase sulfate
       parameter (ngo =  5)           ! gas-phase organics
-      parameter (ngspec = 5)         ! number of condensible gas-phase species
+      parameter (ngspec = 44)         ! number of condensible gas-phase species
 c
 c total number of gas phase species so we know where the aerosol starts
 c
-      parameter (ngtotal = 50)
+      parameter (ngtotal = 100)
       parameter (ngas_aq=ngtotal)
       parameter (naers=naspec)
 

@@ -63,6 +63,7 @@ c
       include  "ptemiss.com"
       include  "bndary.com"
       include  "flags.com"
+      include  "App.com"   !BNM Added
 c
 c
 c======================== Process Analysis Begin ====================================
@@ -86,6 +87,7 @@ c
       dimension hght1d(MXLAYA),wind1d(MXLAYA),tempk1d(MXLAYA),
      1          dtdz1d(MXLAYA)
       real original !Added by Kristina 08/23/07
+      integer loc
 c
       data gamma,p0 /0.286,1000./
 c
@@ -94,6 +96,10 @@ c
 c-----Update concentration due to area source
 c
       if (larsrc) then
+      nx = 97
+      ny = 90
+      nz = 14
+
         do 10 lar = 1,narspc
           l = larmap(lar)
           if (l.eq.0) goto 10
@@ -123,7 +129,7 @@ c
               conc(i,j,1,l) = conc(i,j,1,l) + dconc
 c
 c------------Added by Kristina 05/04/07-------------------------
-c
+c           
               if (lApp) call Appemiss (dconc,i,j,1,l,2,1,conc(i,j,1,l)
      &                                 ,original)
 c
@@ -150,6 +156,10 @@ c
 c
 c-----Update concentration due to point sources
 c
+      nx = 97
+      ny = 90
+      nz = 14
+
       if (lptsrc) then
         do 50 lsrc = 1,nsrc
           n = idsrc(lsrc)
@@ -214,6 +224,7 @@ c
             if(lApp) call Appemiss (dconc,i,j,k,l,1,lsrc,conc(i,j,k,l)
      &                              ,original)
 c
+
 c------------End Added 05/04/07---------------------------------
 c
 c======================== Process Analysis Begin ====================================

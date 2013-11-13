@@ -55,7 +55,7 @@ c     We could more elaborate this... ???
 c     - bkoo (04/18/02)
 c     - revised for PMCAMx by bkoo (03/09/03)
       do i=1,ngas-4
-        diffus(ICG1-1+i) = 0.0791 * 1.d-4
+        diffus(ICA41-1+i) = 0.0791 * 1.d-4
       enddo 
 C
       RETURN

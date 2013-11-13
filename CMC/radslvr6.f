@@ -118,8 +118,7 @@ c
      &                +( 1.000)*r( 17)+( 1.000)*r( 41)+( 1.000)*r( 44)
      &                +( 1.000)*r( 59)+( 1.000)*r( 67)+( 1.000)*r( 78)
      &                +( 1.000)*r( 94)+( 1.000)*r(100)
-        Gain(kNO3  )= ( 1.000)*r( 19)
-
+        Gain(kNO3  )= +( 1.000)*r( 19)
 
           JAC(kN2O5,kN2O5)= +( 1.000)*r( 18)+( 1.000)*r( 19)
           JAC(kN2O5,kNO3 )= +(-1.000)*r( 17)
@@ -150,7 +149,7 @@ c
       bnstrt = rate(nstrt)*jac(nend,nend) - rate(nend)*jac(nstrt,nend)
       bnend = jac(nstrt,nstrt)*rate(nend) - jac(nend,nstrt)*rate(nstrt)
       rate(nstrt) = bnstrt/det - cncrad(nstrt)
-      rate(nend) = bnend/det - cncrad(nend)
+      rate(nend) =  bnend/det - cncrad(nend)
 c
 c  update radical concentrations
 c

@@ -51,8 +51,7 @@ c
             y0((k-1)*nsp+i)=q((k-1)*nsp+i)
          enddo
       enddo
-      call linint(dsec,y0,nsec,dsecf,y1,nsec,nsp,diamb,diame,bound,
-     &            secsize,ax,af)
+      call linint(dsec,y0,nsec,dsecf,y1,nsec,nsp,diamb,diame,bound,secsize,ax,af)
       do i=1,nsp
          do k=1,nsec
             q((k-1)*nsp+i)=y1((k-1)*nsp+i)

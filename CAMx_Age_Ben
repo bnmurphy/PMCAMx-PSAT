@@ -1,19 +1,19 @@
 #!/bin/csh
 #
-#   Script to Run PMCAMx with PSAT for Apr 1-17, 2002 looking at 11 locations
+#   Script to Run PMCAMx for eastern US July 12-28, 2001 test case
 #
-set INPUT  = "/usr/people/BaseInput/October"
-set INPUTA = "/usr/people/BaseInput/October/prep/area"
-set INPUTP = "/usr/people/BaseInput/October/prep/point"
+set INPUT  = "/usr/people/BaseInput/July"
+set INPUTA = "/usr/people/BaseInput/July/prep/area"
+set INPUTP = "/usr/people/BaseInput/July/prep/point"
 
 set DATE    = $1
 set DATE2   = $2
 @ DATE3   = $DATE - 1
 #
-set RUN     = "LOCfall"
+set RUN     = "Age_Ben"
 set OUTPUT  = "/home2/kwagstro/PMCAMx4output/$RUN"
 #
-if ($DATE == "274") then
+if ($DATE == "193") then
   mkdir -p $OUTPUT
   set RST  = "false"
   set RSTF = ""
@@ -23,7 +23,7 @@ else
   set RSTF = $OUTPUT/4rpos.basecase.$DATE3.$RUN.inst.2
   set RSTA = $OUTPUT/4rpos.basecase.$DATE3.$RUN.App
 endif 
-echo $OUTPUT/4rpos.$DATE3.$RUN.inst.2
+echo $OUTPUT/4rpos.basecase.$DATE3.$RUN.inst.2
 #
 date 
 #
@@ -31,12 +31,12 @@ date
 #
 cat << ieof > CAMx.in
 CAMx Version       |VERSION4.0
-Run Message        |PMCAMx v4.0 eastern US PM October 1-17, 2001
+Run Message        |PMCAMx v4.0 eastern US PM Test Run July 12-28 2001
 Root output name   |$OUTPUT/4rpos.basecase.$DATE.$RUN
-Start yr/mo/dy/hr  |01 10 $DATE2 0000.
-End   yr/mo/dy/hr  |01 10 $DATE2 2400.
+Start yr/mo/dy/hr  |01 07 $DATE2 0000.
+End   yr/mo/dy/hr  |01 07 $DATE2 2400.
 DT:max,met,ems,out |15. 60. 60. 60.
-nx,ny,nz           |97   90   16
+nx,ny,nz           |97   90   14
 sCoordinate ID     |LAMBERT
 xorg,yorg,dx,dy    |-900. -1620.  36.  36. -97 40 33 45
 time zone          |5
@@ -84,7 +84,7 @@ Treat point emiss  |true
 3-D average file   |false
 Probing tools      |false
 Apportionment      |true
-Number of Sources  |10
+Number of Sources  |8
 Source 1 Point     |/home/kwagstro/dummyfiles/daypt1
 Source 1 Area      |/home/kwagstro/dummyfiles/dayar1
 Source 2 Point     |/home/kwagstro/dummyfiles/daypt2
@@ -101,24 +101,20 @@ Source 7 Point     |/home/kwagstro/dummyfiles/daypt7
 Source 7 Area      |/home/kwagstro/dummyfiles/dayar7
 Source 8 Point     |/home/kwagstro/dummyfiles/daypt8
 Source 8 Area      |/home/kwagstro/dummyfiles/dayar8
-Source 9 Point     |/home/kwagstro/dummyfiles/daypt9
-Source 9 Area      |/home/kwagstro/dummyfiles/dayar9
-Source 10 Point    |/home/kwagstro/dummyfiles/daypt10
-Source 10 Area     |/home/kwagstro/dummyfiles/dayar10
 Chemparam          |$INPUT/init/CAMx4.chemparam.6
 Photolysis rates   |$INPUT/rate/rate.2001$DATE.do.mech3
 Landuse            |$INPUT/init/surf.4rpos.36.ld.bin
-Height/pressure    |$INPUT/pres/pres.2001$DATE.4rpos.36.16.mm5.ld.camx
-Wind               |$INPUT/wind/wind.2001$DATE.4rpos.36.16.mm5.ld.camx
-Temperature        |$INPUT/temp/temp.2001$DATE.4rpos.36.16.mm5.ld.camx
-Water vapor        |$INPUT/wvap/wvap.2001$DATE.4rpos.36.16.mm5.ld.camx
-Cloud/rain         |$INPUT/clranew/clra.2001$DATE.4rpos.36.16.mm5.ld.camx
-Vertical diffsvty  |$INPUT/vdif/vdif.2001$DATE.4rpos.36.16.mm5.ld.camx.OB70
-Initial conditions |$INPUT/init/init.2001.4rpos.36.16.szres.ld.camx
-Boundary conditions|/home/kwagstro/Boundary/bndr.1001.4rpos.36.16.szres.ld.camx
-Top concentration  |$INPUT/init/topc.2001.4rpos.36.16.m3profile.ld.camx
+Height/pressure    |$INPUT/pres/pres.2001$DATE.4rpos.36.14.mm5.ld.camx
+Wind               |$INPUT/wind/wind.2001$DATE.4rpos.36.14.mm5.ld.camx
+Temperature        |$INPUT/temp/temp.2001$DATE.4rpos.36.14.mm5.ld.camx
+Water vapor        |$INPUT/wvap/wvap.2001$DATE.4rpos.36.14.mm5.ld.camx
+Cloud/rain         |$INPUT/clranew/clra.2001$DATE.4rpos.36.14.mm5.ld.camx
+Vertical diffsvty  |$INPUT/vdif/vdif.2001$DATE.4rpos.36.14.mm5.ld.camx.PATCH
+Initial conditions |$INPUT/init/init.2001.4rpos.36.14.m3profile.ld.camx
+Boundary conditions|/home/kwagstro/Boundary/bndr.0701.4rpos.36.14.m3profile.ld.camx
+Top concentration  |$INPUT/init/topc.2001.4rpos.36.14.m3profile.ld.camx
 Albedo/haze/ozone  |$INPUT/ahoz/ahoz.2001$DATE.4rpos.36.ld
-Point emiss        |$INPUTP/ptsr.2001$DATE.natl.NR.baseE.ld.camx
+Point emiss        |$INPUTP/ptsr.2001$DATE.4rpos.NR.baseE.ld.camx
 Area emiss         |$INPUTA/lamb.2001$DATE.4rpos.36.baseE.ld.camx
 Restart file name  |$RSTF
 App. restart name  |$RSTA
@@ -126,6 +122,6 @@ ieof
 #
 #  --- Execute the model ---
 #
-/usr/bin/time /home/kwagstro/CAMx.LOCfall
+/usr/bin/time /home/kwagstro/CAMx.Age
 date 
 #

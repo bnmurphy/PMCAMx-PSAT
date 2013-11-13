@@ -17,24 +17,6 @@ c
 c     ROUTINES CALLED:
 c     none
 c
-c     VARIABLES (common - used):
-c     ncol  - Number of columns
-c     nrow  - Number of rows
-c     nlay  - Number of layers
-c     nspec - Number of species
-c     conc  - Concentrations (umol/m^3)
-c 
-c     VARIABLES (declared):
-c     nx    - Number of columns
-c     ny    - Number of rows
-c     nz    - Number of layers
-c     i     - Column Counter
-c     j     - Row Counter
-c     k     - Layer Counter
-c     l     - Species Counter
-c     loc   - Location in Array (Appconc)
-c     n4d   - Location in Array (conc)
-c
       include 'camx.prm'
       include 'camx.com'
       include 'camxfld.com'
@@ -64,20 +46,17 @@ c      values) to the I.C. location in the apportionment array.
 c
       if(.NOT.lrstrt) then
         do l = 1,nspec
-          do k = 1,nz
-            do j = 1,ny
-              do i = 1,nx
-                if (Appmap(l).ne.0) then
+          if (Appmap(l).ne.0) then
+            do k = 1,nz
+              do j = 1,ny
+                do i = 1,nx
                   n4d = i+nx*(j-1)+nx*ny*(k-1)+nx*ny*nz*(l-1)
-                  loc = i+nx*(j-1)+nx*ny*(k-1)+nx*ny*nz*(Appmap(l)-1)               
-                  if(Appmap(l).ne.0) Appconc(loc) = conc(n4d)
-                  if(i.eq.50.and.j.eq.21.and.k.eq.2.and.
-     &               Appmap(l).eq.91) write(6,*) 'IC Reset',conc(n4d)
-     &                                           ,loc,Appconc(loc)
-                endif
+                  loc = i+nx*(j-1)+nx*ny*(k-1)+nx*ny*nz*(Appmap(l)-1)            
+                  Appconc(loc) = conc(n4d)
+                enddo
               enddo
             enddo
-          enddo
+          endif
         enddo
       else
          read(iAppinst) (Appconc(i),i=1,MXSOUR*MXVEC3D*MXTRK)

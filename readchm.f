@@ -19,6 +19,9 @@ c                  BDNL values from ug/m3 to umol/m3
 c        1/18/02   Added EC, PFIN, and PCRS to mechanism 4 species list
 c        12/12/02  Expanded species list for Mechanism 4
 c        3/26/03   Added surface resistance scaling factor to gas params
+c        12/23/08  Added Enthalpy of Vaporization table look-up for SOA module.
+c			compatible with SAPRC and SOA vol basis-se approach
+c
 c
 c     Input arguments: 
 c        none 
@@ -38,6 +41,7 @@ c
       include 'flags.com'
       include 'ddmchm.com'
       include 'iehchem.com'
+      include 'soap.com'
 c
       parameter(ncrsspc = 2)
       character*180 record
@@ -54,6 +58,10 @@ c
       real kdum(MXRXN,3), tdum(3), pdum(3)
       real*8  dsec_i(MXSECT+1)
       integer omp_get_num_procs
+c BNM - variables for Hvap look-up
+      integer icstar, tempcnt
+c
+
 c 
 c-----Data that define the mechanism/solver options
 c     The fast state species must come first in SPLIST
@@ -70,8 +78,21 @@ c
      &             'ALK4      ','ALK5      ','ARO1      ',
      &             'ARO2      ','BACL      ','BALD      ',
      &             'BCL1      ','BCL2      ','BUTA      ',
-     &             'CCHO      ','CCRS      ','CG1       ',
-     &             'CG2       ','CG3       ','CG4       ',
+     &             'CCHO      ','CCRS      ','CPO1      ',
+     &             'CPO2      ','CPO3      ','CPO4      ',
+     &             'CPO5      ','CPO6      ',
+     &             'CPO7      ','CPO8      ',
+     &             'COO1      ','COO2      ','COO3      ',
+     &		   'COO4      ','COO5      ','COO6      ',
+     &		   'COO7      ','COO8      ',
+     &             'CBS1      ','CBS2      ','CBS3      ',
+     &		   'CBS4      ','CBS5      ',
+     &             'CAS1      ','CAS2      ',
+     &             'CAS3      ','CAS4      ','CAS5      ',
+     &             'CNS1      ','CNS2      ','CNS3      ',
+     &		   'CNS4      ','CNS5      ','CNS6      ',
+     &		   'CNS7      ','CNS8      ',			! 63 Species so far
+c
      &             'CL2       ','CO        ','CO2H      ',
      &             'CO3H      ','COOH      ','CPRM      ',
      &             'DCB1      ','ETH       ','ETHE      ',
@@ -85,28 +106,172 @@ c
      &             'MGLY      ','MVK       ','NA        ',
      &             'NH3       ','NTR       ','NXOY      ',
      &             'OLE       ','OLE1      ','OLE2      ',
+     &             'BPIN      ','LIMO      ','MONO      ',
+     &             'SESQ      ',
      &             'OPEN      ','PAR       ','PCL       ',
      &             'PEC       ','PHEN      ','PNA       ',
      &             'PNH4      ','PNO3      ','POA       ',
      &             'PROD      ','PSO4      ','RC2H      ',
      &             'RC3H      ','RCHO      ','ROOH      ',
-     &             'SO2       ','SOA1      ','SOA2      ',
-     &             'SOA3      ','SOA4      ','SULF      ',
+     &             'SO2       ',
+     &             'APO1      ',
+     &             'APO2      ','APO3      ','APO4      ',
+     &             'APO5      ','APO6      ',
+     &             'APO7      ','APO8      ',
+     &             'AOO1      ',
+     &             'AOO2      ','AOO3      ','AOO4      ',
+     &             'AOO5      ','AOO6      ','AOO7      ',
+     &             'AOO8      ',
+     &             'ABS1      ','ABS2      ','ABS3      ',
+     &		   'ABS4      ','ABS5      ',
+     &             'AAS1      ','AAS2      ','AAS3      ',
+     &		   'AAS4      ','AAS5      ',
+     &             'ANS1      ',
+     &             'ANS2      ','ANS3      ','ANS4      ',
+     &             'ANS5      ','ANS6      ','ANS7      ',
+     &             'ANS8      ',
+     &             'SULF      ',
      &             'TERP      ','TOL       ','XN        ',
-     &             'XYL       ','SOA1_1    ','SOA1_2    ',
-     &             'SOA1_3    ','SOA1_4    ','SOA1_5    ',
-     &             'SOA1_6    ','SOA1_7    ','SOA1_8    ',
-     &             'SOA1_9    ','SOA1_10   ','SOA2_1    ',
-     &             'SOA2_2    ','SOA2_3    ','SOA2_4    ',
-     &             'SOA2_5    ','SOA2_6    ','SOA2_7    ',
-     &             'SOA2_8    ','SOA2_9    ','SOA2_10   ',
-     &             'SOA3_1    ','SOA3_2    ','SOA3_3    ',
-     &             'SOA3_4    ','SOA3_5    ','SOA3_6    ',
-     &             'SOA3_7    ','SOA3_8    ','SOA3_9    ',
-     &             'SOA3_10   ','SOA4_1    ','SOA4_2    ',
-     &             'SOA4_3    ','SOA4_4    ','SOA4_5    ',
-     &             'SOA4_6    ','SOA4_7    ','SOA4_8    ',
-     &             'SOA4_9    ','SOA4_10   ','POC_1     ',
+     &             'XYL       ',
+c							   ! 98 species (161 total)
+     &             'APO1_1    ',
+     &             'APO1_2    ','APO1_3    ','APO1_4    ',
+     &             'APO1_5    ','APO1_6    ','APO1_7    ',
+     &             'APO1_8    ','APO1_9    ','APO1_10   ',
+     &             'APO2_1    ',
+     &             'APO2_2    ','APO2_3    ','APO2_4    ',
+     &             'APO2_5    ','APO2_6    ','APO2_7    ',
+     &             'APO2_8    ','APO2_9    ','APO2_10   ',
+     &             'APO3_1    ',
+     &             'APO3_2    ','APO3_3    ','APO3_4    ',
+     &             'APO3_5    ','APO3_6    ','APO3_7    ',
+     &             'APO3_8    ','APO3_9    ','APO3_10   ',
+     &             'APO4_1    ',
+     &             'APO4_2    ','APO4_3    ','APO4_4    ',
+     &             'APO4_5    ','APO4_6    ','APO4_7    ',
+     &             'APO4_8    ','APO4_9    ','APO4_10   ',
+     &             'APO5_1    ',
+     &             'APO5_2    ','APO5_3    ','APO5_4    ',
+     &             'APO5_5    ','APO5_6    ','APO5_7    ',
+     &             'APO5_8    ','APO5_9    ','APO5_10   ',
+     &             'APO6_1    ',
+     &             'APO6_2    ','APO6_3    ','APO6_4    ',
+     &             'APO6_5    ','APO6_6    ','APO6_7    ',
+     &             'APO6_8    ','APO6_9    ','APO6_10   ',
+     &             'APO7_1    ',
+     &             'APO7_2    ','APO7_3    ','APO7_4    ',
+     &             'APO7_5    ','APO7_6    ','APO7_7    ',
+     &             'APO7_8    ','APO7_9    ','APO7_10   ',
+     &             'APO8_1    ',
+     &             'APO8_2    ','APO8_3    ','APO8_4    ',
+     &             'APO8_5    ','APO8_6    ','APO8_7    ',
+     &             'APO8_8    ','APO8_9    ','APO8_10   ',
+     &             'AOO1_1    ',
+     &             'AOO1_2    ','AOO1_3    ','AOO1_4    ',
+     &             'AOO1_5    ','AOO1_6    ','AOO1_7    ',
+     &             'AOO1_8    ','AOO1_9    ','AOO1_10   ',
+     &             'AOO2_1    ',
+     &             'AOO2_2    ','AOO2_3    ','AOO2_4    ',
+     &             'AOO2_5    ','AOO2_6    ','AOO2_7    ',
+     &             'AOO2_8    ','AOO2_9    ','AOO2_10   ',	! 100 (261 total)
+     &             'AOO3_1    ',
+     &             'AOO3_2    ','AOO3_3    ','AOO3_4    ',
+     &             'AOO3_5    ','AOO3_6    ','AOO3_7    ',
+     &             'AOO3_8    ','AOO3_9    ','AOO3_10   ',
+     &             'AOO4_1    ',
+     &             'AOO4_2    ','AOO4_3    ','AOO4_4    ',
+     &             'AOO4_5    ','AOO4_6    ','AOO4_7    ',
+     &             'AOO4_8    ','AOO4_9    ','AOO4_10   ',
+     &             'AOO5_1    ',
+     &             'AOO5_2    ','AOO5_3    ','AOO5_4    ',
+     &             'AOO5_5    ','AOO5_6    ','AOO5_7    ',
+     &             'AOO5_8    ','AOO5_9    ','AOO5_10   ',
+     &             'AOO6_1    ',
+     &             'AOO6_2    ','AOO6_3    ','AOO6_4    ',
+     &             'AOO6_5    ','AOO6_6    ','AOO6_7    ',
+     &             'AOO6_8    ','AOO6_9    ','AOO6_10   ',
+     &             'AOO7_1    ',
+     &             'AOO7_2    ','AOO7_3    ','AOO7_4    ',
+     &             'AOO7_5    ','AOO7_6    ','AOO7_7    ',
+     &             'AOO7_8    ','AOO7_9    ','AOO7_10   ',
+     &             'AOO8_1    ',
+     &             'AOO8_2    ','AOO8_3    ','AOO8_4    ',
+     &             'AOO8_5    ','AOO8_6    ','AOO8_7    ',
+     &             'AOO8_8    ','AOO8_9    ','AOO8_10   ',
+     &             'ABS1_1    ',
+     &             'ABS1_2    ','ABS1_3    ','ABS1_4    ',
+     &             'ABS1_5    ','ABS1_6    ','ABS1_7    ',
+     &             'ABS1_8    ','ABS1_9    ','ABS1_10   ',
+     &             'ABS2_1    ',
+     &             'ABS2_2    ','ABS2_3    ','ABS2_4    ',
+     &             'ABS2_5    ','ABS2_6    ','ABS2_7    ',
+     &             'ABS2_8    ','ABS2_9    ','ABS2_10   ',
+     &             'ABS3_1    ',
+     &             'ABS3_2    ','ABS3_3    ','ABS3_4    ',
+     &             'ABS3_5    ','ABS3_6    ','ABS3_7    ',
+     &             'ABS3_8    ','ABS3_9    ','ABS3_10   ',
+     &             'ABS4_1    ',
+     &             'ABS4_2    ','ABS4_3    ','ABS4_4    ',
+     &             'ABS4_5    ','ABS4_6    ','ABS4_7    ',
+     &             'ABS4_8    ','ABS4_9    ','ABS4_10   ',	! 100 (361 total)
+     &             'ABS5_1    ',
+     &             'ABS5_2    ','ABS5_3    ','ABS5_4    ',
+     &             'ABS5_5    ','ABS5_6    ','ABS5_7    ',
+     &             'ABS5_8    ','ABS5_9    ','ABS5_10   ',
+     &             'AAS1_1    ',
+     &             'AAS1_2    ','AAS1_3    ','AAS1_4    ',
+     &             'AAS1_5    ','AAS1_6    ','AAS1_7    ',
+     &             'AAS1_8    ','AAS1_9    ','AAS1_10   ',
+     &             'AAS2_1    ',
+     &             'AAS2_2    ','AAS2_3    ','AAS2_4    ',
+     &             'AAS2_5    ','AAS2_6    ','AAS2_7    ',
+     &             'AAS2_8    ','AAS2_9    ','AAS2_10   ',
+     &             'AAS3_1    ',
+     &             'AAS3_2    ','AAS3_3    ','AAS3_4    ',
+     &             'AAS3_5    ','AAS3_6    ','AAS3_7    ',
+     &             'AAS3_8    ','AAS3_9    ','AAS3_10   ',
+     &             'AAS4_1    ',
+     &             'AAS4_2    ','AAS4_3    ','AAS4_4    ',
+     &             'AAS4_5    ','AAS4_6    ','AAS4_7    ',
+     &             'AAS4_8    ','AAS4_9    ','AAS4_10   ',
+     &             'AAS5_1    ',
+     &             'AAS5_2    ','AAS5_3    ','AAS5_4    ',
+     &             'AAS5_5    ','AAS5_6    ','AAS5_7    ',
+     &             'AAS5_8    ','AAS5_9    ','AAS5_10   ',
+     &             'ANS1_1    ',
+     &             'ANS1_2    ','ANS1_3    ','ANS1_4    ',
+     &             'ANS1_5    ','ANS1_6    ','ANS1_7    ',
+     &             'ANS1_8    ','ANS1_9    ','ANS1_10   ',
+     &             'ANS2_1    ',
+     &             'ANS2_2    ','ANS2_3    ','ANS2_4    ',
+     &             'ANS2_5    ','ANS2_6    ','ANS2_7    ',
+     &             'ANS2_8    ','ANS2_9    ','ANS2_10   ',
+     &             'ANS3_1    ',
+     &             'ANS3_2    ','ANS3_3    ','ANS3_4    ',
+     &             'ANS3_5    ','ANS3_6    ','ANS3_7    ',
+     &             'ANS3_8    ','ANS3_9    ','ANS3_10   ',
+     &             'ANS4_1    ',
+     &             'ANS4_2    ','ANS4_3    ','ANS4_4    ',
+     &             'ANS4_5    ','ANS4_6    ','ANS4_7    ',
+     &             'ANS4_8    ','ANS4_9    ','ANS4_10   ',	! 100 (461 total)
+     &             'ANS5_1    ',
+     &             'ANS5_2    ','ANS5_3    ','ANS5_4    ',
+     &             'ANS5_5    ','ANS5_6    ','ANS5_7    ',
+     &             'ANS5_8    ','ANS5_9    ','ANS5_10   ',
+     &             'ANS6_1    ',
+     &             'ANS6_2    ','ANS6_3    ','ANS6_4    ',
+     &             'ANS6_5    ','ANS6_6    ','ANS6_7    ',
+     &             'ANS6_8    ','ANS6_9    ','ANS6_10   ',
+     &             'ANS7_1    ',
+     &             'ANS7_2    ','ANS7_3    ','ANS7_4    ',
+     &             'ANS7_5    ','ANS7_6    ','ANS7_7    ',
+     &             'ANS7_8    ','ANS7_9    ','ANS7_10   ',
+     &             'ANS8_1    ',
+     &             'ANS8_2    ','ANS8_3    ','ANS8_4    ',
+     &             'ANS8_5    ','ANS8_6    ','ANS8_7    ',
+     &             'ANS8_8    ','ANS8_9    ','ANS8_10   ',
+c							  	! 40 species (501 total)
+     &             'POC_1     ',
      &             'POC_2     ','POC_3     ','POC_4     ',
      &             'POC_5     ','POC_6     ','POC_7     ',
      &             'POC_8     ','POC_9     ','POC_10    ',
@@ -136,7 +301,7 @@ c
      &             'PNO3_10   ','PSO4_1    ','PSO4_2    ',
      &             'PSO4_3    ','PSO4_4    ','PSO4_5    ',
      &             'PSO4_6    ','PSO4_7    ','PSO4_8    ',
-     &             'PSO4_9    ','PSO4_10   ','PH2O      '/
+     &             'PSO4_9    ','PSO4_10   ','PH2O      '/	! 91 species (592 total)
 c
       data crsspc /'CCRS      ','CPRM      '/
 c
@@ -165,11 +330,11 @@ c
      &             'CXO2      ','HCO3      ','TBUO      ',
      &             'BZO       ','BZNO      '/
 c
-      data mchgas   / 34, 24, 25, 34, 56, 34,  0, 0, 0, 0 /
-      data mchaero  /  0,  0,  0, 16,  0, 13,  0, 0, 0, 0 /
+      data mchgas   / 34, 24, 25, 34, 97, 78,  0, 0, 0, 0 /
+      data mchaero  /  0,  0,  0, 16, 43, 53,  0, 0, 0, 0 /
       data mchrad   / 14, 12, 12, 12, 18, 12,  0, 0, 0, 0 /
       data mchiessr /  4,  2,  2,  2,  2,  2,  0, 0, 0, 0 /
-      data mchrxn   /110, 91, 96,100,211,100,  0, 0, 0, 0 /
+      data mchrxn   /110, 91, 96,100,245,100,  0, 0, 0, 0 /
       data mchphot  / 14, 11, 12, 12, 30, 12,  0, 0, 0, 0 /
       data mchfast  /  4,  4,  4,  4, 13,  4,  0, 0, 0, 0 /
       data mchidmin / 1 /
@@ -275,7 +440,7 @@ c
         endif
 c
         if (idmech.eq.2.or.idmech.eq.3.or.idmech.eq.4
-     &                                .or.idmech.eq.6) then
+     &                 .or.idmech.eq.6) then
           do i = 1,nrad
             do j = 1,nradnm
               if (nmrad2(i).eq.radlist(j)) then
@@ -310,6 +475,12 @@ c
       read(record(21:80),*) naero
       nspec = ngas + naero 
       if (idmech.EQ.6 .AND. naero.GT.0) then
+        read(record(21:80),*) naero,nsec_c,dt_aero
+        read(ichem,'(a)') record
+        read(record(21:),*) (dsec_i(i),i=1,nsec_c+1)
+        nspec = ngas + naero * nsec_c
+      endif
+      if (idmech.EQ.5 .AND. naero.GT.0) then
         read(record(21:80),*) naero,nsec_c,dt_aero
         read(ichem,'(a)') record
         read(record(21:),*) (dsec_i(i),i=1,nsec_c+1)
@@ -514,7 +685,7 @@ c
       if (naero.ne.0) then
         read(ichem,'(a)') record
         write(idiag,'(a)') record(:istrln(record))
-        if (idmech.EQ.6) then
+        if (idmech.EQ.6.or.idmech.EQ.5) then
           do iaero = 1, naero
             read(ichem,'(5x,a10,e10.0,f10.0)')
      &           tmpnam,bdnl_tmp,roprt_tmp
@@ -568,7 +739,7 @@ c
         do j = 1,NSPNAM
           kmap(j) = nspec+1
         enddo
-c
+c      
         do 10 j = 1,nspec
           do i = 1,NSPNAM
             if (splist(i).eq.spname(j)) then
@@ -587,19 +758,17 @@ c
 c-----Check for a consistent set of ammonium/nitrate/sulfate 
 c     species
 c
-        if (idmech.EQ.6) then ! MECH 6
+        if (idmech.EQ.6.) then ! MECH 6
           if (kso2.eq.nspec+1    .or. kh2o2.eq.nspec+1
      &   .or. kform.eq.nspec+1   .or. khono.eq.nspec+1
      &   .or. ko3.eq.nspec+1     .or. koh.eq.nspec+1
      &   .or. kho2.eq.nspec+1    .or. kno3.eq.nspec+1
      &   .or. kno.eq.nspec+1     .or. kno2.eq.nspec+1
-     &   .or. kpan.eq.nspec+1    .or. kcg1.eq.nspec+1
-     &   .or. kcg2.eq.nspec+1    .or. kcg3.eq.nspec+1
-     &   .or. kcg4.eq.nspec+1    .or. khno3.eq.nspec+1
+     &   .or. kpan.eq.nspec+1 
+     &   .or. khno3.eq.nspec+1
      &   .or. knh3.eq.nspec+1    .or. ksulf.eq.nspec+1
-     &   .or. khcl.eq.nspec+1    .or. ksoa1_1.eq.nspec+1
-     &   .or. ksoa2_1.eq.nspec+1 .or. ksoa3_1.eq.nspec+1
-     &   .or. ksoa4_1.eq.nspec+1 .or. kcrust_1.eq.nspec+1
+     &   .or. khcl.eq.nspec+1  
+     &   .or. kcrust_1.eq.nspec+1
      &   .or. kpoc_1.eq.nspec+1  .or. kpec_1.eq.nspec+1
      &   .or. kph2o_1.eq.nspec+1 .or. kpcl_1.eq.nspec+1
      &   .or. kna_1.eq.nspec+1   .or. kpnh4_1.eq.nspec+1
@@ -612,7 +781,25 @@ c
             write(iout,'(a)')   ' PSO4 to use Chemistry Mechanism 6.'
             goto 910
           endif
-        else                  ! OTHER THAN MECH 6
+        elseif(idmech.EQ.5 ) then  ! MECH 5
+          if (knh3.lt.nspec+1 .and. kpnh4_1.lt.nspec+1 .and.
+     &       kso2.lt.nspec+1 .and. ksulf.lt.nspec+1 .and.
+     &        kpso4_1.lt.nspec+1 .and. khno3.lt.nspec+1 .and.
+     &         kpno3_1.lt.nspec+1 ) then
+            continue
+          elseif (kpnh4_1.eq.nspec+1 .and. kpso4_1.eq.nspec+1 .and.
+     &         kpno3_1.eq.nspec+1 ) then
+            continue
+          else
+            write(iout,'(/,a)') ' You must have all of the '
+            write(iout,'(a)')   ' ammonium/sulfate/nitrate species '
+            write(iout,'(a)')   ' NH3,NH4,SO2,SULF,PSO4,HNO3,PNO3. '
+            write(iout,'(a)')   ' Or: '
+            write(iout,'(a)')   ' Any combination of the gas-phase'
+            write(iout,'(a)')   ' species NH3,SO2,HNO3. '
+            goto 910
+          endif
+        else                  ! OTHER THAN MECH 6 or 5
           if (knh3.lt.nspec+1 .and. kpnh4.lt.nspec+1 .and.
      &       kso2.lt.nspec+1 .and. ksulf.lt.nspec+1 .and.
      &        kpso4.lt.nspec+1 .and. khno3.lt.nspec+1 .and.
@@ -652,22 +839,22 @@ c
 c
 c-----Check for a consistent set of CG/SOA species, or none
 c
-          if (kcg1.eq.nspec+1 .and. kcg2.eq.nspec+1 .and.
-     &       kcg3.eq.nspec+1 .and. kcg4.eq.nspec+1 .and.
-     &        ksoa1.eq.nspec+1 .and. ksoa2.eq.nspec+1 .and.
-     &         ksoa3.eq.nspec+1 .and. ksoa4.eq.nspec+1 ) then
-            continue
-          elseif (kcg1.lt.nspec+1 .and. kcg2.lt.nspec+1 .and.
-     &       kcg3.lt.nspec+1 .and. kcg4.lt.nspec+1 .and.
-     &        ksoa1.lt.nspec+1 .and. ksoa2.lt.nspec+1 .and.
-     &         ksoa3.lt.nspec+1 .and. ksoa4.lt.nspec+1 ) then
-            continue
-          else
-            write(iout,'(/,a)') ' You must have all or none of the '
-            write(iout,'(a)')   ' secondary organic aerosol species '
-            write(iout,'(a)')   ' CG1,CG2,CG3,CG4,SOA1,SOA2,SOA3,SOA4 '
-            goto 910
-          endif
+c          if (kcg1.eq.nspec+1 .and. kcg2.eq.nspec+1 .and.
+c     &       kcg3.eq.nspec+1 .and. kcg4.eq.nspec+1 .and.
+c     &        ksoa1.eq.nspec+1 .and. ksoa2.eq.nspec+1 .and.
+c     &         ksoa3.eq.nspec+1 .and. ksoa4.eq.nspec+1 ) then
+c            continue
+c          elseif (kcg1.lt.nspec+1 .and. kcg2.lt.nspec+1 .and.
+c     &       kcg3.lt.nspec+1 .and. kcg4.lt.nspec+1 .and.
+c     &        ksoa1.lt.nspec+1 .and. ksoa2.lt.nspec+1 .and.
+c     &         ksoa3.lt.nspec+1 .and. ksoa4.lt.nspec+1 ) then
+c            continue
+c          else
+c            write(iout,'(/,a)') ' You must have all or none of the '
+c            write(iout,'(a)')   ' secondary organic aerosol species '
+c            write(iout,'(a)')   ' CG1,CG2,CG3,CG4,SOA1,SOA2,SOA3,SOA4 '
+c            goto 910
+c          endif
         endif                 ! MECH 6 ?
       endif
 c
@@ -675,6 +862,11 @@ c-----Set up section diameters and check parameters for AERO routines
 c
       if ( lchem .AND. idmech.EQ.6 .AND. naero.GT.0 ) then
         ierr = 0 
+        call aeroset(nsec_c,dsec_i,ierr)
+        if ( ierr .ne. 0 ) goto 910
+      endif
+      if ( lchem .AND. idmech.EQ.5 .AND. naero.GT.0 ) then
+        ierr = 0
         call aeroset(nsec_c,dsec_i,ierr)
         if ( ierr .ne. 0 ) goto 910
       endif
@@ -783,6 +975,39 @@ c
       write(idiag,*)
       call flush(idiag)
 c
+
+
+
+
+c================ BNM - Reading Hvap tables ===================
+c
+c      ccc   Using Look-up Table Compiled by Scott Epstein   ccc
+c       Set Variables
+c            ntemp = 231
+c            ncstar = 109
+
+c       Read in all data from look-up tables
+c            open (96, file='/home/bnmurphy/Research/PMCAMx/PMCAMxSAPRC_SEMIvol/'//
+c     &           'SOAP/POA_DHVAP.txt', status='OLD')
+c            open (97, file='/home/bnmurphy/Research/PMCAMx/PMCAMxSAPRC_SEMIvol/'//
+c     &           'SOAP/POA_LOGCSTAR.txt', status='OLD')
+c            open (98, file='/home/bnmurphy/Research/PMCAMx/PMCAMxSAPRC_SEMIvol/'//
+c     &           'SOAP/POA_T.txt', status='OLD')
+c            open (99, file='/home/bnmurphy/Research/PMCAMx/PMCAMxSAPRC_SEMIvol/'//
+c     &          'SOAP/SOA_DHVAP.txt', status='OLD')
+c            do tempcnt = 1,ntemp
+c                read(98, *), dhtemp(tempcnt)
+c                read(96, *), (poadhvap(tempcnt,icstar),icstar=1,ncstar)
+c                read(99, *), (soadhvap(tempcnt,icstar),icstar=1,ncstar)
+c            end do
+c            read(97, *), (dhcstar(icstar),icstar=1,ncstar)
+c            close(96)
+c            close(97)
+c            close(98)
+c            close(99)
+
+c=============== End Hvap Table Open and Read =============
+
       return
 c
  900  write(iout,'(//,a)') 'ERROR: Reading CHEMPARAM file record:'

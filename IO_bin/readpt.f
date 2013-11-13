@@ -79,6 +79,7 @@ c-----Added by Kristina 04/17/2007--------------------------------
 c
 c      if(lApp) call Appreadpt(ptemis,nptspc)
 c      if(lApp) call Appsetpt(ptemis,nptspc)
+      if(lApp) call Appsetpt  !BNM
 c
 c-------------End Added 04/17/2007-------------------------------
 c
@@ -100,9 +101,9 @@ c
  200  do 10 l = 1,nptspc
         do n = 1,npts 
           ptemis(n,l) = ptemis(n,l)/(60.*dtems)
-          if(l.ge.19.and.l.le.24) then !APT=Alexandra Panagiotou Tsimpidi
-             ptemis(n,l)=ptemis(n,l)*0.5
-          end if
+c          if(l.ge.19.and.l.le.24) then !APT=Alexandra Panagiotou Tsimpidi
+c             ptemis(n,l)=ptemis(n,l)*0.5
+c          end if
         enddo 
  10   continue 
 c 

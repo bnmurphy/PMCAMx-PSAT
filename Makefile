@@ -104,8 +104,8 @@ linux:
 	@rm -f $(INC)/camx.prm
 	@csh chktracer camx.prm.$(DOMAIN) CAMx.$(DOMAIN).linux
 	@ln -s camx.prm.$(DOMAIN) $(INC)/camx.prm
-	make model FC="pgf77" FLGS="-I$(INC) -O2 -tp p6 -pc 64 -Kieee -Mdalign -Mextend -Mnoframe -byteswapio -Wl,-Bstatic" TARGT="CAMx.$(DOMAIN).linux" DUM=dummy
-#	make model FC="pgf77" FLGS="-I$(INC) -O2 -tp k8-64 -pc 64 -Kieee -Mdalign -Mextend -Mnoframe -byteswapio -Wl, -mcmodel=medium" TARGT="CAMx.$(DOMAIN).linux" DUM=dummy
+#	make model FC="pgf77" FLGS="-I$(INC) -O2 -tp k8-32 -pc 64 -Kieee -Mdalign -Mextend -Mnoframe -byteswapio -Wl,-Bstatic" TARGT="CAMx.$(DOMAIN).linux" DUM=dummy
+	make model FC="pgf77" FLGS="-I$(INC) -O2 -tp k8-64 -pc 64 -Kieee -Mdalign -Mextend -Mnoframe -byteswapio -mcmodel=medium -Mlarge_arrays -L/usr/pgi/linux86-64/6.0/libso -lpgftnrtl " TARGT="CAMx.$(DOMAIN).linux" DUM=dummy
 
 linuxomp:
 	@rm -f $(INC)/camx.prm
@@ -447,25 +447,25 @@ $(APP)/Appprep.o \
 $(APP)/Appave.o \
 $(APP)/Appwrt.o \
 $(APP)/Appemmap.o \
-$(APP)/Appreadar.o \
-$(APP)/Appreadpt.o \
 $(APP)/Appsetpt.o \
 $(APP)/Appsetar.o \
 $(APP)/Appemiss.o \
 $(APP)/Appxyadv.o \
 $(APP)/Apphdiff.o \
-$(APP)/Appvdiff.o \
 $(APP)/Appwetdep.o \
 $(APP)/Appzadv.o \
 $(APP)/Appaero.o \
 $(APP)/Appgas.o \
 $(APP)/vdepread.o \
 $(APP)/Appalign.o \
+#$(APP)/Appreadar.o \
+#$(APP)/Appreadpt.o \
 
 model: 	$(OBJCTS)
 	$(FC) -o $(TARGT) $(FLGS) $(OBJCTS) $(LIBS)
 .f.o	:
 	$(FC) -c -o $@ $(FLGS) $<
+
 
 CAMx.o 			: CAMx.f                                               \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
@@ -543,13 +543,14 @@ drydep.o 		: drydep.f                                             \
 
 emiss.o 		: emiss.f                                              \
                         $(INC)/camx.prm $(INC)/ptemiss.com $(INC)/bndary.com   \
-                        $(INC)/flags.com $(INC)/procan.com $(INC)/tracer.com
+                        $(INC)/flags.com $(INC)/procan.com $(INC)/tracer.com   \
+                        $(INC)/App.com
 
 emistrns.o 		: emistrns.f                                           \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
                         $(INC)/chmstry.com $(INC)/grid.com $(INC)/flags.com    \
                         $(INC)/filunit.com $(INC)/ptemiss.com                  \
-                        $(INC)/bndary.com $(INC)/procan.com                    \
+                        $(INC)/bndary.com $(INC)/procan.com $(INC)/App.com     \
                         $(INC)/tracer.com $(INC)/rtracchm.com
 
 exptbl.o 		: exptbl.f                                             \
@@ -626,7 +627,8 @@ readaho.o 		: readaho.f                                            \
 
 readchm.o 		: readchm.f                                            \
                         $(INC)/camx.prm $(INC)/chmstry.com $(INC)/filunit.com  \
-                        $(INC)/flags.com $(INC)/ddmchm.com $(INC)/iehchem.com
+                        $(INC)/flags.com $(INC)/ddmchm.com $(INC)/iehchem.com  \
+			$(INC)/soap.com
 
 readpht.o 		: readpht.f                                            \
                         $(INC)/camx.prm $(INC)/chmstry.com $(INC)/filunit.com  \
@@ -641,7 +643,7 @@ setbc.o 		: setbc.f                                              \
 
 startup.o 		: startup.f                                            \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
-                        $(INC)/filunit.com $(INC)/chmstry.com                  \
+                        $(INC)/filunit.com $(INC)/chmstry.com $(INC)/soap.com  \
                         $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
                         $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com
 
@@ -653,25 +655,25 @@ timrates.o 		: timrates.f                                           \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/bndary.com
 
 trap.o 			: trap.f                                               \
-                        $(INC)/camx.prm $(INC)/chmstry.com $(INC)/filunit.com
+                        $(INC)/camx.prm $(INC)/chmstry.com $(INC)/filunit.com  \
+			$(INC)/flags.com $(INC)/App.com
  
 updtmet.o 		: updtmet.f                                            \
                         $(INC)/camx.prm $(INC)/bndary.com
 
 vdiffimp.o 		: vdiffimp.f                                           \
-                        $(INC)/camx.prm $(INC)/procan.com $(INC)/flags.com
+                        $(INC)/camx.prm $(INC)/procan.com
 
 vnmshcal.o 		: vnmshcal.f                                           \
                         $(INC)/camx.prm $(INC)/filunit.com
 
 vrtslv.o 		: vrtslv.f                                             \
-                        $(INC)/camx.prm $(INC)/filunit.com $(INC)/tracer.com   \
-                        $(INC)/flags.com
+                        $(INC)/camx.prm $(INC)/filunit.com $(INC)/tracer.com
 
 wetdep.o 		: wetdep.f                                             \
                         $(INC)/camx.prm $(INC)/bndary.com $(INC)/chmstry.com   \
                         $(INC)/tracer.com $(INC)/procan.com                    \
-                        $(INC)/deposit.com $(INC)/section.inc $(INC)/flags.com
+                        $(INC)/deposit.com $(INC)/section.inc
 
 wrtmass.o 		: wrtmass.f                                            \
                         $(INC)/camx.prm $(INC)/camxfld.com $(INC)/chmstry.com  \
@@ -685,8 +687,8 @@ xyadvec.o 		: xyadvec.f                                            \
 zadvec.o 		: zadvec.f                                             \
                         $(INC)/camx.prm $(INC)/bndary.com $(INC)/chmstry.com   \
                         $(INC)/filunit.com $(INC)/tracer.com                   \
-                        $(INC)/rtracchm.com $(INC)/procan.com $(INC)/flags.com \
-                        $(INC)/App.com
+                        $(INC)/rtracchm.com $(INC)/procan.com                  \
+                        $(INC)/flags.com $(INC)/App.com
 
 zrates.o 		: zrates.f                                             \
                         $(INC)/camx.prm $(INC)/bndary.com $(INC)/flags.com
@@ -752,7 +754,7 @@ $(BNRY)/readar.o 	: $(BNRY)/readar.f                                     \
 $(BNRY)/readbnd.o 	: $(BNRY)/readbnd.f                                    \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
                         $(INC)/filunit.com $(INC)/bndary.com $(INC)/grid.com   \
-                        $(INC)/chmstry.com $(INC)/flags.com
+                        $(INC)/chmstry.com
 
 $(BNRY)/readcnc.o 	: $(BNRY)/readcnc.f                                    \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
@@ -1321,10 +1323,10 @@ $(RTRAC)/wrrcprt.o 	: $(RTRAC)/wrrcprt.f                                   \
                         $(INC)/rtracchm.com $(INC)/filunit.com
 
 $(SOAP)/soapdat.o 	: $(SOAP)/soapdat.f                                    \
-                        $(INC)/soap.com
+                        $(INC)/soap.com $(INC)/camx.prm
 
 $(SOAP)/soap.o 		: $(SOAP)/soap.f                                       \
-                        $(INC)/soap.com
+                        $(INC)/soap.com  
 
 $(AER)/addit.o		: $(AER)/addit.f
 
@@ -1406,7 +1408,7 @@ $(AER)/eqpart.o		: $(AER)/eqpart.f                                      \
                         $(INC)/dynamic.inc $(INC)/equaer.inc
 
 $(AER)/eqparto.o	: $(AER)/eqparto.f                                     \
-                        $(INC)/dynamic.inc $(INC)/soap.com
+                        $(INC)/dynamic.inc $(INC)/soap.com $(INC)/camx.prm
 
 $(AER)/equaer.o		: $(AER)/equaer.f                                      \
                         $(INC)/dynamic.inc $(INC)/equaer.inc
@@ -1452,7 +1454,7 @@ $(AER)/vsrm.o		: $(AER)/vsrm.f                                        \
                         $(INC)/aerpar.inc $(INC)/droppar.inc $(INC)/dropcom.inc
 
 $(AER)/slsode.o		: $(AER)/slsode.f
-
+ 
 $(APP)/Appinit.o        : $(APP)/Appinit.f                                     \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
                         $(INC)/filunit.com $(INC)/chmstry.com                  \
@@ -1460,7 +1462,7 @@ $(APP)/Appinit.o        : $(APP)/Appinit.f                                     \
                         $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
                         $(INC)/App.com
 
-$(APP)/Appbnd.o         : $(APP)/Appbnd.f                                      \
+$(APP)/Appbnd.o         : $(APP)/Appbnd.f                                     \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
                         $(INC)/filunit.com $(INC)/chmstry.com                  \
                         $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
@@ -1473,85 +1475,71 @@ $(APP)/Appprep.o        : $(APP)/Appprep.f                                     \
                         $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
                         $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
                         $(INC)/App.com
-
-$(APP)/Appave.o         : $(APP)/Appave.f                                      \
+ 
+$(APP)/Appwrt.o         : $(APP)/Appwrt.f                                     \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
                         $(INC)/filunit.com $(INC)/chmstry.com                  \
                         $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
                         $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
                         $(INC)/App.com
 
-$(APP)/Appwrt.o         : $(APP)/Appwrt.f                                      \
+$(APP)/Appave.o         : $(APP)/Appave.f                                     \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
                         $(INC)/filunit.com $(INC)/chmstry.com                  \
                         $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
                         $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
                         $(INC)/App.com
 
-$(APP)/Appemmap.o       : $(APP)/Appemmap.f                                    \
+$(APP)/Appemmap.o       : $(APP)/Appemmap.f                                     \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
                         $(INC)/filunit.com $(INC)/chmstry.com                  \
                         $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
                         $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
                         $(INC)/App.com
 
-$(APP)/Appreadar.o       : $(APP)/Appreadar.f                                  \
+#$(APP)/Appreadar.o        : $(APP)/Appreadar.f                                     \
+#                        $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
+#                        $(INC)/filunit.com $(INC)/chmstry.com                  \
+#                        $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
+#                        $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
+#                        $(INC)/App.com
+
+#$(APP)/Appreadpt.o        : $(APP)/Appreadpt.f                                     \
+#                        $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
+#                        $(INC)/filunit.com $(INC)/chmstry.com                  \
+#                        $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
+#                        $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
+#                        $(INC)/App.com
+
+$(APP)/Appsetpt.o        : $(APP)/Appsetpt.f                                     \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
                         $(INC)/filunit.com $(INC)/chmstry.com                  \
                         $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
                         $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
                         $(INC)/App.com
 
-$(APP)/Appreadpt.o       : $(APP)/Appreadpt.f                                  \
+$(APP)/Appsetar.o        : $(APP)/Appsetar.f                                     \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
                         $(INC)/filunit.com $(INC)/chmstry.com                  \
                         $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
                         $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
                         $(INC)/App.com
 
-$(APP)/Appsetpt.o       : $(APP)/Appsetpt.f                                    \
+$(APP)/Appemiss.o        : $(APP)/Appemiss.f                                     \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
                         $(INC)/filunit.com $(INC)/chmstry.com                  \
                         $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
                         $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
                         $(INC)/App.com
 
-$(APP)/Appsetar.o       : $(APP)/Appsetar.f                                    \
+$(APP)/Appxyadv.o        : $(APP)/Appxyadv.f                                     \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
                         $(INC)/filunit.com $(INC)/chmstry.com                  \
                         $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
                         $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
                         $(INC)/App.com
 
-$(APP)/Appemiss.o       : $(APP)/Appemiss.f                                    \
-                        $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
-                        $(INC)/filunit.com $(INC)/chmstry.com                  \
-                        $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
-                        $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
-                        $(INC)/App.com
-
-$(APP)/Appxyadv.o       : $(APP)/Appxyadv.f                                    \
-                        $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
-                        $(INC)/filunit.com $(INC)/chmstry.com                  \
-                        $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
-                        $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
-                        $(INC)/App.com
-
-$(APP)/Apphdiff.o       : $(APP)/Apphdiff.f                                    \
-                        $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
-                        $(INC)/filunit.com $(INC)/chmstry.com                  \
-                        $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
-                        $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
-                        $(INC)/App.com
-
-$(APP)/Appvdiff.o       : $(APP)/Appvdiff.f                                    \
-                        $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
-                        $(INC)/filunit.com $(INC)/chmstry.com                  \
-                        $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
-                        $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
-                        $(INC)/App.com
-
-$(APP)/Appwetdep.o      : $(APP)/Appwetdep.f                                   \
+$(APP)/Appwetdep.o        : $(APP)/Appwetdep.f                                     \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
                         $(INC)/filunit.com $(INC)/chmstry.com                  \
                         $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
@@ -1572,23 +1560,24 @@ $(APP)/Appaero.o        : $(APP)/Appaero.f                                     \
                         $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
                         $(INC)/App.com
 
-$(APP)/Appgas.o        : $(APP)/Appgas.f                                       \
+$(APP)/Appgas.o        : $(APP)/Appgas.f                                     \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
                         $(INC)/filunit.com $(INC)/chmstry.com                  \
                         $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
                         $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
                         $(INC)/App.com
 
-$(APP)/vdepread.o       : $(APP)/vdepread.f                                    \
+$(APP)/vdepread.o        : $(APP)/vdepread.f                                     \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
                         $(INC)/filunit.com $(INC)/chmstry.com                  \
                         $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
                         $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
                         $(INC)/App.com
 
-$(APP)/Appalign.o       : $(APP)/Appalign.f                                    \
+$(APP)/Appalign.o        : $(APP)/Appalign.f                                     \
                         $(INC)/camx.prm $(INC)/camx.com $(INC)/camxfld.com     \
                         $(INC)/filunit.com $(INC)/chmstry.com                  \
                         $(INC)/ahomap.com $(INC)/grid.com $(INC)/pigsty.com    \
                         $(INC)/flags.com $(INC)/tracer.com $(INC)/procan.com   \
                         $(INC)/App.com
+

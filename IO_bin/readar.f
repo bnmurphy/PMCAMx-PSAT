@@ -62,7 +62,7 @@ c
       endif
       tim1 = 100.*tim1 
       tim2 = 100.*tim2 
-      do ll = 1,narspc 
+      do ll = 1,narspc-4 
         read(iarem) idum,(arspec(i),i=1,10),
      &              ((aremis(i,j,ll),i=1,ncol),j=1,nrow)
       enddo
@@ -71,19 +71,10 @@ c-------Added by Kristina 04/13/2007-------------------------------------
 c
 c      if (lApp) call Appreadar(aremis,narspc)
 c      if(lApp) call Appsetar(aremis,narspc)
+      if(lApp) call Appsetar     !BNM
 c
 c----------End Added 04/13/2007-----------------------------------------
 c
-
-c-----------50% areaemission of EC --------------------------------------
-        do i=1,ncol
-         do j=1,nrow
-          do k=23,28
-           aremis(i,j,k)=aremis(i,j,k) !*0.5
-          end do
-         end do
-        end do
-c--------------------------------------------------------------------------  
 
       write(iout,'(a40,2(f7.0,i8.5),a,i3)')
      &      'Read area source file at ',tim1,idat1,tim2,idat2,

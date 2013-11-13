@@ -1,6 +1,7 @@
       subroutine Apphdiff(flx,i,j,k,spc,original,Apptot,Actconc)
 c
-c     This subroutine handles the changes in apportionment due to emissions. 
+c     This subroutine handles the changes in apportionment due to 
+c     horizontal diffusion. 
 c  
 c     DEVELOPED BY: 
 c     Kristina Wagstrom
@@ -8,24 +9,11 @@ c     Carnegie Mellon University (Chemical Engineering)
 c     04/13/2007
 c
 c     CALLED BY:
-c     
+c     diffus
 c
 c     ROUTINES CALLED:
 c     none
 c
-c     VARIABLES (common):
-c     Appnam  - Apportionment species names
-c     Appmap  - Mapping values between model and apportionment 
-c     MXSPEC  - Maximum number of species
-c     MXTRK   - Maximum number of tracked species
-c     AppemisP- Mapping between apportionment and emissions species - point
-c     AppemisA- Mapping between apportionment and emissions species - area
-c     
-c     VARIABLES (declared):
-c     i,j     - Counters
-c     match   - Check whether a match was found
-c     num     - Numbers 1-10 in text form
-c     
       include 'camx.prm'
       include 'camx.com'
       include 'camxfld.com'
@@ -40,6 +28,7 @@ c
       real flx(8),original(MXCOL1,MXROW1,MXSOUR)
       real Apptot(MXCOL1,MXROW1),total,Actconc
       integer i,j,k,spc,loc,s,nx,ny,nz
+                    !spc is already equal to Appmap(ispc) from diffus.f
 c
       nx = ncol(1)
       ny = nrow(1)

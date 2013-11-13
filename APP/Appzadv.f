@@ -1,6 +1,7 @@
       subroutine Appzadv(f1,f2,f3,i,j,spc,Actconc)
 c
-c     This subroutine handles the changes in apportionment due to emissions. 
+c     This subroutine handles the changes in apportionment due to
+c     vertical advection. 
 c  
 c     DEVELOPED BY: 
 c     Kristina Wagstrom
@@ -8,24 +9,11 @@ c     Carnegie Mellon University (Chemical Engineering)
 c     04/13/2007
 c
 c     CALLED BY:
-c     
+c     zadvec
 c
 c     ROUTINES CALLED:
 c     none
 c
-c     VARIABLES (common):
-c     Appnam  - Apportionment species names
-c     Appmap  - Mapping values between model and apportionment 
-c     MXSPEC  - Maximum number of species
-c     MXTRK   - Maximum number of tracked species
-c     AppemisP- Mapping between apportionment and emissions species - point
-c     AppemisA- Mapping between apportionment and emissions species - area
-c     
-c     VARIABLES (declared):
-c     i,j     - Counters
-c     match   - Check whether a match was found
-c     num     - Numbers 1-10 in text form
-c     
       include 'camx.prm'
       include 'camx.com'
       include 'camxfld.com'
@@ -58,7 +46,57 @@ c     Save original values
       enddo
 c
       do s=1,Appnum+3
-        do k=1,nz-1
+c
+c-------Surface (f1 should = 0)
+c
+          k = 1
+          loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
+     &          nx*ny*nz*MXTRK*(s-1)
+c
+c         ENTRAINMENT
+c
+          if (-1*f2(k).gt.Apptot(k)) then !If more than original conc is transported out
+            remain = Apptot(k) + f2(k)
+            if (f1(k).lt.0) then
+              write(6,*) 'Negative conc in Appzadv - fluxes too high'
+            endif
+c
+          elseif (-1*f1(k).gt.Apptot(k)) then !If more than original conc is transported out
+            remain = Apptot(k) + f1(k)
+            if (f2(k).ge.0) then
+              Appconc(loc)=(f2(k)+remain)*original(k+1,s)/Apptot(k+1)
+            elseif (f2(k).lt.0) then
+              write(6,*) 'Negative conc in Appzadv - fluxes too high'
+            endif
+c
+          else
+            if (f2(k).ge.0.and.f1(k).ge.0) then
+              Appconc(loc) = Appconc(loc) + f2(k)*original(k+1,s)/
+     &                       Apptot(k+1)
+            elseif (f2(k).ge.0.and.f1(k).lt.0) then
+              Appconc(loc) = Appconc(loc) + f2(k)*original(k+1,s)/
+     &                       Apptot(k+1) + f1(k)*original(k,s)/
+     &                       Apptot(k)
+            elseif (f2(k).le.0.and.f1(k).ge.0) then
+              Appconc(loc) = Appconc(loc) + f2(k)*original(k,s)/
+     &                       Apptot(k)
+            elseif (f2(k).le.0.and.f1(k).lt.0) then
+              Appconc(loc) = Appconc(loc) + f2(k)*original(k,s)/
+     &                       Apptot(k) + f1(k)*original(k,s)/
+     &                       Apptot(k)
+            endif
+          endif
+c
+c         DILUTION
+          Appconc(loc) = Appconc(loc) - f3(k)*original(k,s)/
+     &                   Apptot(k)
+          if (Appconc(loc).eq.'NaN') 
+     &      write(6,*) 'Problem in Appzadv',i,j,k,spc
+        
+c
+c-------Layer 2 to NZ-1
+c
+        do k=2,nz-1
 c
           loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &          nx*ny*nz*MXTRK*(s-1)
@@ -70,15 +108,15 @@ c
             if (f1(k).ge.0) then
               Appconc(loc)=(f1(k)+remain)*original(k-1,s)/Apptot(k-1)
             elseif (f1(k).lt.0) then
-              write(6,*) 'Negative conc in Appvdiff - fluxes too high'
+              write(6,*) 'Negative conc in Appzadv - fluxes too high'
             endif
 c
-          else if (-1*f1(k).gt.Apptot(k)) then !If more than original conc is transported out
+          elseif (-1*f1(k).gt.Apptot(k)) then !If more than original conc is transported out
             remain = Apptot(k) + f1(k)
             if (f2(k).ge.0) then
               Appconc(loc)=(f2(k)+remain)*original(k+1,s)/Apptot(k+1)
             elseif (f2(k).lt.0) then
-              write(6,*) 'Negative conc in Appvdiff - fluxes too high'
+              write(6,*) 'Negative conc in Appzadv - fluxes too high'
             endif
 c
           else
@@ -102,7 +140,6 @@ c
           endif
 c
 c         DILUTION
-
           Appconc(loc) = Appconc(loc) - f3(k)*original(k,s)/
      &                   Apptot(k)
           if (Appconc(loc).eq.'NaN') 
@@ -216,6 +253,12 @@ c              if (check.eq.1) goto 100
 c            endif
 c           FINISH CORRECTION
 c            if (Appconc(loc2).lt.0) then
+
+            !IF THE CONCENTRATION IS LESS THAN THE LOWER BOUND VALUE,
+            !SET IT TO ZERO
+            if (abs(Appconc(loc)).lt.bdnl(Appmaprev(spc)) ) then
+              Appconc(loc) = 0.0
+            else
               write(6,*) 'Negative Value in Appzadv'
               write(6,*) 'i,j,k,spc: ',i,j,k,spc
               write(6,*) 'Actual Conc.', Actconc(k)
@@ -224,9 +267,11 @@ c            if (Appconc(loc2).lt.0) then
               do n=1,Appnum+3
                 loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
      &                nx*ny*nz*MXTRK*(n-1)
+                print *,'loc=',loc
                 write(6,*) n,Appconc(loc),original(k,n),original(k-1,n)
               enddo
               stop
+             endif
 c            endif
           endif
         enddo

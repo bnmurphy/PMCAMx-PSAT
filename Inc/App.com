@@ -26,9 +26,11 @@ c
 c--------------------------------------------------------------------------
 c
       real Appconc(MXVEC3D*MXSOUR*MXTRK)
-      real Appavg(MXCOL1*MXROW1*MXSOUR*MXTRK)
+      real AppFORE(MXCOL1,MXROW1,MXLAY1,MXSPEC)
+      real AppAFT(MXCOL1,MXROW1,MXLAY1,MXSPEC)
+      real Appavg(MXCOL1*MXROW1*MXLAY1*MXSOUR*MXTRK)
       integer Appnum, Appmap(MXSPEC), Appct
-      integer Appmaprev(MXTRK)
+      integer Appmaprev(MXTRK), sa_num_gas
       character*10 Appnam(MXTRK)
       integer AppemisP(MXSOUR-3,MXTRK)
       integer AppemisA(MXSOUR-3,MXTRK)
@@ -38,10 +40,10 @@ c
       real modvdep(MXCOL1,MXROW1,MXSPEC)
 c
       common /App/ Appconc,Appnum,Appnam,Appmap,Appct,
-     &             Appavg
+     &             Appavg, AppFORE, AppAFT
       common /App2/ nAppA,nAppP,Appmaprev
       common /App3/ AppemfracA,AppemfracP
       common /App4/ AppemisP, AppemisA
-      common /App5/ modvdep
+      common /App5/ modvdep, sa_num_gas
 c     
 c     END

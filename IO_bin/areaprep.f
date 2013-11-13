@@ -71,6 +71,7 @@ c-----Read 1st AREA header record and check inputs
 c             
          rewind(iarem)
          read(iarem) ifile,note,nseg,narspc,idat1,tim1,idat2,tim2
+         narspc = narspc + 4
          if( INT(tim2) .EQ. 24 ) then
              idat2 = idat2 + 1
              tim2 = 0.
@@ -155,13 +156,17 @@ c
 c-----Read 3rd & 4th AREA header 
 c 
       read(iarem) (idum,idum,idum,idum,n=1,nseg) 
-      read(iarem) ((arspec(n,l),n=1,10),l=1,narspc) 
+      read(iarem) ((arspec(n,l),n=1,10),l=1,(narspc-4)) 
 c 
 c-----Map AREA species to model species 
 c 
       do 15 lar = 1,narspc 
         larmap(lar,igrid) = 0
         write(arspc,'(10a1)') (arspec(n,lar),n=1,10) 
+        if (lar.eq.narspc-3) arspc = 'BPIN      '
+        if (lar.eq.narspc-2) arspc = 'DLIM      '
+        if (lar.eq.narspc-1) arspc = 'MONO      '
+        if (lar.eq.narspc) arspc = 'SESQ      '
         if (arspc.eq.'HNO2      ') arspc = 'HONO      '
         if (arspc.eq.'HCHO      ' .and. kHCHO.eq.nspec+1)
      &                                        arspc = 'FORM      '

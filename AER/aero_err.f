@@ -46,8 +46,7 @@ c
 
       write(*,*) 
       write(*,*) 
-      write(*,*) ' CAMx is stopping because an error has occured',
-     &           ' in the aerosol routines '
+      write(*,*) ' CAMx is stopping because an error has occured in the aerosol routines '
       write(*,*) ' See the .out output file for details'
       write(*,*) ' igrd,i,j,k :',igrdchm,ichm,jchm,kchm
       write(*,*) 

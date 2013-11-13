@@ -30,7 +30,6 @@ c
       include "filunit.com"
       include "bndary.com"
       include "chmstry.com"
-c      include "App.com" 
       include "flags.com"
 c
       integer ncol,nrow,nspc
@@ -40,10 +39,6 @@ c
       do i=1,ncol
         do j=1,nrow
           do k=1,nspc
-c            write(6,*) 'In VDEPREAD: ',i,j,k,ncol,nrow,nspc
-c            write(6,*) 'VDEP: ',vdep(i,j,k)
-c            write(6,*) 'MODVDEP: ',modvdep(i,j,k)
-c            write(6,*) 'VDEP: ',vdep(i,j,k)
             modvdep(i,j,k)=vdep(i,j,k)
           enddo
         enddo

@@ -37,7 +37,7 @@ c
       r( 15) = rk( 15)*cncrad(kNO3)*conc(kNO)
       r( 16) = rk( 16)*cncrad(kNO3)*conc(kNO2)
       r( 17) = rk( 17)*cncrad(kNO3)*conc(kNO2)
-      r( 18) = rk( 18)*cncrad(kN2O5)*H2O
+      r( 18) = rk( 18)*cncrad(kN2O5)*H2O*nflag
       r( 19) = rk( 19)*cncrad(kN2O5)
       r( 20) = rk( 20)*conc(kNO)*conc(kNO)
       r( 21) = rk( 21)*conc(kNO)*conc(kNO2)*H2O
@@ -45,7 +45,7 @@ c
       r( 23) = rk( 23)*conc(kHONO)
       r( 24) = rk( 24)*cncrad(kOH)*conc(kHONO)
       r( 25) = rk( 25)*conc(kHONO)*conc(kHONO)
-      r( 26) = rk( 26)*conc(kNO2)*cncrad(kOH)
+      r( 26) = rk( 26)*conc(kNO2)*cncrad(kOH)*nflag
       r( 27) = rk( 27)*cncrad(kOH)*conc(kHNO3)
       r( 28) = rk( 28)*cncrad(kHO2)*conc(kNO)
       r( 29) = rk( 29)*cncrad(kHO2)*conc(kNO2)
@@ -60,10 +60,10 @@ c
       r( 38) = rk( 38)*conc(kFORM)
       r( 39) = rk( 39)*conc(kFORM)
       r( 40) = rk( 40)*conc(kFORM)*cncrad(kO)
-      r( 41) = rk( 41)*conc(kFORM)*cncrad(kNO3)
+      r( 41) = rk( 41)*conc(kFORM)*cncrad(kNO3)*nflag
       r( 42) = rk( 42)*conc(kALD2)*cncrad(kO)
       r( 43) = rk( 43)*conc(kALD2)*cncrad(kOH)
-      r( 44) = rk( 44)*conc(kALD2)*cncrad(kNO3)
+      r( 44) = rk( 44)*conc(kALD2)*cncrad(kNO3)*nflag
       r( 45) = rk( 45)*conc(kALD2)
       r( 46) = rk( 46)*cncrad(kC2O3)*conc(kNO)
       r( 47) = rk( 47)*cncrad(kC2O3)*conc(kNO2)
@@ -86,7 +86,7 @@ c
       r( 64) = rk( 64)*cncrad(kTO2)*conc(kNO)
       r( 65) = rk( 65)*cncrad(kTO2)
       r( 66) = rk( 66)*cncrad(kOH)*conc(kCRES)
-      r( 67) = rk( 67)*conc(kCRES)*cncrad(kNO3)
+      r( 67) = rk( 67)*conc(kCRES)*cncrad(kNO3)*nflag
       r( 68) = rk( 68)*cncrad(kCRO)*conc(kNO2)
       r( 69) = rk( 69)*conc(kOPEN)
       r( 70) = rk( 70)*conc(kOPEN)*cncrad(kOH)
@@ -113,7 +113,7 @@ c
       r( 91) = rk( 91)*cncrad(kCRO)
       r( 92) = rk( 92)*cncrad(kOH)*conc(kISPD)
       r( 93) = rk( 93)*conc(kO3)*conc(kISPD)
-      r( 94) = rk( 94)*cncrad(kNO3)*conc(kISPD)
+      r( 94) = rk( 94)*cncrad(kNO3)*conc(kISPD)*nflag
       r( 95) = rk( 95)*conc(kISPD)
       r( 96) = rk( 96)*conc(kNO2)*conc(kISOP)
       r( 97) = rk( 97)*cncrad(kO)*conc(kOLE2)

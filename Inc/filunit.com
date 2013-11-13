@@ -57,7 +57,7 @@ c-----------------------------------------------------------------------
      &               itopc,iaho,iptem,ihtp(MXGRID),iarem(3,MXGRID),
      &               isurf(MXGRID),iwind(MXGRID),itemp(MXGRID),
      &               ikv(MXGRID),irstc,irstf,irstp,iAppiP(MXSOUR-3),
-     &               iAppo,iAppoA,iAppinst,iAppiA(MXSOUR-3)
+     &               iAppo,iAppoA(MXLAY1),iAppinst,iAppiA(MXSOUR-3)
 c
 c========================= Process Analysis Begin ==============================
 c

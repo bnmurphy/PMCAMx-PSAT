@@ -1,0 +1,23 @@
+CAMx.102108.ASOA.3D - most up-to-date run as of November, 2008.  This is the base-case.  It does not include Lea's toluene yields, Scott's deltaH parameterizations, or anything with nitrate radicals.  It is capable of making multiple layer output files though.
+
+CAMx.122308.ASOA.3D.2 - is the same as the one before but it includes a comment in chemdriv.f to output the layer number so I can time how long the aerosol module is taking.
+
+CAMx.NOAGE.022609 - Density is corrected in SOAP module. ALL (POA, OPOA, ASOA, BSOA) aging is turned off by setting rxn rates themselves to 0.
+
+wetdep1.f - Version accompanying SAPRC, Gaydos code
+wetdep2.f - Version with Vlassis and alexandra code
+
+trap_SAPRC.f - Default version of trap capmatible with PSSA solveing of NO3 radicals
+trap_NO3.f  - new version of trap (Vlassis KARYDIS) which calls new radslvr subroutine correctly and implements OH concentration reporting
+
+
+CAMx.032009.ASOA.Rads.1 - ASOA aging, NO3 Hertel Chemistry, Radical Conc Output, Newest Hvap parameters (3-20-09)
+
+CAMx.041009.allage - ASOA and BSOA aging, NO3 QSSA Chemistry, Radical Conc Output, Newest Hvap params, New Density Treatment
+
+Budget Analysis
+CAMx.Budget.Base.063009 - Only Functionalized OA, Base-case. No BSOA aging
+CAMx.Budget.FUNC1.063009 - Same as Base-Case but with new fragmentation option for aging. Frag is set to 0 so that
+			   I can compare with the base-case and make sure code is working correctly.
+CAMx.Budget.P07S05.063009 - First sensitivity case. FUNC(POA) = 0.7; FRAG(POA) = 0.3
+						    FUNC(SOA) = 0.5; FRAG(SOA) = 0.5

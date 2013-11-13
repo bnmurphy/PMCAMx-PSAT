@@ -1,0 +1,11 @@
+rateslo5.f - SAPRC rates file currently in use
+rateslo5a.f - All Aging rxns result in volatility decrease
+rateslo5b.f - Branching ratio employed
+
+rxnrate5a.f - all aging rxns turned on
+rxnrate5b.f - base case, BSOA aging turned off
+rxnrate5c.f - SOA aging turned off
+
+radslvr5_SAPRC.f  - default radical chemistry solver. NO3 radical is unstable
+radslvr5_NO3.f - Vlassis version.  Uses Hertel's method to solve NO3-N2O5 system/
+radslvr5_BenNO3.f - BNM version.  Uses Hertel's eqn but includes r(12) in gain for NO3 because I think it should be there.

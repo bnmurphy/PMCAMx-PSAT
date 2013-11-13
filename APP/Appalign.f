@@ -1,6 +1,8 @@
       subroutine Appalign(actual,saconc)
 c
-c     This subroutine handles the changes in apportionment due to gas phase chemistry. 
+c     This program realigns the mass totals between CAMx and PSAT after
+c     the source tracers are sent through the vertical diffusion
+c     CAMx routines.
 c  
 c     DEVELOPED BY: 
 c     Kristina Wagstrom
@@ -8,14 +10,11 @@ c     Carnegie Mellon University (Chemical Engineering)
 c     04/13/2007
 c
 c     CALLED BY:
-c     
+c     emistrns
 c
 c     ROUTINES CALLED:
 c     none
 c
-c     VARIABLES (common):
-c     actual  - The model predicted total species concentrations
-c     saconc  - The array of source concentrations
 c     
 c     
       include 'camx.prm'

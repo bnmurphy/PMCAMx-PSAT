@@ -1,6 +1,7 @@
       subroutine Appaero(orig,final,ii,jj,kk,convfac)
 c
-c     This subroutine handles the changes in apportionment due to emissions. 
+c     This subroutine handles the changes in apportionment due to aerosol 
+c     processes. 
 c  
 c     DEVELOPED BY: 
 c     Kristina Wagstrom
@@ -8,23 +9,10 @@ c     Carnegie Mellon University (Chemical Engineering)
 c     04/13/2007
 c
 c     CALLED BY:
-c     
+c     chemdriv
 c
 c     ROUTINES CALLED:
 c     none
-c
-c     VARIABLES (common):
-c     Appnam  - Apportionment species names
-c     Appmap  - Mapping values between model and apportionment 
-c     MXSPEC  - Maximum number of species
-c     MXTRK   - Maximum number of tracked species
-c     AppemisP- Mapping between apportionment and emissions species - point
-c     AppemisA- Mapping between apportionment and emissions species - area
-c     
-c     VARIABLES (declared):
-c     i,j     - Counters
-c     match   - Check whether a match was found
-c     num     - Numbers 1-10 in text form
 c     
       include 'camx.prm'
       include 'camx.com'
@@ -37,10 +25,10 @@ c
       include 'flags.com'
       include 'App.com'
 c
-      real orig(MXSPEC),final(MXSPEC),MW(8),conv,convfac
-      integer i,j,k,aspc,gspc,n,s,loc,locA,locG,ii,jj,kk
-      integer nx,ny,nz,a,g,coorA(8),coorG(8),count
-      real total(MXTRK),frac,allsize(8,MXSOUR),allsizetot(8)
+      real orig(MXSPEC),final(MXSPEC),MW(38),conv,convfac
+      integer i,j,k,aspc,gspc,n,s,loc,locA,locG,ii,jj,kk,v
+      integer nx,ny,nz,a,g,coorA(38),coorG(38),count
+      real total(MXTRK),frac,allsize(38,MXSOUR),allsizetot(38)
       integer loc2,loc3,loc4,spc,coorP(5)
 c
       nx = ncol(1)
@@ -53,57 +41,149 @@ c
 c     ASSIGNING MW FOR GAS SPECIES
 c
       MW(1) = 98.1 !H2SO4 (SULF)
-      MW(2) = 150 !CG1
-      MW(3) = 150 !CG2
-      MW(4) = 150 !CG3
-      MW(5) = 180 !CG4
-      MW(6) = 36.5 !HCl
-      MW(7) = 17 !NH3
-      MW(8) = 63 !HNO3
+      MW(2) = 250 !CPO1
+      MW(3) = 250 !CPO2
+      MW(4) = 250 !CPO3
+      MW(5) = 250 !CPO4
+      MW(6) = 250 !CPO5
+      MW(7) = 250 !CPO6
+      MW(8) = 250 !CPO7
+      MW(9) = 250 !CPO8
+      MW(10) = 250 !COO1
+      MW(11) = 250 !COO2
+      MW(12) = 250 !COO3
+      MW(13) = 250 !COO4
+      MW(14) = 250 !COO5
+      MW(15) = 250 !COO6
+      MW(16) = 250 !COO7
+      MW(17) = 250 !COO8
+      MW(18) = 250 !CNS1
+      MW(19) = 250 !CNS2
+      MW(20) = 250 !CNS3
+      MW(21) = 250 !CNS4
+      MW(22) = 250 !CNS5
+      MW(23) = 250 !CNS6
+      MW(24) = 250 !CNS7
+      MW(25) = 250 !CNS8
+      MW(26) = 180 !CBS1
+      MW(27) = 180 !CBS2
+      MW(28) = 180 !CBS3
+      MW(29) = 180 !CBS4
+      MW(30) = 180 !CBS5
+      MW(31) = 150 !CAS1
+      MW(32) = 150 !CAS2
+      MW(33) = 150 !CAS3
+      MW(34) = 150 !CAS4
+      MW(35) = 150 !CAS5
+      MW(36) = 36.5 !HCl
+      MW(37) = 17 !NH3
+      MW(38) = 63 !HNO3
 c
-c     MAP GAS TO AEROSOL
-      coorA(1) = 145 !PSO4
-      coorA(2) = 25 !SOA1
-      coorA(3) = 35 !SOA2
-      coorA(4) = 45 !SOA3
-      coorA(5) = 55 !SOA4
-      coorA(6) = 105 !PCL
-      coorA(7) = 125 !PNH4
-      coorA(8) = 135 !PNO3
+c     MAP GAS TO AEROSOL (the gas/aerosol pairs share an index)
+      coorA(1) = 115 !PSO4
+      coorA(2) = 125 !APO1
+      coorA(3) = 135 !APO2
+      coorA(4) = 145 !APO3
+      coorA(5) = 155 !APO4
+      coorA(6) = 165 !APO5
+      coorA(7) = 175 !APO6
+      coorA(8) = 185 !APO7
+      coorA(9) = 195 !APO8
+      coorA(10) = 205 !AOO1
+      coorA(11) = 215 !AOO2
+      coorA(12) = 225 !AOO3
+      coorA(13) = 235 !AOO4
+      coorA(14) = 245 !AOO5
+      coorA(15) = 255 !AOO6
+      coorA(16) = 265 !AOO7
+      coorA(17) = 275 !AOO8
+      coorA(18) = 285 !ANS1
+      coorA(19) = 295 !ANS2
+      coorA(20) = 305 !ANS3
+      coorA(21) = 315 !ANS4
+      coorA(22) = 325 !ANS5
+      coorA(23) = 335 !ANS6
+      coorA(24) = 345 !ANS7
+      coorA(25) = 355 !ANS8
+      coorA(26) = 365 !ABS1
+      coorA(27) = 375 !ABS2
+      coorA(28) = 385 !ABS3
+      coorA(29) = 395 !ABS4
+      coorA(30) = 405 !ABS5
+      coorA(31) = 415 !AAS1
+      coorA(32) = 425 !AAS2
+      coorA(33) = 435 !AAS3
+      coorA(34) = 445 !AAS4
+      coorA(35) = 455 !AAS5
+      coorA(36) = 195 !PCL
+      coorA(37) = 475 !PNH4
+      coorA(38) = 465 !PNO3
       coorG(1) = 15 !SO2
-      coorG(2) = 19 !CG1
-      coorG(3) = 20 !CG2
-      coorG(4) = 21 !CG3
-      coorG(5) = 22 !CG4
-      coorG(6) = 24 !HCL
-      coorG(7) = 17 !NH3
-      coorG(8) = 11 !HNO3
+      coorG(2) = 22 !CPO1
+      coorG(3) = 23 !CPO2
+      coorG(4) = 24 !CPO3
+      coorG(5) = 25 !CPO4
+      coorG(6) = 26 !CPO5
+      coorG(7) = 27 !CPO6
+      coorG(8) = 28 !CPO7
+      coorG(9) = 29 !CPO8
+      coorG(10) = 30 !COO1
+      coorG(11) = 31 !COO2
+      coorG(12) = 32 !COO3
+      coorG(13) = 33 !COO4
+      coorG(14) = 34 !COO5
+      coorG(15) = 35 !COO6
+      coorG(16) = 36 !COO7
+      coorG(17) = 37 !COO8
+      coorG(18) = 38 !CNS1
+      coorG(19) = 39 !CNS2
+      coorG(20) = 40 !CNS3
+      coorG(21) = 41 !CNS4
+      coorG(22) = 42 !CNS5
+      coorG(23) = 43 !CNS6
+      coorG(24) = 44 !CNS7
+      coorG(25) = 45 !CNS8
+      coorG(26) = 46 !CBS1
+      coorG(27) = 47 !CBS2
+      coorG(28) = 48 !CBS3
+      coorG(29) = 49 !CBS4
+      coorG(30) = 50 !CBS5
+      coorG(31) = 51 !CAS1
+      coorG(32) = 52 !CAS2
+      coorG(33) = 53 !CAS3
+      coorG(34) = 54 !CAS4
+      coorG(35) = 55 !CAS5
+      coorG(36) = 19 !HCL
+      coorG(37) = 17 !NH3
+      coorG(38) = 11 !HNO3
       !Primary species
       coorP(1) = 65
       coorP(2) = 75
       coorP(3) = 85
       coorP(4) = 95
-      coorP(5) = 115
+      coorP(5) = 105
+
 c
 c     GETTING TOTALS
       do n=1,MXTRK
+        if ( (n.gt.sa_num_gas .and. n.lt.65) .or.n.ge.485) goto 200
         total(n) = 0
         do s=1,Appnum+3
           loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(n-1) +
      &          nx*ny*nz*MXTRK*(s-1)
           total(n) = total(n) + Appconc(loc)
         enddo
-        if (n.lt.25) conv = convfac
-        if (n.ge.25) conv = 1
+        if (n.le.sa_num_gas) conv = convfac
+        if (n.gt.sa_num_gas) conv = 1
 c
 c     CHECKING TOTALS AT BEGINNING
         if (abs(total(n)-orig(Appmaprev(n))).gt.
-     &      0.05*MIN(orig(Appmaprev(n)),total(n)).or.
+     &      0.10*MIN(orig(Appmaprev(n)),total(n)).or.
      &      orig(Appmaprev(n)).eq.bdnl(Appmaprev(n))*conv) then 
           if ((abs(orig(Appmaprev(n))-bdnl(Appmaprev(n))*conv).lt.
      &         0.05*bdnl(Appmaprev(n))*conv).or.
      &        (n.eq.4).or.(n.eq.5).or.
-     &        (i.eq.1.or.i.eq.96.or.j.eq.1.or.j.eq.90))
+     &        (i.eq.1.or.i.eq.97.or.j.eq.1.or.j.eq.90))
      &         then
             do ict=1,Appnum+3
               loc3 = i + nx*(j-1) + nx*ny*(k-1)+nx*ny*nz*(n-1)+
@@ -123,14 +203,15 @@ c     CHECKING TOTALS AT BEGINNING
             write(6,*) 'Total,old:',total(n),orig(Appmaprev(n))
             write(6,*) 'New: ',final(Appmaprev(n))
             write(6,*) 'Bdnl: ',bdnl(Appmaprev(n))*conv,conv
-            stop
+             stop
           endif
         endif
+ 200    continue  !Skip the blank arrays between ALK4 and PEC_1
       enddo
 c
       conv = convfac
 c     TOTALS FOR AEROSOL SPECIES -- ADD ALL SIZE SECTIONS TOGETHER
-      do count=1,8
+      do count=1,38
         allsizetot(count) = 0.0
         do n=1,10
           do s=1,Appnum+3
@@ -172,8 +253,8 @@ c     SULFATE
         enddo
       enddo
 c
-c     Remaining Species
-      do count=2,8
+c     Remaining Species (semi-volatiles)
+      do count=2,38
         do n=1,10
           a = coorA(count)-1+n
           g = coorG(count)
@@ -188,21 +269,19 @@ c     Remaining Species
             frac = (Appconc(locG)*MW(count)+allsize(count,s))/
      &             (total(g)*MW(count)+allsizetot(count))
             check = check + frac
-c            write(6,*) s,check,Appconc(locG),allsize(count,s),
-c     &                 total(g),allsizetot(count)
             if (frac.lt.0.or.frac.gt.1) write(6,*) 'Improper frac: ',
      &        frac,i,j,k,a,g,s
             if (abs(1-check).gt.0.001.and.s.eq.Appnum+3) then
               write(6,*) 'frac Total not 1: ',frac,i,j,k,a,g,check,
      &                   count
-              do s=1,Appnum+3
+              do v=1,Appnum+3
                 locA = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(a-1) +
-     &                 nx*ny*nz*MXTRK*(s-1)
+     &                 nx*ny*nz*MXTRK*(v-1)
                 locG = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(g-1) +
-     &                 nx*ny*nz*MXTRK*(s-1)
-                frac = (Appconc(locG)*MW(count)+allsize(count,s))/
+     &                 nx*ny*nz*MXTRK*(v-1)
+                frac = (Appconc(locG)*MW(count)+allsize(count,v))/
      &                 (total(g)*MW(count)+allsizetot(count))
-                write(6,*) allsize(count,s),Appconc(locG),frac,total(g),
+                write(6,*) allsize(count,v),Appconc(locG),frac,total(g),
      &                     total(g),allsizetot(count),MW(count)
               enddo
               stop
@@ -267,35 +346,8 @@ c
 c-------------------------------------------------------------------
 c------------------------CHECKS-------------------------------------
 c-------------------------------------------------------------------
-c   90/10 Check
       do spc=1,MXTRK
-c        loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
-c     &        nx*ny*nz*MXTRK*(3-1)
-c        loc2 = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
-c     &         nx*ny*nz*MXTRK*(4-1)
-c        loc3 = Appmaprev(spc)
-c        do n=1,4
-c          loc4 = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
-c     &          nx*ny*nz*MXTRK*(n-1)
-c          if (Appconc(loc4).lt.0.and.abs(Appconc(loc4)).lt.
-c     &         0.0001*final(Appmaprev(spc))) then
-c            Appconc(loc4) = 0
-c          endif
-c        enddo
-c        if (abs(Appconc(loc)*9-Appconc(loc2)).gt.0.01*Appconc(loc2).and.
-c     &      Appconc(loc).gt.0.001*final(loc3)) then
-c          write(6,*) 'ERROR in Appaero: 90/10 split incorrect'
-c          write(6,*) 'i,j,k,spc: ',i,j,k,spc
-c          write(6,*) 'Actual Conc.(old, new)',orig(loc3)
-c     &               ,final(loc3),loc3
-c          do s=1,Appnum+3
-c            loc = i + nx*(j-1) + nx*ny*(k-1) + nx*ny*nz*(spc-1) +
-c     &            nx*ny*nz*MXTRK*(s-1)
-c            write(6,*) s,Appconc(loc)
-c          enddo
-c          stop
-c        endif
-c
+
 c
 c-----Check total & Negative Concentrations
         tot = 0.0
@@ -318,7 +370,7 @@ c            stop
 c          endif
           tot = tot+Appconc(loc)
         enddo
-        if (abs(tot-final(loc2)).gt.0.05*MIN(final(loc2),tot)) 
+        if (abs(tot-final(loc2)).gt.0.10*MIN(final(loc2),tot)) 
      &       then
 c          if (final(Appmaprev(n)).eq.bdnl(Appmaprev(n))) then
 c            do ict=1,Appnum+3

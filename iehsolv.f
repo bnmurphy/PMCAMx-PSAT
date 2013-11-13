@@ -52,6 +52,7 @@ c
       include "camx.prm"
       include "chmstry.com"
       include "filunit.com"
+      include "iehchem.com"
 c
 c========================== Process Analysis Begin ==================================
 c
@@ -216,6 +217,8 @@ c
         call ierxn(y,neq(2),rrxn,rk,nreact)
         call ieslow(rrxn,rate,gain,loss,nreact,neq(2),
      &              nrad+nspfst+1,nrad+ngas)
+
+
         do l = nrad+nspfst+1, nrad+ngas
           tmp = y(l) + dtuse*rate(l)
           y(l) = amax1(tmp, bdnl(l-nrad))

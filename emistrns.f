@@ -46,7 +46,7 @@ c
       include 'filunit.com'
       include "ptemiss.com"
       include "bndary.com"
-      include 'App.com'
+      include 'App.com' !Added by Kristina
 c
 c======================== Process Analysis Begin ====================================
 c
@@ -309,7 +309,8 @@ c
       write(6,*) 'PSAT Diffusion calculations ...'
 c
 c      p=vdep(iptrem(igrd))
-      call vdepread(ncol(igrd),nrow(igrd),nspec,vdep(iptrem(igrd)),modvdep)
+      call vdepread(ncol(igrd),nrow(igrd),nspec,vdep(iptrem(igrd)),
+     &              modvdep)
       do i=1,ncol(igrd)
         do j=1,nrow(igrd)
           do k=1,nlay(igrd)
@@ -319,8 +320,10 @@ c      p=vdep(iptrem(igrd))
                 modspc = Appmaprev(n)
 c                write(6,*) 'Here: ',i,j,k,n,s,modspc,saspc,MXSOUR
 c                if (k.eq.1) savdep(i,j,saspc) = modvdep(i,j,modspc)
-                loc=i+ncol(igrd)*(j-1)+(nrow(igrd)*ncol(igrd))*(k-1)+(nlay(igrd)*
-     &              ncol(igrd)*nrow(igrd))*(n-1)+(MXTRK*ncol(igrd)*nrow(igrd)*
+                loc=i+ncol(igrd)*(j-1)+(nrow(igrd)*ncol(igrd))*(k-1)+
+     &              (nlay(igrd)*
+     &              ncol(igrd)*nrow(igrd))*(n-1)+(MXTRK*ncol(igrd)
+     &              *nrow(igrd)*
      &              nlay(igrd))*(s-1)
 c                write(6,*) 'Here #2: ',loc
                 saconc(i,j,k,saspc)=Appconc(loc)
@@ -329,6 +332,7 @@ c                write(6,*) 'Here #2: ',loc
           enddo
         enddo
       enddo
+
 c
       write(6,*) 'PSAT diffusion calculations, take 2'
 c              
@@ -337,8 +341,10 @@ c
 c  --- call routine with tracer species arrays, send dummy
 c      arguemnts for the total mass arrays ---
 c
+c     --Call modified by Kristina to calculate source tracer diffusion---------
+c
          call diffus(igrd,ncol(igrd),nrow(igrd),nlay(igrd),
-     &               MXTRK*MXSOUR,1,
+     &               MXTRK*MXSOUR,1,                          
      &               deltat(igrd),deltax(1,igrd),deltay(igrd),
      &               idfin(iptr2d(igrd)),savdep,rkx(iptr3d(igrd)),
      &               rky(iptr3d(igrd)),rkv(iptr3d(igrd)),
@@ -347,11 +353,14 @@ c
      &               saconc,fluxdum,depdum,saconc,
      &               tarray2,
      &               '  SA z diffus ......','  SA x/y diff ......',
-     &               ipacl_2d(iptr2d(igrd)),ipacl_3d(iptr3d(igrd)) )
+     &               ipacl_2d(iptr2d(igrd)),ipacl_3d(iptr3d(igrd)) )  
 c
 c----Added by Kristina 08/08/08---------------------------------
 c
         call Appalign(conc(iptr4d(igrd)),saconc)
+c
+c -----End added 08/08/08---------------------------------------
+c
       endif
 c
 c========================= Source Apportion End ========================

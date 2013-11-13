@@ -223,7 +223,7 @@ c
 c
 c======================== Process Analysis Begin ====================================
 c
-      if (ldoipts.or.lApp) then
+      if (ldoipts.or.lApp) then    !lApp added by Kristina
         do k = 1,nlay+1
           aa_old(k) = aa(k)
           cc_old(k) = cc(k)

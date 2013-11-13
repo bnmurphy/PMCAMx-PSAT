@@ -1,6 +1,7 @@
-       subroutine Appsetpt(pointemis,npointsp)
+       subroutine Appsetpt
+c       subroutine Appsetpt(pointemis,npointsp)
 c
-c     This subroutine reads in the source specific area emissions.
+c     This subroutine sets the source specific point emissions.
 c  
 c     DEVELOPED BY: 
 c     Kristina Wagstrom
@@ -13,18 +14,6 @@ c
 c     ROUTINES CALLED:
 c     none
 c
-c     VARIABLES (common):
-c     spname  - Modeled species names
-c     Appnam  - Apportionment species names
-c     Appmap  - Mapping values between model and apportionment 
-c     MXSPEC  - Maximum number of species
-c     MXTRK   - Maximum number of tracked species
-c     
-c     VARIABLES (declared):
-c     i,j     - Counters
-c     match   - Check whether a match was found
-c     num     - Numbers 1-10 in text form
-c     
       include 'camx.prm'
       include 'camx.com'
       include 'camxfld.com'
@@ -36,8 +25,8 @@ c
       include 'flags.com'
       include 'App.com'
 c
-      real pointemis(120000,MXSPEC)
-      real Appemis(120000,MXTRK)
+c      real pointemis(120000,MXSPEC)
+c      real Appemis(120000,MXTRK)
       real flowrat1(120000),effph1(120000)
       character*4 name1(10)
       integer s

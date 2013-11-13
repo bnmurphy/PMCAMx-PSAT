@@ -1,7 +1,8 @@
       subroutine chemdriv(igrd,ncol,nrow,nlay,dt,itzon,idfin,fcloud,
      &                    cldtrns,water,tempk,press,height,cwc,conc,
      &                    cncrad,cellat,cellon,ldark,l3davg,
-     &                    iptr2d,iptrsa,ipa_cel)
+     &                    iptr2d,iptrsa,ipa_cel, masschem,masspart, !<- BNM 6/2/09
+     &                    dxmass, dymass, dzmass )    !<-BNM 6/30/09
 c
 c-----CAMx v4.02 030709
 c
@@ -88,12 +89,6 @@ c======================== Source Apportion Begin =======================
 c
       include "tracer.com"
 c
-c-------------Added by Kristina 08/19/07--------------------------------
-c
-c      include 'flags.com'
-c
-c-----------------End Added 08/19/07------------------------------------
-c
 c-----------------------------------------------------------------------
 c  Local variables:
 c-----------------------------------------------------------------------
@@ -101,7 +96,15 @@ c
       integer   ispc
       real      delo3, delno, delno2, delvoc, delh22, delhn3
       real      modo3, modnox, modvoc, o3old, o3new
-      real      cold(MXTRSP), cnew(MXTRSP)
+      real      cold(MXTRSP), cnew(MXTRSP), dtchem
+
+C BNM         VARIABLES FOR SUMMING MASSES
+      real dconcchem(ncol,nrow,nlay,nspec), dconcpart(ncol,nrow,nlay,nspec)
+      real conca(nspec), concb(nspec)
+      real masschem(nspec), masspart(nspec)
+      real dxmass(nrow), dymass, dzmass(ncol,nrow,nlay)
+      real concbnmNO2        !debugging
+
 c
 c========================= Source Apportion End ========================
 c
@@ -154,6 +157,7 @@ c-----Entry point
 c
       lApp = .TRUE. !Added by Kristina
 c
+
       call flush(6)
       call flush(iout)
 c
@@ -168,7 +172,7 @@ c     aero_dt  : actual time interval for each grid (hr) (accumulated dtchem)
       aero_tchk = time
       aero_dt(igrd) = aero_dt(igrd) + dtchem
       laero_upd = .false.
-      if (idmech.eq.6) then ! bkoo_dbg
+      if (idmech.eq.6.or.idmech.eq.5) then ! bkoo_dbg
       write(*,*) 'aerotchk,grdtime: ',aero_tchk,grd_time(igrd)
       if ( (aero_tchk-grd_time(igrd)) .ge. -0.01 .and.
      &     (date .eq. date_aer(igrd)) ) then
@@ -178,6 +182,21 @@ c     aero_dt  : actual time interval for each grid (hr) (accumulated dtchem)
       endif
       endif                 ! bkoo_dbg
 c
+CDEBUGBNM  PRINT BSOG Concentration
+c        concbnmNO2 = 0.0
+c        concbnmNO = 0.0
+c        do k2 = 1,nlay
+c        do i2 = 1,ncol
+c         do j2 = 1,nrow
+c          concbnmNO2 = concbnmNO2 + conc(i2,j2,k2,KCBS1)
+c          concbnmNO = concbnmNO + conc(i2,j2,k2,KCBS2)
+c         enddo
+c        enddo
+c        enddo
+c        print *,'CHEMDRIV: Ccbs1(Before chem)=',concbnmNO2
+c        print *,'CHEMDRIV: Ccbs2(Before chem)=',concbnmNO
+
+
       igrdchm = igrd
       do 91 k = 1,nlay
 c
@@ -192,6 +211,7 @@ c$omp&  copyin(/ijkgrd/)
 c
 c$omp do schedule(dynamic)
 c
+
         do 90 j = 2,nrow-1
           i1 = 2
           i2 = ncol-1
@@ -204,6 +224,7 @@ c
             ichm = i
             jchm = j
             kchm = k
+
 c
 c-----skip chemistry if fine grid exists in this cell
 c
@@ -222,10 +243,8 @@ cbk              conc(i,j,k,kcg2) = conc(i,j,k,kcg2)*convfac
 cbk              conc(i,j,k,kcg3) = conc(i,j,k,kcg3)*convfac
 cbk              conc(i,j,k,kcg4) = conc(i,j,k,kcg4)*convfac
 cbk            endif
-c
-c
             do is = 1,ngas
-              con(is) = conc(i,j,k,is)/convfac
+              con(is) = conc(i,j,k,is)/convfac  !umol/m3->ppm
               if (con(is).lt.0.) then
                 write(iout,'(//,a)') 'ERROR in CHEMDRIV:'
                 write(iout,*) 'Negative concentration before chem'
@@ -236,11 +255,11 @@ c
                 call camxerr()
               endif
               con(is) = amax1(bdnl(is),con(is))
-c
             enddo
 c
 c-----Load any aerosols
 c
+
             if (ngas.lt.nspec) then
               do is=ngas+1,nspec
                 con(is) = conc(i,j,k,is)
@@ -256,6 +275,7 @@ c
                 con(is) = amax1(bdnl(is),con(is))
               enddo
             endif
+
 c
 c-----Load radicals from last time step to use as initial guess
 c
@@ -405,24 +425,86 @@ c
      &             lirr,i,j,k) !Kristina added i,j,k,changes on 06/21/07
                  call aerochem(water(i,j,k),tcell,pcell,cwc(i,j,k),con,
      &                                  convfac,dtchem,ldoipr,ipa_idx)
-               elseif (idmech.eq.5) then
-                 call trap(rxnrate5,radslvr5,ratejac5,rateslo5,dtchem,
-     &             ldark(i,j),water(i,j,k),atm,O2,CH4,H2,con,crad,
-     &             avgrad,tcell,
-     &             sddm,nddmsp,ngas,ddmjac5,lddm,nirrrxn,titrt,rrxn_irr,
-     &             lirr,i,j,k) !Kristina added i,j,k,changes on 06/21/07
-               elseif (idmech.eq.6) then
+
+               elseif (idmech.eq.5) then  !Used for SAPRC/VBS Version
                  if (ldark(i,j)) then
                    nflag=1.0d0
                  else
                    nflag=1.0d0
                  endif
-                 call trap(rxnrate6,radslvr6,ratejac6,rateslo6,dtchem,
+
+C BNM                Split Budget Contributions from Chemistry and Partitioning
+
+CDEBUG
+c                print *
+c                print *,'CHEMDRIV: dtchem=',dtchem
+
+                  do ispc = 1,nspec
+                        conca(ispc) = conc(i,j,k,ispc)
+                  enddo
+C END <- BNM 
+
+c
+CDEBUGBNM  PRINT OPOG Concentration
+c        concbnmNO2 = 0.0
+c        concbnmNO = 0.0
+c        do k2 = 1,nlay
+c        do i2 = 1,ncol
+c         do j2 = 1,nrow
+c          concbnmNO2 = concbnmNO2 + conc(i2,j2,k2,KCBS1)
+c          concbnmNO = concbnmNO + conc(i2,j2,k2,KCBS2)
+c         enddo
+c        enddo
+c        enddo
+c        print *,'CHEMDRIV: Ccbs1(Before chem)=',concbnmNO2
+c        print *,'CHEMDRIV: Ccbs2(Before chem)=',concbnmNO
+c        print *,'CHEMDRIV: Con(cbs1,Before chem)=',con(KCBS1)
+c         loc = 73+97*(6-1)+90*97*(1-1)+97*90*14*(14-1)+97*90*14*490*(1-1)
+c         print *,'Chemdriv: Appconc(73,6,1,PAN2)=',
+c     &           (Appconc(loc+97*90*14*490*(is-1)),is=1,4) 
+
+                 call trap(rxnrate5,radslvr5,ratejac5,rateslo5,dtchem,
      &             ldark(i,j),water(i,j,k),atm,O2,CH4,H2,con,crad,
      &             avgrad,tcell,
-     &             sddm,nddmsp,ngas,ddmjac6,lddm,nirrrxn,titrt,rrxn_irr,
+     &             sddm,nddmsp,ngas,ddmjac5,lddm,nirrrxn,titrt,rrxn_irr,
      &             lirr,i,j,k,convfac) !Kristina added i,j,k,changes on 06/21/07
-                 if ( laero_upd ) then !Kristina added "then" on 05/11/07
+
+C END <- BNM 
+
+C BNM                Account for just contribution from chemistry
+CDEBUGBNM  PRINT OPOG Concentration
+c        concbnmNO2 = 0.0
+c        concbnmNO = 0.0
+c        do k2 = 1,nlay
+c        do i2 = 1,ncol
+c         do j2 = 1,nrow
+c          concbnmNO2 = concbnmNO2 + conc(i2,j2,k2,KCBS1)
+c          concbnmNO = concbnmNO + conc(i2,j2,k2,KCBS2)
+c         enddo
+c        enddo
+c        enddo
+c        print *,'CHEMDRIV: Ccbs1(After chem)=',concbnmNO2
+c        print *,'CHEMDRIV: Ccbs2(After chem)=',concbnmNO
+c        print *,'CHEMDRIV: Con(cbs1,After chem)=',con(KCbs1)
+
+                     do ispc = 1,ngas
+                        dconcchem(i,j,k,ispc) = amax1(bdnl(ispc),con(ispc))*convfac
+     &                                - conca(ispc)
+                        concb(ispc) = amax1(bdnl(ispc),con(ispc))*convfac
+                      enddo
+                      if (ngas.lt.nspec) then
+                          do ispc = ngas+1,nspec
+                        dconcchem(i,j,k,ispc) = amax1(con(ispc),bdnl(ispc))
+     &                                - conca(ispc)
+                        concb(ispc) = amax1(bdnl(ispc),con(ispc))
+                          enddo
+                      endif
+CDEBUG
+c                print *,'CHEMDRIV: dtchem before aero=',dtchem
+                dtchem1 = dtchem
+C END <- BNM
+
+                 if ( laero_upd )then !Kristina added "then" on 05/11/07
 c
 c------------------Added by Kristina 05/11/07------------------------
 c
@@ -437,11 +519,11 @@ c
                    endif
 c
 c-------------------End added 05/11/07--------------------------------
-c                  
+c
                    call fullaero(water(i,j,k),tcell,pcell,cwc(i,j,k),
-     &                           MXSPEC,MXRADCL,NSPEC,NGAS,
-     &                           con,crad,convfac,time,aero_dt(igrd),
-     &                           i,j,k,height)
+     &                         MXSPEC,MXRADCL,NSPEC,NGAS,
+     &                         con,crad,convfac,time,aero_dt(igrd),
+     &                         i,j,k,height)
 c
 c------------------Added by Kristina 05/11/07------------------------
 c
@@ -463,8 +545,61 @@ c
                    endif
 c
 c-------------------End added 05/11/07--------------------------------
-c  
+c 
                  endif !Added by Kristina on 05/11/07
+
+C END <- BNM 
+CDEBUGBNM  PRINT OPOG Concentration
+c        concbnmNO2 = 0.0
+c        concbnmNO = 0.0
+c        do k2 = 1,nlay
+c        do i2 = 1,ncol
+c         do j2 = 1,nrow
+c          concbnmNO2 = concbnmNO2 + conc(i2,j2,k2,KCBS1)
+c          concbnmNO = concbnmNO + conc(i2,j2,k2,KCBS2)
+c         enddo
+c        enddo
+c        enddo
+c        print *,'CHEMDRIV: Ccbs1(After aero)=',concbnmNO2
+c        print *,'CHEMDRIV: Ccbs2(After aero)=',concbnmNO
+c        print *,'CHEMDRIV: Con(cbs1,After aero)=',con(KCBS1)
+c        print *
+
+C BNM                Account for just contribution from partitioning
+
+CDEBUG
+c                print *,'CHEMDRIV: after aero dtchem=',dtchem
+c                print *,'CHEMDRIV: after aero dtchem1=',dtchem1
+                dtchem = dtchem1
+
+                     do ispc = 1,ngas
+                        dconcpart(i,j,k,ispc) = amax1(bdnl(ispc),con(ispc))*convfac
+     &                                - concb(ispc)
+                      enddo
+                      if (ngas.lt.nspec) then
+                          do ispc = ngas+1,nspec
+                        dconcpart(i,j,k,ispc) = amax1(con(ispc),bdnl(ispc))
+     &                                - concb(ispc)
+                          enddo
+                      endif
+C END <- BNM
+
+               elseif (idmech.eq.6) then
+                 if (ldark(i,j)) then
+                   nflag=1.0d0
+                 else
+                   nflag=1.0d0
+                 endif
+                 call trap(rxnrate6,radslvr6,ratejac6,rateslo6,dtchem,
+     &             ldark(i,j),water(i,j,k),atm,O2,CH4,H2,con,crad,
+     &             avgrad,tcell,
+     &             sddm,nddmsp,ngas,ddmjac6,lddm,nirrrxn,titrt,rrxn_irr,
+     &             lirr)
+                 if ( laero_upd )
+     &           call fullaero(water(i,j,k),tcell,pcell,cwc(i,j,k),
+     &                         MXSPEC,MXRADCL,NSPEC,NGAS,
+     &                         con,crad,convfac,time,aero_dt(igrd),
+     &                         i,j,k,height)
                endif
 c
             elseif ( idsolv .EQ. IDIEH ) then
@@ -506,6 +641,7 @@ c
             do l=1,nrad
               cncrad(i,j,k,l) = amax1(crad(l),bdlrad)
             enddo
+
 c
 c======================== Source Apportion Begin =======================
 c
@@ -634,21 +770,77 @@ cbk              con(kcg4) = con(kcg4)/convfac
 cbk            endif
             do is=1,ngas
               con(is) = amax1(bdnl(is),con(is)) ! bkoo (03/12/03)
-              conc(i,j,k,is) = con(is)*convfac
+              conc(i,j,k,is) = con(is)*convfac  ! ppm->umol/m3
             enddo
             if (ngas.lt.nspec) then
               do is=ngas+1,nspec
                 conc(i,j,k,is) = amax1(con(is),bdnl(is))
               enddo
             endif
-c
-  89      continue
-  90    continue
+
+  89      continue  !col
+  90    continue    !row
+
+c BNM
+        print *,'Layer: ',k
+c BNM
+
 c
 c$omp end parallel
 c
-  91  continue
+  91  continue  !Layer
 c
+
+C BNM         ADD UP MASS CONTRIBUTIONS OF CHEMISTRY AND PARTITIONOING FROM
+C        ALL ROWS, COLUMNS, AND LAYERS
+        do ispc = 1,nspec
+            do k = 1,nlay
+            do j = 2,nrow-1
+            do i = ibeg(j),iend(j)
+                masschem(ispc) = masschem(ispc) 
+     &                  + dconcchem(i,j,k,ispc)*dxmass(j)*dymass*dzmass(i,j,k)
+                masspart(ispc) = masspart(ispc) 
+     &                  + dconcpart(i,j,k,ispc)*dxmass(j)*dymass*dzmass(i,j,k)
+            enddo
+            enddo
+            enddo
+        enddo
+C END <- BNM
+
+
+c BNM cccc ------------- Write Radicals Murphy -------------- cccc
+c Write these radicals once every time step instead of within the
+c  Trap.f subroutine (1 write statement vs 90*97*14 write statements
+
+c-----------------write OH Tsimpidi------------------------
+c      call get_param(igrdchm,ichm,jchm,kchm,iout,idiag)
+       do irads = 1,nrads
+        do k = 1,MXLAY1
+          if (l3davg.or.k.eq.1) then
+c            print *, 'l3davg = ',l3davg
+c            print *,'Trap Time: ',dtchem
+c            print *,'Time Time: ',time
+c            print *,'Grid cell: i=',ichm,' j=',jchm,' k=',kchm
+c            print *,'iavg = ',iavg
+            write(iavg+(k-1)*(1+nrads)+irads) time,
+     &           ((bnmradcnc(irads,i,j,k),i=1,MXCOL1),j=1,MXROW1)
+c             print *,'bnmradcnc(OH,Pit) = ', bnmradcnc(1,55,61,k)
+c             print *,'bnmradcnc(NO3,Pit) = ', bnmradcnc(2,55,61,k)
+c             print *,'bnmradcnc(HO2,Pit) = ', bnmradcnc(3,55,61,k)
+
+
+c            print *, 'Writing to file unit: ',iavg+(k-1)*(1+nrads)+irads, '  for radical ',crads(irads)
+          endif
+        enddo
+       enddo
+c----------------------------------------------------------
+
+
+
+
+c BNM cccc -------------------------------------------------
+
+
 c     if fullaero was called
 c     - reset aero_dt 
 c     - increase grd_time (& date_aer) by dtaero (or multiple of dtaero)
@@ -667,6 +859,6 @@ c     - increase grd_time (& date_aer) by dtaero (or multiple of dtaero)
         goto 92
       endif
   93  continue
-c
+
       return
       end

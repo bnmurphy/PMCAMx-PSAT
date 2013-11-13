@@ -13,11 +13,6 @@ c
 c     ROUTINES CALLED:
 c     Appwrt.f
 c
-c     VARIABLES (common):
-c     Appavg  -- Hourly averaged source concentrations
-c     Appconc -- Instantaneous source concentrations
-c     
-c     
       include 'camx.prm'
       include 'camx.com'
       include 'camxfld.com'
@@ -49,9 +44,9 @@ c
                 loc2 = i+MXCOL1*(j-1)+MXCOL1*MXROW1*MXLAY1*(spc-1)+
      &                MXCOL1*MXROW1*MXLAY1*MXTRK*(s-1)
                 loc3 = i+MXCOL1*(j-1)
-                if (spc.le.24) then !Change if change PSAT species
+                if (spc.le.sa_num_gas) then !Change if change PSAT species
                   convfac=densfac*(273./tempk(loc3))*
-     &                    (press(loc3)/1013.)
+     &                    (press(loc3)/1013.)    !For Gases, umol/m3->ppm
                   Appavg(loc) = Appconc(loc2)/convfac
 c                  if (s.eq.4.and.spc.eq.15.and.Appavg(loc).ne.0)
 c     &              write(6,*) i,j,spc,s,Appavg(loc),Appconc(loc)
@@ -75,9 +70,9 @@ c
                 loc2 = i+MXCOL1*(j-1)+MXCOL1*MXROW1*MXLAY1*(spc-1)+
      &                MXCOL1*MXROW1*MXLAY1*MXTRK*(s-1)
                 loc3 = i+MXCOL1*(j-1)
-                if (spc.le.24) then !Change if change PSAT species
+                if (spc.le.sa_num_gas) then !Change if change PSAT species
                   convfac=densfac*(273./tempk(loc3))*
-     &                    (press(loc3)/1013.)
+     &                    (press(loc3)/1013.)    !For Gases, umol/m3->ppm
                   Appavg(loc) = (Appconc(loc2)/convfac+Appavg(loc)*
      &                          Appct)/(Appct+1)
                 else

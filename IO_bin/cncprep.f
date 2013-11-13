@@ -189,32 +189,23 @@ c
       else
         nlayer = 1 
       endif
-
-c
-c-----Coarse grid average header-not binary
-c
-
-c      rewind(30)
-c      write(30,11) ifile,note,nseg,navspc,idat1,tim1,idat2,tim2
-c      write(30,12) zero,zero,izone,orgx,orgy,dx,dy,nx,ny,nlayer,
-c     &            izero,izero,zero,zero,zero
-c      write(30,13) izero,izero,nx,ny
-c      write(30,14) ((icspec(n,l),n=1,10),l=1,navspc)
-
-c 11   format(10A,60A,3I10,F17.7,I10,F17.7)
-c 12   format(2F17.7,I10,4F17.7,5I10,3F17.7)
-c 13   format(4I10)
-c 14   format(1580A)
 c
 c-----Coarse grid average header
 c
-      rewind(iavg)
-      write(iavg) ifile,note,nseg,navspc,idat1,tim1,idat2,tim2
-      write(iavg) zero,zero,izone,orgx,orgy,dx,dy,nx,ny,nlayer,
+
+c BNM    - add avrg output files for each layer
+
+      do ilay = 1,nlayer
+        rewind(iavg+(nrads+1)*(ilay-1))
+        write(iavg+(nrads+1)*(ilay-1)) ifile,note,nseg,navspc,idat1,tim1,idat2,tim2
+        write(iavg+(nrads+1)*(ilay-1)) zero,zero,izone,orgx,orgy,dx,dy,nx,ny,nlayer,
      &            izero,izero,zero,zero,zero
-      write(iavg) izero,izero,nx,ny
-      write(iavg) ((icspec(n,l),n=1,10),l=1,navspc)
-      if( ngrid .EQ. 1 ) goto 9999
+        write(iavg+(nrads+1)*(ilay-1)) izero,izero,nx,ny
+        write(iavg+(nrads+1)*(ilay-1)) ((icspec(n,l),n=1,10),l=1,navspc)
+      enddo  !nlayer  BNM
+
+c BNM
+        if( ngrid .EQ. 1 ) goto 9999
 c
 c-----Fine grid average header
 c

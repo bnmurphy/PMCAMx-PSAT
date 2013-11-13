@@ -1,6 +1,6 @@
        subroutine Appreadpt(pointemis,npointsp)
 c
-c     This subroutine reads in the source specific area emissions.
+c     This subroutine reads in the source specific point emissions.
 c  
 c     DEVELOPED BY: 
 c     Kristina Wagstrom
@@ -13,18 +13,6 @@ c
 c     ROUTINES CALLED:
 c     none
 c
-c     VARIABLES (common):
-c     spname  - Modeled species names
-c     Appnam  - Apportionment species names
-c     Appmap  - Mapping values between model and apportionment 
-c     MXSPEC  - Maximum number of species
-c     MXTRK   - Maximum number of tracked species
-c     
-c     VARIABLES (declared):
-c     i,j     - Counters
-c     match   - Check whether a match was found
-c     num     - Numbers 1-10 in text form
-c     
       include 'camx.prm'
       include 'camx.com'
       include 'camxfld.com'
@@ -45,6 +33,7 @@ c
 c-----Initialize the fractions array
 c
         write(6,*) 'Reading the Appportionment point emissions'
+        write(6,*) 'Date: ',date
         do i=1,120000
           do k=1,MXSPEC
             AppemfracP(i,k,1)=1.0
@@ -112,7 +101,7 @@ c
 c
 c-----Assigning remaining fraction to "others" (4th dimension = 1)
 c
-        write(6,*) 'Location 2...'
+c        write(6,*) 'Location 2...'
         do i=1,npts1
           do k=1,nAppP(s)
             do s=1,Appnum
