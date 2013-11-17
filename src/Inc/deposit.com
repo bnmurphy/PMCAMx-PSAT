@@ -32,14 +32,8 @@ c
       parameter (nseccrs = 3)
       parameter (nsecdep = nsecfin + nseccrs)
 c
-      real diadep(nsecdep)    ! log-mean diameter for each bin
-      real wfdep(nsecdep)     ! weighting-factor for each bin
+      common /deposit2/ diadep(nsecdep),wfdep(nsecdep)
 c
 c     wfdep(1) + ... + wfdep(nsecfin) = 1
 c     wfdep(nsecfin+1) + ... + wfdep(nsecdep) = 1
 c
-      data diadep /0.055013, 0.12847,     0.3, 0.70057,  1.6360,
-     &               3.8204,  8.9214,  20.833/
-      data wfdep  /  0.0294,  0.2094,  0.4061,  0.2216,  0.1335,
-     &               0.4078,  0.4205,  0.1717/
-

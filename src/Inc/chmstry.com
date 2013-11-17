@@ -660,6 +660,6 @@ c	radout -- Mapped variable for radical concentration pointer
       character*4  crads(nrads)
       real  bnmradcnc(nrads,MXCOL1,MXROW1,MXLAY1)
 
-      data crads /'OH','NO3','HO2'/  
+c      data crads /'OH','NO3','HO2'/  
 
-      common bnmradcnc    
+      common /rad_print/ bnmradcnc, crads

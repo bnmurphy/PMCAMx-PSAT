@@ -70,10 +70,11 @@ $(buildDir)/%.o: %.$(srcExt)
 #	@$(FC) -c -o $@ $(Flags) $<
 
 case:
-	ln -fs camx.prm.ladco.$(tags) $(srcDir)/Inc/camx.prm
-	ln -fs Appemiss.f.$(case) $(srcDir)/APP/Appemiss.f
-	ln -fs readar.f.$(emis) $(srcDir)/IO_bin/readar.f
-	ln -fs readpt.f.$(emis) $(srcDir)/IO_bin/readpt.f
+	ln -fs camx.prm.ladco $(srcDir)/Inc/camx.prm
+	#ln -fs camx.prm.ladco.$(tags) $(srcDir)/Inc/camx.prm
+	#ln -fs Appemiss.f.$(case) $(srcDir)/APP/Appemiss.f
+	#ln -fs readar.f.$(emis) $(srcDir)/IO_bin/readar.f
+	#ln -fs readpt.f.$(emis) $(srcDir)/IO_bin/readpt.f
 
 clean:
 	$(RM) -r $(buildDir)
