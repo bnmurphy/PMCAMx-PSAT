@@ -1,0 +1,13 @@
+build
+bin/PMCAMx_*
+bin/CAMx.in
+src/tags
+.#*
+.*swp
+*~
+src/APP/Appemiss.f
+src/IO_bin/readar.f
+src/IO_bin/readpt.f
+/bin/test
+src/Inc/camx.prm
+/make.sh
